@@ -12,8 +12,8 @@ import android.view.GestureDetector;
 import android.view.View;
 
 import com.viatom.lpble.R;
-import com.viatom.lpble.constants.Constant.BluetoothConfig;
 import com.viatom.lpble.ble.DataController;
+import com.viatom.lpble.constants.Constant;
 
 /**
  * TODO: document your custom view class.
@@ -32,19 +32,24 @@ public class EcgView extends View{
 
     public int mWidth;
     public int mHeight;
-    public float mTop;
-    public float mBottom;
-    public int mBase;
 
-//    private static byte[] dataSrc;
-//    private static int index = 0;
+
     private int maxIndex;
 
-    private int lastAmpKey = 0;
 
     private GestureDetector detector;
 
+    //设备状态
     private int runState;
+
+    //单元高度
+    private int cellHeight;
+
+    private int cellSize = 4;
+
+    public float[] mTop = new float[cellSize];
+    public float[] mBottom = new float[cellSize];
+    public int[] mBase = new int[cellSize];
 
     public EcgView(Context context) {
         super(context);
@@ -128,82 +133,93 @@ public class EcgView extends View{
         Log.d("EcgView", "runState: " + runState );
         Log.d("EcgView", "maxIndex: " + maxIndex);
         Log.d("EcgView", "dataSrc.length: " + DataController.dataSrc.length);
-        if((runState == 1 || runState == 2) && DataController.dataSrc.length > 0) {
+        if((runState == Constant.BluetoothConfig.RunState.PREPARING_TEST || runState == Constant.BluetoothConfig.RunState.RECORDING) && DataController.dataSrc.length > 0) {
             drawRuler(canvas);
 
             drawWave(canvas);
         }
-//        drawWave(canvas);
     }
 
     private void iniParam() {
 //        SPEED = DataController.SPEED;
 
-        maxIndex = DataController.maxIndex;
+        maxIndex = DataController.maxIndex; // 画满需要的点数
 
-//        maxIndex = (int) (getWidth() / 2 / SPEED * 2);
-//        dataSrc = new byte[maxIndex*2];
 
         if (DataController.dataSrc == null) {
             DataController.dataSrc = new float[maxIndex];
         }
 
-//        float pxHeight = 20
 
         mWidth = getWidth();
         mHeight = getHeight();
 
-//        mBase = (mHeight / 2);
-        float thickGridCount = mHeight/(5/DataController.mm2px);
-        float baseIndex = thickGridCount / 2;
-        if( baseIndex % 1 >= 0.5)
-            baseIndex ++;
-        baseIndex -= baseIndex%1;
-        mBase = (int) (baseIndex * (5/DataController.mm2px));
-        mTop = (float) (mBase - 20/ DataController.mm2px);
-        mBottom = (float) (mBase + 20/ DataController.mm2px);
+        cellHeight = mHeight / cellSize;
+
+        float thickGridCount = mHeight/(5/DataController.mm2px);// 纵向格子数
+
+
+//        float baseIndex = thickGridCount / 2 ; // 波形基线
+
+        for (int i = 0; i < cellSize; i++){
+            float baseIndex =  thickGridCount / (cellSize* 2) * (i*2 + 1);
+            if( baseIndex % 1 >= 0.5)
+                baseIndex ++;
+            baseIndex -= baseIndex%1;
+
+            mBase[i] = (int) (baseIndex * (5/DataController.mm2px)); // 波形基线
+            mTop[i] = mBase[i] - 20/ DataController.mm2px; //  波形顶线
+            mBottom[i] = mBase[i] + 20/ DataController.mm2px; // 波行底线
+        }
+
+
     }
 
     private void drawRuler(Canvas canvas) {
-        float chartStartX = (float) (1.0 / (5.0 *  DataController.mm2px));
-        float standardYTop = mBase - (DataController.amp[DataController.ampKey] * 0.5f / DataController.mm2px);
-        float standardTBottom = mBase + (DataController.amp[DataController.ampKey] * 0.5f / DataController.mm2px);
-
-        canvas.drawLine(chartStartX + 20, standardYTop, chartStartX+20, standardTBottom, linePaint);
-
-        String rulerStr =  "1mV";
-        canvas.drawText(rulerStr, chartStartX+25, standardTBottom + 20, mTextPaint);
+//        float chartStartX = (float) (1.0 / (5.0 *  DataController.mm2px));
+//        float standardYTop = mBase - (DataController.amp[DataController.ampKey] * 0.5f / DataController.mm2px);
+//        float standardTBottom = mBase + (DataController.amp[DataController.ampKey] * 0.5f / DataController.mm2px);
+//
+//        canvas.drawLine(chartStartX + 20, standardYTop, chartStartX+20, standardTBottom, linePaint);
+//
+//        String rulerStr =  "1mV";
+//        canvas.drawText(rulerStr, chartStartX+25, standardTBottom + 20, mTextPaint);
     }
 
     private void drawWave(Canvas canvas) {
         Path p = new Path();
-        p.moveTo(0, mBase);
-        for (int i = 0; i < maxIndex; i++) {
+        for (int c = 0; c < cellSize; c++){
+            p.moveTo(0, mBase[c]);
 
-            if (i == DataController.index && i < maxIndex-5) {
+            int cellStartIndex =  maxIndex / cellSize * c;
+            int cellEndIndex = cellStartIndex +  maxIndex / cellSize;
 
-                float y = (mBase - (DataController.amp[DataController.ampKey]*DataController.dataSrc[i+4]/ DataController.mm2px));
-//                y = y > mBottom ? mBottom : y;
-//                y = y < mTop ? mTop : y;
+            for (int i = cellStartIndex; i < cellEndIndex; i++) {
 
-                float x = (float) (i+4)/5/ DataController.mm2px;
+                if (i == DataController.index  && i < cellEndIndex -5) {
 
-                p.moveTo(x, y);
-                i = i+4;
-            } else {
-                float y1 = mBase - (DataController.amp[DataController.ampKey]*DataController.dataSrc[i]/ DataController.mm2px);
+                    float y = (mBase[c] - (DataController.amp[DataController.ampKey]*DataController.dataSrc[i+4]/ DataController.mm2px));
 
-//                y1 = y1 > mBottom ? mBottom : y1;
-//                y1 = y1 < mTop ? mTop : y1;
+                    float x = (float) (i - cellStartIndex +4)/5/ DataController.mm2px ;
 
-                float x1 = (float) i/5/ DataController.mm2px;
-                p.lineTo(x1, y1);
+                    p.moveTo(x , y);
+                    i = i+4;
+                } else {
+                    float y1 = mBase[c] - (DataController.amp[DataController.ampKey]*DataController.dataSrc[i] / DataController.mm2px);
+
+
+                    float x1 = (float) (i - cellStartIndex)/5/ DataController.mm2px;
+                    p.lineTo(x1 , y1);
+                }
+
             }
+            canvas.drawPath(p, wPaint);
         }
 
-        canvas.drawPath(p, wPaint);
 
-//        canvas.drawText("" + DataController.index, 0,100,bPaint);
+
+
+
     }
 
     public void clear() {
@@ -217,5 +233,13 @@ public class EcgView extends View{
 
     public void setRunState(int runState) {
         this.runState = runState;
+    }
+
+    public int getCellSize() {
+        return cellSize;
+    }
+
+    public void setCellSize(int cellSize) {
+        this.cellSize = cellSize;
     }
 }

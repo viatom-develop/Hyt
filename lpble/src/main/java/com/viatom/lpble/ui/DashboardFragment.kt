@@ -28,6 +28,7 @@ import com.viatom.lpble.widget.EcgBkg
 import com.viatom.lpble.widget.EcgView
 import java.util.concurrent.TimeUnit
 import kotlin.experimental.and
+import kotlin.math.floor
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
@@ -62,7 +63,7 @@ class DashboardFragment : Fragment() {
         binding.ctx = this
 
         activity?.window?.setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        calScreen()
+
 
         EcgBkg(requireContext()).apply {
             binding.waveBg.measure(0, 0)
@@ -72,7 +73,7 @@ class DashboardFragment : Fragment() {
         ecgView = EcgView(requireContext()).apply {
             binding.wave.measure(0, 0)
             binding.wave.addView(this)
-
+            calScreen(this)
         }
 
 
@@ -99,10 +100,10 @@ class DashboardFragment : Fragment() {
                 .create()
     }
 
-    private fun calScreen() {
+    private fun calScreen(ecgView: EcgView) {
         val dm = resources.displayMetrics
-        val index = Math.floor(dm.widthPixels / dm.xdpi * 25.4 / 25 * 125).toInt()
-        DataController.maxIndex = index
+        val index = floor(dm.widthPixels / dm.xdpi * 25.4 / 25 * 125).toInt()
+        DataController.maxIndex = index * ecgView.cellSize
         // 假设 x\y dpi 相同
         val mm2px = 25.4.toFloat() / dm.xdpi
         DataController.mm2px = mm2px

@@ -122,7 +122,7 @@ class DashboardViewModel : ViewModel() {
                     return
                 }
                 period =
-                    if (DataController.dataRec.size > 150) 39 else 41
+                    if (DataController.dataRec.size > 150) 39 else period
                 startWaveTimer(ecgView)
             }
         }
