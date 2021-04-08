@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="ctx"
+            type="com.viatom.lpble.ui.DashboardFragment" />
+        <variable
+            name="viewModel"
+            type="com.viatom.lpble.viewmodels.DashboardViewModel" />
+    </data>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/color_FF1C1C1E"
+        android:paddingTop="10dp"
+        android:fitsSystemWindows="true"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/device"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="10dp"
+            android:text="@string/device"
+            style="@style/h_16text"
+            android:onClick="@{() -> ctx.showDialog()}"
+            />
+        
+        <com.viatom.lpble.widget.BatteryView
+            android:id="@+id/battery"
+            android:layout_width="49dp"
+            android:layout_height="25dp"
+            app:layout_constraintEnd_toStartOf="@id/device"
+            app:layout_constraintTop_toTopOf="@id/device"
+            app:layout_constraintBottom_toBottomOf="@id/device"
+            android:layout_marginEnd="5dp"
+            />
+
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/device"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="24dp"
+            android:layout_marginTop="42dp"
+            android:text="10 mm/mv"
+            style="@style/b_16text"
+            android:id="@+id/amp"
+            />
+
+
+        <TextView
+            android:id="@+id/hr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="88"
+            android:textSize="40sp"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="@id/amp"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="24dp"
+            />
+        <TextView
+            android:id="@+id/bpm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/hr"
+            app:layout_constraintStart_toEndOf="@id/hr"
+            android:text="bpm"
+            style="@style/h_16text"
+            android:layout_marginStart="5dp"
+            />
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            app:layout_constraintTop_toBottomOf="@id/amp"
+            android:layout_marginTop="8dp"
+            >
+            <RelativeLayout
+                android:id="@+id/wave.bg"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                >
+
+            </RelativeLayout>
+            <RelativeLayout
+                android:id="@+id/wave"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

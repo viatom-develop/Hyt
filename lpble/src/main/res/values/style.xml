@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="h_24text">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+    <style name="h_18text">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+    <style name="h_16text">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+
+    <style name="h_14text">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="b_14text">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/color_99EBEBF5</item>
+    </style>
+
+    <style name="b_16text">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/color_99EBEBF5</item>
+    </style>
+
+    <declare-styleable name="EcgView">
+        <attr name="exampleString" format="string"/>
+        <attr name="exampleDimension" format="dimension"/>
+        <attr name="exampleColor" format="color"/>
+        <attr name="exampleDrawable" format="color|reference"/>
+    </declare-styleable>
+
+
+</resources>

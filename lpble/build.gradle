@@ -1,0 +1,117 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+}
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        minSdkVersion 23
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+
+    buildFeatures {
+        dataBinding = true
+    }
+
+}
+
+dependencies {
+
+    api "org.jetbrains.kotlin:kotlin-stdlib:$rootProject.kotlin_version"
+    api "androidx.activity:activity-ktx:$rootProject.activity_ktx"
+    api "androidx.fragment:fragment-ktx:$rootProject.fragment_ktx"
+
+    api "androidx.constraintlayout:constraintlayout:$rootProject.constraintlayout"
+
+    api "androidx.lifecycle:lifecycle-viewmodel-ktx:$rootProject.viewmodel_ktx"
+    api "androidx.core:core-ktx:$rootProject.core_ktx"
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$rootProject.coroutines"
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.coroutines"
+
+    api "androidx.navigation:navigation-fragment-ktx:$rootProject.nav_version"
+    api "androidx.navigation:navigation-ui-ktx:$rootProject.nav_version"
+
+    api "androidx.core:core-ktx:$rootProject.core_ktx"
+    api "androidx.appcompat:appcompat:$rootProject.appcompat"
+    api "com.google.android.material:material:$rootProject.material"
+    api "androidx.lifecycle:lifecycle-livedata-ktx:$rootProject.livedata_ktx"
+
+
+    api "androidx.room:room-runtime:$rootProject.room_version"
+    kapt "androidx.room:room-compiler:$rootProject.room_version"
+    api "androidx.room:room-ktx:$rootProject.room_version"
+    api "androidx.room:room-testing:$rootProject.room_version"
+
+    //EventBus
+    implementation "com.jeremyliao:live-event-bus-x:$rootProject.live_event_bus"
+
+
+    // 屏幕适配
+    api "me.jessyan:autosize:$rootProject.autosize"
+
+    //Lepu Ble
+    api "com.lepu.blepro:lepu-ble:$rootProject.lepu_ble"
+
+
+    //retrofit
+    api "com.squareup.retrofit2:retrofit:$rootProject.retrofit"
+    api "com.squareup.retrofit2:converter-gson:$rootProject.retrofit"
+    api "com.squareup.retrofit2:retrofit-mock:$rootProject.retrofit"
+    api "com.squareup.okhttp3:logging-interceptor:$rootProject.okhttpLogging"
+
+    //bugly
+    api "com.tencent.bugly:crashreport:$rootProject.bugly"
+    api "com.tencent.bugly:nativecrashreport:$rootProject.bugly"
+
+    //pdfview
+    api "com.github.barteksc:android-pdf-viewer:$rootProject.pdf_viewer"
+
+    //binding util
+    api "com.hi-dhl:jdatabinding:$rootProject.jdatabinding"
+
+    //permission
+    api "com.permissionx.guolindev:permissionx:$rootProject.permissionx"
+
+    api "com.afollestad.material-dialogs:core:$rootProject.material_dialogs"
+
+    api "com.github.CymChad:BaseRecyclerViewAdapterHelper:$rootProject.brvah"
+
+    api "com.qmuiteam:qmui:$rootProject.qmui"
+
+
+
+
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+}
