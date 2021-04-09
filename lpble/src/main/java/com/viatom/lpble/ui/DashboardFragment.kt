@@ -115,7 +115,7 @@ class DashboardFragment : Fragment() {
             binding.hr.visibility = if(it in RunState.NONE..RunState.PREPARING_TEST || it in RunState.SAVE_FAILED..RunState.LEAD_OFF) View.INVISIBLE else View.VISIBLE
             binding.bpm.visibility = if(it in RunState.NONE..RunState.PREPARING_TEST || it in RunState.SAVE_FAILED..RunState.LEAD_OFF) View.INVISIBLE else View.VISIBLE
 
-            if (it in RunState.PREPARING_TEST..RunState.RECORDING) viewModel.startTimer(ecgView) else viewModel.stopTimer()
+
         })
 
 
@@ -173,6 +173,7 @@ class DashboardFragment : Fragment() {
                                 if (this != lastState){
                                     ecgView.clear()
                                     ecgView.invalidate()
+                                    if (this in RunState.PREPARING_TEST..RunState.RECORDING) viewModel.startTimer(ecgView) else viewModel.stopTimer()
                                 }
                             }
 

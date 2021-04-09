@@ -158,9 +158,6 @@ public class EcgView extends View{
 
         float thickGridCount = mHeight/(5/DataController.mm2px);// 纵向格子数
 
-
-//        float baseIndex = thickGridCount / 2 ; // 波形基线
-
         for (int i = 0; i < cellSize; i++){
             float baseIndex =  thickGridCount / (cellSize* 2) * (i*2 + 1);
             if( baseIndex % 1 >= 0.5)
