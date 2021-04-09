@@ -20,12 +20,12 @@ class Constant{
         companion object{
             val SUPPORT_MODEL: Int = Bluetooth.MODEL_ER1
             val TIME_OUT_MILLIS: Long = 2000
-            val CHECK_BLE_REQUEST_CODE = 1001
+            val CHECK_BLE_REQUEST_CODE = 6001
 
             var isLpBleEnable: Boolean = false
             var currentRunState: Int = RunState.NONE
-
         }
+
         interface RunState{
             /**
              * dashboardState包括状态:<br>
@@ -42,60 +42,29 @@ class Constant{
              * 导联断开 7
              **/
             companion object{
-                /**
-                 * 空状态 -2
-                 */
                 const val NONE = -2
-
-                /**
-                 * 离线 -1
-                 */
                 const val OFFLINE = -1
-
-                /**
-                 * 空闲待机 0
-                 */
                 const val STANDBY = 0
-
-                /**
-                 * 测试准备 1
-                 */
                 const val PREPARING_TEST = 1
-
-                /**
-                 * 记录中 2
-                 */
                 const val RECORDING = 2
-
-                /**
-                 * 分析中 3
-                 */
                 const val ANALYZING = 3
-
-                /**
-                 * 存储成功( >= 30s）4
-                 */
                 const val SAVE_SUCCESS = 4
-
-                /**
-                 * 存储失败( < 30s） 5
-                 */
                 const val SAVE_FAILED = 5
-
-                /**
-                 * 噪声提示重启测试超过6次,即将进入待机状态 6
-                 */
                 const val COMING_STANDBY = 6
-
-                /**
-                 * 导联断开 7
-                 */
                 const val LEAD_OFF = 7
             }
         }
 
+
     }
 
+
+    interface EcgViewConfig{
+        companion object{
+            val ECG_CELL_SIZE: Int = 4
+            val PADDING_TOP: Int = 20
+        }
+    }
     interface EventUI{
        companion object{
            val connectingLoading: String = "connecting_loading"

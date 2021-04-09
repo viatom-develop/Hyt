@@ -106,7 +106,6 @@ dependencies {
 
     api "com.github.CymChad:BaseRecyclerViewAdapterHelper:$rootProject.brvah"
 
-    api "com.qmuiteam:qmui:$rootProject.qmui"
 
 
 

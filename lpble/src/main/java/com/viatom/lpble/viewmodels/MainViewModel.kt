@@ -13,21 +13,21 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lepu.blepro.objs.Bluetooth
-import com.qmuiteam.qmui.widget.dialog.QMUITipDialog
 import com.viatom.lpble.BuildConfig
 import com.viatom.lpble.R
 import com.viatom.lpble.ble.BleSO
 import com.viatom.lpble.ble.LpBleUtil
+import com.viatom.lpble.ble.WaveFilter
 import com.viatom.lpble.constants.Constant
 import com.viatom.lpble.constants.Constant.BluetoothConfig.Companion.SUPPORT_MODEL
 import com.viatom.lpble.data.entity.DeviceEntity
 import com.viatom.lpble.data.entity.local.DBHelper
 import com.viatom.lpble.ext.checkBluetooth
 import com.viatom.lpble.ext.createDir
-import com.viatom.lpble.ext.createTip
 import com.viatom.lpble.ext.permissionNecessary
 import com.viatom.lpble.util.doFailure
 import com.viatom.lpble.util.doSuccess
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -50,6 +50,15 @@ class MainViewModel: ViewModel() {
     var bleEnable : LiveData<Boolean> = _bleEnable
 
     /**
+     * 连接过程中的蓝牙对象
+     */
+    val _toConnectDevice = MutableLiveData<Bluetooth?>().apply {
+        value = null
+    }
+    var toConnectDevice: LiveData<Bluetooth?> = _toConnectDevice
+
+
+    /**
      * 当前蓝牙
      */
     val _curBluetooth = MutableLiveData<DeviceEntity?>().apply {
@@ -68,52 +77,6 @@ class MainViewModel: ViewModel() {
 
 
 
-    /**
-     * 显示loading
-     */
-    val _connectLoading = MutableLiveData<Boolean>().apply {
-        value = false
-    }
-    var connectLoading: LiveData<Boolean?> = _connectLoading
-    private var connectTip: QMUITipDialog? = null
-
-    fun showConnecting(context: Context ){
-//       connectTip?.let {
-//           it.show()
-//       }?: run {
-//           connectTip = context.createTip(R.string.connecting)
-//           connectTip!!.show()
-//
-//       }
-    }
-
-    fun hideConnecting(){
-//        connectTip?.let { it.hide() }
-    }
-    fun permission(activity: FragmentActivity) = runBlocking<Unit>{
-        // 启动并发的协程以验证主线程并未阻塞
-        launch {
-            for (k in 1..3) {
-                println("I'm not blocked $k")
-                delay(100)
-            }
-        }
-
-        activity.permissionNecessary().collect { per ->
-            Log.e("collect", per.toString())
-            //权限OK, 检查蓝牙状态
-            if (per)
-                activity.checkBluetooth(Constant.BluetoothConfig.CHECK_BLE_REQUEST_CODE).let {
-                    Log.e("main", "蓝牙状态 $it")
-                    _bleEnable.value = true
-                    initBle(activity.application)
-
-
-                }
-
-        }
-
-    }
 
     fun initBle(application: Application){
 
@@ -162,5 +125,23 @@ class MainViewModel: ViewModel() {
             }
 
         }
+    }
+
+    fun saveDevice(application: Application, deviceEntity: DeviceEntity){
+        DBHelper.getInstance(application).let {
+            viewModelScope.launch(Dispatchers.IO) {
+                it.insertOrUpdateDevice(it.db.deviceDao(), deviceEntity)
+            }
+
+        }
+    }
+
+    //重置dashboard
+    fun resetDashboard(){
+
+        Constant.BluetoothConfig.currentRunState = Constant.BluetoothConfig.RunState.NONE
+        WaveFilter.resetFilter()
+
+
     }
 }

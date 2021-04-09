@@ -1,24 +1,26 @@
 package com.viatom.lpble.ui
 
-import ConnectDialog
 import android.app.AlertDialog
+import android.app.ProgressDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import androidx.core.view.isInvisible
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.afollestad.materialdialogs.MaterialDialog
 import com.jeremyliao.liveeventbus.LiveEventBus
 import com.lepu.blepro.ble.cmd.Er1BleResponse
+import com.lepu.blepro.event.EventMsgConst
 import com.lepu.blepro.event.InterfaceEvent
 import com.viatom.lpble.R
 import com.viatom.lpble.ble.BatteryInfo
 import com.viatom.lpble.ble.DataController
+import com.viatom.lpble.constants.Constant
 import com.viatom.lpble.constants.Constant.BluetoothConfig.RunState
 import com.viatom.lpble.constants.Constant.BluetoothConfig
 import com.viatom.lpble.databinding.FragmentDashboradBinding
@@ -26,6 +28,7 @@ import com.viatom.lpble.viewmodels.DashboardViewModel
 import com.viatom.lpble.viewmodels.MainViewModel
 import com.viatom.lpble.widget.EcgBkg
 import com.viatom.lpble.widget.EcgView
+import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.experimental.and
 import kotlin.math.floor
@@ -49,11 +52,6 @@ class DashboardFragment : Fragment() {
 
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
-
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
@@ -65,16 +63,6 @@ class DashboardFragment : Fragment() {
         activity?.window?.setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
 
-        EcgBkg(requireContext()).apply {
-            binding.waveBg.measure(0, 0)
-            binding.waveBg.addView(this)
-        }
-
-        ecgView = EcgView(requireContext()).apply {
-            binding.wave.measure(0, 0)
-            binding.wave.addView(this)
-            calScreen(this)
-        }
 
 
         return binding.root
@@ -85,7 +73,6 @@ class DashboardFragment : Fragment() {
         initView()
         subscribeUi()
         initLiveEvent()
-        initData()
 
 
 //        view.findViewById<Button>(R.id.button_first).setOnClickListener {
@@ -94,16 +81,28 @@ class DashboardFragment : Fragment() {
     }
 
     private fun initView() {
+        calScreen()
+        EcgBkg(requireContext()).apply {
+            binding.waveBg.measure(0, 0)
+            binding.waveBg.addView(this)
+        }
+
+        ecgView = EcgView(requireContext()).apply {
+            binding.wave.measure(0, 0)
+            binding.wave.addView(this)
+
+        }
+
         leadOffDialog = AlertDialog.Builder(context)
                 .setTitle(R.string.public_lead_off_tip)
                 .setMessage(R.string.public_lead_off_msg)
                 .create()
     }
 
-    private fun calScreen(ecgView: EcgView) {
+    private fun calScreen() {
         val dm = resources.displayMetrics
         val index = floor(dm.widthPixels / dm.xdpi * 25.4 / 25 * 125).toInt()
-        DataController.maxIndex = index * ecgView.cellSize
+        DataController.maxIndex = index * Constant.EcgViewConfig.ECG_CELL_SIZE
         // 假设 x\y dpi 相同
         val mm2px = 25.4.toFloat() / dm.xdpi
         DataController.mm2px = mm2px
@@ -113,8 +112,8 @@ class DashboardFragment : Fragment() {
         viewModel.runState.observe(viewLifecycleOwner, {
             binding.battery.visibility =  if(it in RunState.NONE..RunState.OFFLINE) View.INVISIBLE else View.VISIBLE
             binding.hr.visibility = if(it in RunState.NONE..RunState.PREPARING_TEST || it in RunState.SAVE_FAILED..RunState.LEAD_OFF) View.INVISIBLE else View.VISIBLE
-            binding.bpm.visibility = if(it in RunState.NONE..RunState.PREPARING_TEST || it in RunState.SAVE_FAILED..RunState.LEAD_OFF) View.INVISIBLE else View.VISIBLE
-
+            binding.bpmText.visibility = if(it in RunState.NONE..RunState.PREPARING_TEST || it in RunState.SAVE_FAILED..RunState.LEAD_OFF) View.INVISIBLE else View.VISIBLE
+            binding.bpmImg.visibility = if(it in RunState.NONE..RunState.PREPARING_TEST || it in RunState.SAVE_FAILED..RunState.LEAD_OFF) View.INVISIBLE else View.VISIBLE
 
         })
 
@@ -144,7 +143,6 @@ class DashboardFragment : Fragment() {
         viewModel.hr.observe(viewLifecycleOwner, { h ->
             (h < 30 || h > 250).let {
                 binding.hr.text =   if (it) "--" else h.toString()
-                binding.bpm.isInvisible = it
             }
 
         })
@@ -167,18 +165,22 @@ class DashboardFragment : Fragment() {
                             viewModel._runState.value = this
 
                             //判断状态是否切换了
-                            BluetoothConfig.currentRunState.let { lastState->
 
-                                Log.d("dashboard", "currentRunState = $this,lastState = $lastState")
-                                if (this != lastState){
-                                    ecgView.clear()
-                                    ecgView.invalidate()
-                                    if (this in RunState.PREPARING_TEST..RunState.RECORDING) viewModel.startTimer(ecgView) else viewModel.stopTimer()
+                            synchronized(BluetoothConfig.currentRunState){
+                                BluetoothConfig.currentRunState.let { lastState->
+
+                                    Log.d("dashboard", "currentRunState = $this,lastState = $lastState")
+                                    if (this != lastState){
+                                        ecgView.clear()
+                                        ecgView.invalidate()
+                                        if (this in RunState.PREPARING_TEST..RunState.RECORDING) startTimer(ecgView) else stopTimer()
+                                    }
                                 }
+
+                                //更新记录为最新的状态
+                                BluetoothConfig.currentRunState = this
                             }
 
-                            //更新记录为最新的状态
-                            BluetoothConfig.currentRunState = this
                             ecgView.setRunState(this)
 
                             Log.d("dashboard runState", "$this")
@@ -211,20 +213,103 @@ class DashboardFragment : Fragment() {
             }
 
         })
-    }
 
-    private fun initData() {
-        //
+        // 当停止实时任务
+        LiveEventBus.get(EventMsgConst.RealTime.EventRealTimeStop).observe(viewLifecycleOwner, {
+
+        })
     }
 
 
     fun showDialog(){
-        if (!BluetoothConfig.isLpBleEnable)return
+        if (!BluetoothConfig.isLpBleEnable){
+            Toast.makeText(requireContext(), "初始化中，请稍候再试！", Toast.LENGTH_SHORT).show()
+            return
+        }
         activity?.supportFragmentManager?.let { ConnectDialog().show(it, "show") }
     }
 
+    var waveTimer: Timer? =  null
+    var waveTask: TimerTask? = null
+    var watchTimer: Timer? = null
+    var watchTask: TimerTask? = null
+    var period: Long = 41L
 
+    fun startWaveTimer(ecgView: EcgView) {
 
+        stopWaveTimer()
+        waveTimer = Timer()
+        waveTask = object : TimerTask() {
+            override fun run() {
+                var temp: FloatArray? = DataController.draw(5)
+                Log.d("dashboard", "DataController.draw(5) == " + Arrays.toString(temp))
+                if (viewModel._runState.value !== RunState.RECORDING) {  // 非测试状态,画0
+                    temp = if (temp == null || temp.isEmpty()) {
+                        FloatArray(0)
+                    } else {
+                        FloatArray(temp.size)
+                    }
+                }
+                DataController.feed(temp)
+                ecgView.invalidate()
+            }
+        }
+        waveTimer?.schedule(
+                waveTask,
+                5,
+                period
+        )
+    }
+
+    fun stopWaveTimer() {
+        waveTask?.cancel()
+        waveTask = null
+
+        waveTimer?.cancel()
+        waveTimer = null
+    }
+
+    fun startWatchTimer(ecgView: EcgView) {
+        stopWatchTimer()
+        watchTimer = Timer()
+        watchTask = object : TimerTask() {
+            override fun run() {
+                if (period == 0L) {
+                    return
+                }
+                if (DataController.dataRec.size in 101..199) {
+                    return
+                }
+                period =
+                        if (DataController.dataRec.size > 150) 39 else period
+                startWaveTimer(ecgView)
+            }
+        }
+        watchTimer?.schedule(
+                watchTask,
+                1000,
+                1000L
+        )
+    }
+
+    fun stopWatchTimer() {
+        watchTask?.cancel()
+        watchTask = null
+    }
+
+    fun stopTimer() {
+        stopWatchTimer()
+        stopWaveTimer()
+    }
+    fun startTimer(ecgView: EcgView) {
+        startWatchTimer(ecgView)
+        startWaveTimer(ecgView)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopTimer()
+    }
 
 }
 

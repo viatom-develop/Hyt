@@ -2,6 +2,15 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
+    <data>
+        <variable
+            name="viewModel"
+            type="com.viatom.lpble.viewmodels.ConnectViewModel" />
+        <variable
+            name="ctx"
+            type="com.viatom.lpble.ui.ConnectDialog" />
+
+    </data>
 
 
 
@@ -15,42 +24,47 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/refresh"
+            style="@style/h_18text"
+            android:text="@string/refresh"
+            android:paddingHorizontal="18dp"
+            android:paddingVertical="4dp"
+            android:background="@drawable/public_shape_corner_12"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="16dp"
+            android:onClick="@{() ->ctx.refresh()}"
+
+
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/refresh"
             android:text="@string/choose_device"
             style="@style/h_24text"
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/refresh"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            style="@style/h_18text"
-            android:text="@string/refresh"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="20dp"
 
 
-            />
-
-        <ProgressBar
-            android:id="@+id/progress.bar"
-            style="?android:progressBarStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginLeft="20dp"
-            android:indeterminateDrawable="@drawable/circle_progressbar"
-            android:indeterminateDuration="50"
-            android:visibility="invisible"
-            app:layout_constraintTop_toTopOf="@id/refresh"
-            app:layout_constraintEnd_toStartOf="@id/refresh"
-            app:layout_constraintBottom_toBottomOf="@id/refresh"
-            android:layout_marginEnd="2dp"
-            />
+<!--        <ProgressBar-->
+<!--            android:id="@+id/progress.bar"-->
+<!--            style="?android:progressBarStyleSmall"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_gravity="center"-->
+<!--            android:layout_marginLeft="20dp"-->
+<!--            android:indeterminateDrawable="@drawable/circle_progressbar"-->
+<!--            android:indeterminateDuration="50"-->
+<!--            android:visibility="invisible"-->
+<!--            app:layout_constraintTop_toTopOf="@id/refresh"-->
+<!--            app:layout_constraintEnd_toStartOf="@id/refresh"-->
+<!--            app:layout_constraintBottom_toBottomOf="@id/refresh"-->
+<!--            android:layout_marginEnd="2dp"-->
+<!--            />-->
 
 
         <TextView
@@ -61,7 +75,7 @@
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginTop="10dp"
             android:layout_marginStart="16dp"
-            android:text="@string/connected_device"
+            android:text="@string/current_device"
             style="@style/b_14text" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -88,10 +102,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/connected"
+                android:layout_marginEnd="7dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                style="@style/h_18text" />
+                style="@style/h_18text"
+                android:onClick="@{() -> ctx.reconnect() }"
+                />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -118,6 +135,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/device.list"
+
                 />
 
 

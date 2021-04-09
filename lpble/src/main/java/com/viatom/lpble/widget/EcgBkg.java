@@ -5,7 +5,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.text.TextPaint;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -13,38 +13,38 @@ import androidx.annotation.ColorRes;
 
 import com.viatom.lpble.R;
 import com.viatom.lpble.ble.DataController;
+import com.viatom.lpble.constants.Constant.EcgViewConfig;
 
 import static com.viatom.lpble.ble.DataController.dataSrc;
 
 public class EcgBkg extends View {
-    private TextPaint mTextPaint;
-    private Paint bPaint;
-    private Paint redPaint;
     private Paint bkg;
     private Paint bkg_paint_1;
-    private Paint bkg_paint_2;
-    private float mTextWidth;
-    private float mTextHeight;
+    private Paint bkg_paint_5;
+    private Paint cellBkg;
 
     private Canvas canvas;
 
     public int mWidth;
     public int mHeight;
-    public float mTop;
-    public float mBottom;
-    public int mBase;
 
     private int maxIndex;
 
+    private int cellSize = EcgViewConfig.Companion.getECG_CELL_SIZE();
+
+    private int paddingTop = EcgViewConfig.Companion.getPADDING_TOP();
+    private int cellHeight;
+
+
     @ColorRes
-    private int bgColor = R.color.white;//color_vb_dashboard_ecg_bkg;
-//    private int bgColor = R.color.ecg_bkg;
+    private int bgColor = R.color.color_ecgbg;
     @ColorRes
-    private int gridColor5mm = R.color.color_vb_dashboard_ecg_grid_5mm;
-//    private int gridColor5mm = R.color.ecg_line_1;
+    private int gridColor5mm = R.color.color_ecgbg_grid_5mm;
     @ColorRes
-    private int gridColor1mm = R.color.color_vb_dashboard_ecg_grid_1mm;
-//    private int gridColor1mm = R.color.ecg_line_2;
+    private int gridColor1mm = R.color.color_ecgbg_grid_1mm;
+
+    @ColorRes
+    private int cellBkgColor = R.color.color_ecgbg_cell;
 
     public EcgBkg(Context context) {
         super(context);
@@ -69,37 +69,30 @@ public class EcgBkg extends View {
 
         a.recycle();
 
-        // Set up a default TextPaint object
-        mTextPaint = new TextPaint();
-        mTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
-        mTextPaint.setTextAlign(Paint.Align.LEFT);
         iniPaint();
     }
 
     private void iniPaint() {
-        redPaint = new Paint();
-        redPaint.setColor(getColor(R.color.red_m));
-        redPaint.setStyle(Paint.Style.STROKE);
-        redPaint.setStrokeWidth(4.0f);
 
         bkg = new Paint();
         bkg.setColor(getColor(bgColor));
 
         bkg_paint_1 = new Paint();
+        bkg_paint_1.setColor(getColor(gridColor1mm));
         bkg_paint_1.setStyle(Paint.Style.STROKE);
         bkg_paint_1.setStrokeWidth(2.0f);
 
-        bkg_paint_2 = new Paint();
-        bkg_paint_2.setColor(getColor(gridColor1mm));
-        bkg_paint_2.setStyle(Paint.Style.STROKE);
-        bkg_paint_2.setStrokeWidth(1.0f);
+        bkg_paint_5 = new Paint();
+        bkg_paint_5.setColor(getColor(gridColor5mm));
+        bkg_paint_5.setStyle(Paint.Style.STROKE);
+        bkg_paint_5.setStrokeWidth(1.0f);
 
-        bPaint = new Paint();
-        bPaint.setTextAlign(Paint.Align.LEFT);
-        bPaint.setTextSize(32);
-        bPaint.setColor(getColor(R.color.black));
-        bPaint.setStyle(Paint.Style.STROKE);
-        bPaint.setStrokeWidth(4.0f);
+        cellBkg = new Paint();
+        cellBkg.setColor(getColor(cellBkgColor));
+        cellBkg.setStyle(Paint.Style.FILL);
+        cellBkg.setAntiAlias(true);
+
+
     }
 
     @Override
@@ -107,11 +100,6 @@ public class EcgBkg extends View {
         super.onDraw(canvas);
 
         iniParam();
-
-        int paddingLeft = getPaddingLeft();
-        int paddingTop = getPaddingTop();
-        int paddingRight = getPaddingRight();
-        int paddingBottom = getPaddingBottom();
 
         this.canvas = canvas;
         drawBkg(canvas);
@@ -121,99 +109,48 @@ public class EcgBkg extends View {
 
         maxIndex = DataController.maxIndex;
 
-        //        maxIndex = (int) (getWidth() / 2 / SPEED * 2);
-        //        dataSrc = new byte[maxIndex*2];
-
         if (dataSrc == null) {
             dataSrc = new float[maxIndex];
         }
 
-        //        float pxHeight = 20
-
         mWidth = getWidth();
         mHeight = getHeight();
 
-        mBase = (mHeight / 2);
-        mTop = (float) (mBase - 20 / DataController.mm2px);
-        mBottom = (float) (mBase + 20 / DataController.mm2px);
+        cellHeight = (mHeight - cellSize * paddingTop ) / cellSize;
     }
 
     private void drawBkg(Canvas canvas) {
-//        Path path = new Path();
-//        path.moveTo(0, mBase);
-//        path.lineTo(0, mBottom);
-//        path.lineTo(mWidth, mBottom);
-//        path.lineTo(mWidth, mTop);
-//        path.lineTo(0, mTop);
-//        path.lineTo(0, mBase);
-//        path.lineTo(mWidth, mBase);
-//        canvas.drawPath(path, redPaint);
 
         canvas.drawColor(getColor(bgColor));
 
-        bkg.setColor(getColor(bgColor));
-        bkg_paint_1.setColor(getColor(gridColor5mm));
-        bkg_paint_2.setColor(getColor(gridColor1mm));
+        for (int c = 0; c < cellSize;  c++){
 
-        // 1mm y
-        for (int i = 0; i < mHeight/(1/DataController.mm2px); i ++) {
-            Path p = new Path();
-            p.moveTo(0,  i*(1/DataController.mm2px));
-            p.lineTo(mWidth,  i*(1/DataController.mm2px));
+            RectF rectF = new RectF(0, (paddingTop * (c + 1) + cellHeight * c), mWidth,  (paddingTop * (c + 1) + cellHeight * c) + cellHeight);// 设置个新的长方形
+            canvas.drawRoundRect(rectF, 20, 15, cellBkg);
 
-          /*  p.moveTo(0, mBase - i*(1/DataController.mm2px));
-            p.lineTo(mWidth, mBase - i*(1/DataController.mm2px));*/
 
-            canvas.drawPath(p, bkg_paint_2);
-        }
+            // 5mm y
+            for (int i = 0; i < cellHeight/(5/DataController.mm2px); i++) {
+                Path p = new Path();
+                p.moveTo(0,  i*(5/DataController.mm2px) + paddingTop * (c + 1) + cellHeight * c);
+                p.lineTo(mWidth,  i*(5/DataController.mm2px) + paddingTop * (c + 1) + cellHeight * c );
 
-        // 5mm y
-        for (int i = 0; i < mHeight/(5/DataController.mm2px); i++) {
-            Path p = new Path();
-            p.moveTo(0,  i*(5/DataController.mm2px));
-            p.lineTo(mWidth,  i*(5/DataController.mm2px));
 
-          /*  p.moveTo(0, mBase - i*(5/DataController.mm2px));
-            p.lineTo(mWidth, mBase - i*(5/DataController.mm2px));*/
-            canvas.drawPath(p, bkg_paint_1);
-        }
+                canvas.drawPath(p, bkg_paint_5);
+            }
 
-        // 20 mm y
-        for (int i = 0; i < mHeight/2/(20/DataController.mm2px); i++) {
-//            Path p = new Path();
-//            p.moveTo(0, mBase + i*(20/DataController.mm2px));
-//            p.lineTo(mWidth, mBase + i*(20/DataController.mm2px));
-//
-//            p.moveTo(0, mBase - i*(20/DataController.mm2px));
-//            p.lineTo(mWidth, mBase - i*(20/DataController.mm2px));
-//
-//            canvas.drawPath(p, redPaint);
-        }
 
-        // 1mm x
-        for (int i = 0; i < mWidth/(1/ DataController.mm2px) + 1; i++) {
-            Path p = new Path();
-            p.moveTo(i/ DataController.mm2px, 0);
-            p.lineTo(i/ DataController.mm2px, mHeight);
-            canvas.drawPath(p, bkg_paint_2);
-        }
+            // 5mm x
+            for (int i = 0; i < mWidth/(5/ DataController.mm2px) + 1; i++) {
+                Path p = new Path();
+                p.moveTo(i*5/ DataController.mm2px, paddingTop* (c+1) + c * cellHeight );
+                p.lineTo(i*5/ DataController.mm2px, paddingTop* (c+1) + c * cellHeight + cellHeight  );
+                canvas.drawPath(p, bkg_paint_5);
+            }
 
-        // 5mm x
-        for (int i = 0; i < mWidth/(5/ DataController.mm2px) + 1; i++) {
-            Path p = new Path();
-            p.moveTo(i*5/ DataController.mm2px, 0);
-            p.lineTo(i*5/ DataController.mm2px, mHeight);
-            canvas.drawPath(p, bkg_paint_1);
         }
 
 
-        // 25mm x
-//        for (int i = 0; i<mWidth/(25/ DataController.mm2px) + 1; i++) {
-//            Path p = new Path();
-//            p.moveTo(i*25/ DataController.mm2px, 0);
-//            p.lineTo(i*25/ DataController.mm2px, mHeight);
-//            canvas.drawPath(p, redPaint);
-//        }
 
     }
 
@@ -225,18 +162,4 @@ public class EcgBkg extends View {
         this.bgColor = bgColor;
     }
 
-    public void setGridLine5mmColor(@ColorRes int gridColor5mm) {
-        this.gridColor5mm = gridColor5mm;
-    }
-
-    public void setGridLine1mmColor(@ColorRes int gridColor1mm) {
-        this.gridColor1mm = gridColor1mm;
-    }
-
-    public void setColors(@ColorRes int bgColor, @ColorRes int gridColor5mm, @ColorRes int gridColor1mm) {
-        this.bgColor = bgColor;
-        this.gridColor5mm = gridColor5mm;
-        this.gridColor1mm = gridColor1mm;
-        invalidate();
-    }
 }

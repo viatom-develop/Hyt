@@ -18,8 +18,8 @@ import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.MaterialDialog.SingleButtonCallback
 import com.permissionx.guolindev.PermissionX
-import com.qmuiteam.qmui.widget.dialog.QMUITipDialog
 import com.viatom.lpble.R
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
 import java.io.File
@@ -31,11 +31,8 @@ import java.io.File
  */
 
 
-
-
-
-
- fun FragmentActivity.permissionNecessary() = channelFlow<Boolean> {
+@ExperimentalCoroutinesApi
+fun FragmentActivity.permissionNecessary() = channelFlow<Boolean> {
 
 
     lifecycleScope.launch {
@@ -201,11 +198,3 @@ fun Context.convertPixelsToDp(px: Float): Float {
     return px / (resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
 }
 
-
-
-fun Context.createTip(msg: Int): QMUITipDialog{
-    return QMUITipDialog.Builder(this)
-            .setIconType(QMUITipDialog.Builder.ICON_TYPE_LOADING)
-            .setTipWord(getString(msg))
-            .create()
-}

@@ -45,13 +45,13 @@ public class BatteryView extends View {
 
         int battery_left = 0;
         int battery_top = 0;
-        int battery_width = (int) ContextExtKt.convertDpToPixel(getContext(),45);
-        int battery_height =(int) ContextExtKt.convertDpToPixel(getContext(),25);
+        int battery_width = (int) ContextExtKt.convertDpToPixel(getContext(),32);
+        int battery_height =(int) ContextExtKt.convertDpToPixel(getContext(),16);
 
         int battery_head_width = (int) ContextExtKt.convertDpToPixel(getContext(),4);
         int battery_head_height = (int) ContextExtKt.convertDpToPixel(getContext(),7);
-        int battery_round_x = (int) ContextExtKt.convertDpToPixel(getContext(),4);
-        int battery_round_y = (int) ContextExtKt.convertDpToPixel(getContext(),6);
+        int battery_round_x = (int) ContextExtKt.convertDpToPixel(getContext(),2);
+        int battery_round_y = (int) ContextExtKt.convertDpToPixel(getContext(),2);
 
         int battery_inside_margin = (int) ContextExtKt.convertDpToPixel(getContext(),1);
 
@@ -59,7 +59,7 @@ public class BatteryView extends View {
         Paint paint = new Paint();
         paint.setColor(Color.GRAY);
         paint.setAntiAlias(true);
-        paint.setStrokeWidth(2);
+        paint.setStrokeWidth(4);
         paint.setStyle(Paint.Style.STROKE);
 
         RectF rectF = new RectF(battery_left, battery_top,
@@ -92,8 +92,8 @@ public class BatteryView extends View {
        if(!isCharging()) {
            Paint mPaint = new Paint();
            mPaint.setStyle(Paint.Style.FILL);
-           mPaint.setTextSize((int) ContextExtKt.convertDpToPixel(getContext(),14));
-           mPaint.setColor(Color.BLACK);
+           mPaint.setTextSize((int) ContextExtKt.convertDpToPixel(getContext(),12));
+           mPaint.setColor(Color.WHITE);
            Paint.FontMetrics fontMetrics = mPaint.getFontMetrics();
            float bottomLineY = rectF.centerY() - (fontMetrics.bottom - fontMetrics.top) / 2 - fontMetrics.top;
            String bat = power + "%";

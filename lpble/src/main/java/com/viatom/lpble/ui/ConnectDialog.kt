@@ -1,13 +1,18 @@
+package com.viatom.lpble.ui
+
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.TextView
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jeremyliao.liveeventbus.LiveEventBus
 import com.lepu.blepro.ble.data.LepuDevice
@@ -17,6 +22,7 @@ import com.lepu.blepro.objs.BluetoothController
 import com.viatom.lpble.R
 import com.viatom.lpble.adapter.ConnectAdapter
 import com.viatom.lpble.ble.LpBleUtil
+import com.viatom.lpble.constants.Constant
 import com.viatom.lpble.constants.Constant.BluetoothConfig.Companion.SUPPORT_MODEL
 import com.viatom.lpble.data.entity.DeviceEntity
 import com.viatom.lpble.databinding.ConnectDialogBinding
@@ -25,6 +31,9 @@ import com.viatom.lpble.ext.createDir
 import com.viatom.lpble.ext.screenSize
 import com.viatom.lpble.viewmodels.ConnectViewModel
 import com.viatom.lpble.viewmodels.MainViewModel
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 /**
@@ -49,6 +58,7 @@ class ConnectDialog : DialogFragment(){
     ): View? {
 
         binding = DataBindingUtil.inflate(inflater, R.layout.connect_dialog, container, false)
+        binding.ctx = this
 
         activity?.let { fragmentActivity ->
             val width = fragmentActivity.screenSize()[0]
@@ -61,8 +71,6 @@ class ConnectDialog : DialogFragment(){
                     it.decorView.setBackgroundColor(Color.TRANSPARENT)
                     it.setDimAmount(0.6f)
 
-
-
                     // 设置宽度
                     val params: WindowManager.LayoutParams = it.attributes
 
@@ -74,29 +82,29 @@ class ConnectDialog : DialogFragment(){
                 d.setCanceledOnTouchOutside(true)
             }
         }
-        LinearLayoutManager(context).apply {
-            this.orientation = LinearLayoutManager.VERTICAL
-            binding.deviceList.layoutManager = this
-        }
+
 
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initView()
         initLiveEvent()
         subscribeUi()
-        initData()
 
     }
+    private fun initView(){
+        LinearLayoutManager(context).apply {
+            this.orientation = LinearLayoutManager.VERTICAL
+            binding.deviceList.layoutManager = this
+        }
 
-    fun initData(){
         adapter = ConnectAdapter(R.layout.connect_device_item, null).apply {
             this.setOnItemClickListener { adapter, view, position ->
                 // 去连接
-                this.data[position]?.let {
-                    mainVM._connectLoading.value = true
-                    viewModel._toConnectDevice.value = it
+                this.data[position].let {
+                    mainVM._toConnectDevice.value = it
 
                     dialog?.setCanceledOnTouchOutside(false)
                     LpBleUtil.connect(requireContext(),it)
@@ -105,31 +113,25 @@ class ConnectDialog : DialogFragment(){
             }
             binding.deviceList.adapter = this
         }
-
-
     }
 
-    private fun startScan(){
-        //清空
-        BluetoothController.clear()
-        adapter.setNewInstance(null)
-        adapter.notifyDataSetChanged()
-        //重新扫描
-        LpBleUtil.startScan(SUPPORT_MODEL)
 
-    }
+
 
 
     private fun subscribeUi(){
         mainVM.bleEnable.observe(this, {
-            if (it)startScan()
+            // ble 状态可用即开始扫描
+            if (it)viewModel._scanning.value = true
 
         })
 
-        //扫描点击响应
-        viewModel.isRefreshing.observe(viewLifecycleOwner, {
-            if (it)
+        //更新扫描状态
+        viewModel.scanning.observe(viewLifecycleOwner, {
+            if (it){
                 startScan()
+                binding.deviceList.smoothScrollToPosition(0)
+            } else LpBleUtil.stopScan()
 
         })
 
@@ -141,12 +143,16 @@ class ConnectDialog : DialogFragment(){
         })
 
         mainVM.curBluetooth.observe(this, {
-            binding.connectedName.text = it?.deviceName?: ""
+            binding.connectedName.run {
+                this.text = it?.deviceName ?: ""
+                this.visibility = it?.let { View.VISIBLE }?: View.INVISIBLE
+            }
+            binding.connectedState.visibility = it?.let { View.VISIBLE }?: View.INVISIBLE
         })
 
     }
 
-    fun initLiveEvent(){
+    private fun initLiveEvent(){
 
         //扫描通知
         LiveEventBus.get(EventMsgConst.Discovery.EventDeviceFound)
@@ -155,33 +161,35 @@ class ConnectDialog : DialogFragment(){
                 adapter.notifyDataSetChanged()
 
             })
-        // 设备信息通知
-        LiveEventBus.get(InterfaceEvent.ER1.EventEr1Info)
-                .observe(this, { event ->
-
-                    event as InterfaceEvent
-                    Log.d("EventEr1Info","currentDevice init")
-
-                    //根目录下创建设备名文件夹
-                    viewModel.toConnectDevice.value?.device?.let { b ->
-                        b.name?.let {
-                            requireContext().createDir(it)
-                        }
-
-                        //保存设备
-                        viewModel.saveDevice(requireActivity().application, DeviceEntity.convert2DeviceEntity(b, event.data as LepuDevice))
-
-                        //ui
-                        mainVM._connectLoading.value = false
-                        dialog?.setCanceledOnTouchOutside(true)
-
-
-                    }
-
-
-                })
 
     }
+
+    fun startScan(){
+        //清空
+        BluetoothController.clear()
+        adapter.setNewInstance(null)
+        adapter.notifyDataSetChanged()
+
+
+        //重新扫描
+        LpBleUtil.startScan(SUPPORT_MODEL)
+        // 10s后停止扫描
+        lifecycleScope.launch {
+            delay(10000)
+            viewModel._scanning.postValue(false)
+        }
+    }
+
+    fun reconnect(){
+        if (LpBleUtil.isDisconnected(SUPPORT_MODEL))
+            mainVM.curBluetooth.value?.deviceName?.let { LpBleUtil.reconnect(SUPPORT_MODEL, it) }
+
+    }
+
+    fun refresh(){
+        viewModel._scanning.value = true
+    }
+
 
     override fun onDestroy() {
         super.onDestroy()

@@ -7,7 +7,6 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:background="@android:color/transparent"
-        android:paddingHorizontal="16dp"
         >
 
         <TextView
@@ -21,5 +20,13 @@
             android:background="?android:attr/selectableItemBackgroundBorderless"
 
             />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:background="@color/color_545458"
+            />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 

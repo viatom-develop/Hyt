@@ -18,6 +18,7 @@ import java.util.*
  * description:
  */
 class DashboardViewModel : ViewModel() {
+
     val _runState = MutableLiveData<Int>().apply {
         value = RunState.NONE
     }
@@ -70,82 +71,6 @@ class DashboardViewModel : ViewModel() {
     }
 
 
-    var waveTimer: Timer? =  null
-    var waveTask: TimerTask? = null
-    var watchTimer: Timer? = null
-    var watchTask: TimerTask? = null
-    var period: Long = 41L
-
-    fun startWaveTimer(ecgView: EcgView) {
-        
-        stopWaveTimer()
-        waveTimer = Timer()
-        waveTask = object : TimerTask() {
-            override fun run() {
-                var temp: FloatArray? = DataController.draw(5)
-                Log.d("dashboard", "DataController.draw(5) == " + Arrays.toString(temp))
-                if (_runState.value !== RunState.RECORDING) {  // 非测试状态,画0
-                    temp = if (temp == null || temp.isEmpty()) {
-                        FloatArray(0)
-                    } else {
-                        FloatArray(temp.size)
-                    }
-                }
-                DataController.feed(temp)
-                ecgView.invalidate()
-            }
-        }
-        waveTimer?.schedule(
-            waveTask,
-            5,
-            period
-        )
-    }
-
-    fun stopWaveTimer() {
-        waveTask?.cancel()
-        waveTask = null
-
-        waveTimer?.cancel()
-        waveTimer = null
-    }
-
-    fun startWatchTimer(ecgView: EcgView) {
-        stopWatchTimer()
-        watchTimer = Timer()
-        watchTask = object : TimerTask() {
-            override fun run() {
-                if (period == 0L) {
-                    return
-                }
-                if (DataController.dataRec.size in 101..199) {
-                    return
-                }
-                period =
-                    if (DataController.dataRec.size > 150) 39 else period
-                startWaveTimer(ecgView)
-            }
-        }
-        watchTimer?.schedule(
-            watchTask,
-            1000,
-            1000L
-        )
-    }
-
-    fun stopWatchTimer() {
-        watchTask?.cancel()
-        watchTask = null
-    }
-
-    fun stopTimer() {
-        stopWatchTimer()
-        stopWaveTimer()
-    }
-    fun startTimer(ecgView: EcgView) {
-        startWatchTimer(ecgView)
-        startWaveTimer(ecgView)
-    }
 
 
 }
