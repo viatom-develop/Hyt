@@ -22,16 +22,12 @@ import com.viatom.lpble.constants.Constant
 import com.viatom.lpble.constants.Constant.BluetoothConfig.Companion.SUPPORT_MODEL
 import com.viatom.lpble.data.entity.DeviceEntity
 import com.viatom.lpble.data.entity.local.DBHelper
-import com.viatom.lpble.ext.checkBluetooth
 import com.viatom.lpble.ext.createDir
-import com.viatom.lpble.ext.permissionNecessary
 import com.viatom.lpble.util.doFailure
 import com.viatom.lpble.util.doSuccess
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 /**
  * author: wujuan
@@ -100,7 +96,7 @@ class MainViewModel: ViewModel() {
     fun getCurrentDevice(application: Application){
         DBHelper.getInstance(application).let {
             viewModelScope.launch {
-                it.getCurrentDeviceDistinctUntilChanged(it.db.deviceDao())
+                it.getCurrentDevice(it.db.deviceDao())
                         .onStart {
                             Log.d("main", "开始查询当前设备")
                         }
@@ -116,9 +112,8 @@ class MainViewModel: ViewModel() {
                                 Log.d("main", "查询当前设备失败")
                             }
                             result.doSuccess {
-                                Log.d("main", "查询当前设备成功${it.toString()}")
+                                Log.d("main", "查询当前设备成功${it}")
                                 _curBluetooth.postValue(it)
-
                             }
 
                         }
@@ -130,6 +125,7 @@ class MainViewModel: ViewModel() {
     fun saveDevice(application: Application, deviceEntity: DeviceEntity){
         DBHelper.getInstance(application).let {
             viewModelScope.launch(Dispatchers.IO) {
+                Log.e("main", "saveDevice")
                 it.insertOrUpdateDevice(it.db.deviceDao(), deviceEntity)
             }
 

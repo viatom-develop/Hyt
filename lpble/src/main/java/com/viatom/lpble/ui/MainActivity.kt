@@ -34,6 +34,7 @@ import com.viatom.lpble.data.entity.DeviceEntity
 import com.viatom.lpble.ext.checkBluetooth
 import com.viatom.lpble.ext.createDir
 import com.viatom.lpble.ext.permissionNecessary
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -52,10 +53,7 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
 
         subscribeUi()
         initLiveEvent()
-        permission(this)
-
-
-
+        permissionNecessary()
 
 
     }
@@ -96,6 +94,17 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
                    }
 
                 })
+        LiveEventBus.get(Constant.EventUI.permissionNecessary).observe(this, { p ->
+            //权限OK, 检查蓝牙状态
+            if (p ==  true)
+                checkBluetooth(CHECK_BLE_REQUEST_CODE).let {
+                    Log.e("main", "蓝牙状态 $it")
+                    mainVM._bleEnable.value = true
+                    mainVM.initBle(application)
+
+
+                }
+        })
 
     }
 
@@ -123,8 +132,9 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
 
         // 查询到当前设备后去重连
         mainVM.curBluetooth.observe(this, { device ->
+            Log.e("curBluetooth", "to reconnect...")
             device?.deviceName?.let {
-                Log.d("main", "to reconnect...")
+
                 LpBleUtil.reconnect(SUPPORT_MODEL, it)
             }
 
@@ -138,30 +148,7 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
 
         })
     }
-    fun permission(activity: FragmentActivity) = runBlocking<Unit>{
-        // 启动并发的协程以验证主线程并未阻塞
-        launch {
-            for (k in 1..3) {
-                println("I'm not blocked $k")
-                delay(100)
-            }
-        }
 
-        activity.permissionNecessary().collect { per ->
-            Log.e("collect", per.toString())
-            //权限OK, 检查蓝牙状态
-            if (per)
-                activity.checkBluetooth(Constant.BluetoothConfig.CHECK_BLE_REQUEST_CODE).let {
-                    Log.e("main", "蓝牙状态 $it")
-                    mainVM._bleEnable.value = true
-                    mainVM.initBle(activity.application)
-
-
-                }
-
-        }
-
-    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -196,19 +183,17 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
             }
             State.CONNECTED ->{
                 //去开启实时任务
-                if (LpBleUtil.isRtStop(SUPPORT_MODEL)) LpBleUtil.startRtTask(SUPPORT_MODEL, 200)
+//                if (LpBleUtil.isRtStop(SUPPORT_MODEL)) LpBleUtil.startRtTask(SUPPORT_MODEL, 200)
             }
         }
     }
 
     private fun showConnecting(b : Bluetooth){
-        if (this::dialog.isInitialized){
-            dialog.setMessage("正在连接 ${b.name}...")
-            dialog.setCancelable(false)
-            dialog.show()
-        }else{
+        if (!this::dialog.isInitialized)
             dialog = ProgressDialog(this)
-        }
+        dialog.setMessage("正在连接 ${b.name}...")
+        dialog.setCancelable(false)
+        dialog.show()
     }
 
     private fun hideConnecting(){

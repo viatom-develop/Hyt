@@ -103,10 +103,11 @@ class ConnectDialog : DialogFragment(){
         adapter = ConnectAdapter(R.layout.connect_device_item, null).apply {
             this.setOnItemClickListener { adapter, view, position ->
                 // 去连接
+                if (LpBleUtil.isBleConnected(SUPPORT_MODEL))
+                    LpBleUtil.disconnect(false)
+
                 this.data[position].let {
                     mainVM._toConnectDevice.value = it
-
-                    dialog?.setCanceledOnTouchOutside(false)
                     LpBleUtil.connect(requireContext(),it)
 
                 }

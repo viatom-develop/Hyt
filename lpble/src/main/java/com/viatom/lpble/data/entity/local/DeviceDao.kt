@@ -15,14 +15,11 @@ interface DeviceDao {
     suspend fun insertDevice(deviceEntity: DeviceEntity)
 
 
-    @Update(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun updateDevice(deviceEntity: DeviceEntity)
-
 
     @Query("SELECT * FROM devices WHERE deviceName=:name")
     fun getDevice(name: String): DeviceEntity?
 
-    @Query("SELECT * FROM devices ORDER BY id DESC LIMIT 0,1")
+    @Query("SELECT * FROM devices ORDER BY currentTime DESC LIMIT 1")
     fun getCurrentDevices(): Flow<DeviceEntity>?
 
 

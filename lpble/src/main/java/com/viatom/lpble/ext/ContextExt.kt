@@ -17,8 +17,10 @@ import androidx.lifecycle.lifecycleScope
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.MaterialDialog.SingleButtonCallback
+import com.jeremyliao.liveeventbus.LiveEventBus
 import com.permissionx.guolindev.PermissionX
 import com.viatom.lpble.R
+import com.viatom.lpble.constants.Constant
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
@@ -32,10 +34,9 @@ import java.io.File
 
 
 @ExperimentalCoroutinesApi
-fun FragmentActivity.permissionNecessary() = channelFlow<Boolean> {
+fun FragmentActivity.permissionNecessary() {
 
 
-    lifecycleScope.launch {
 
         PermissionX.init(this@permissionNecessary)
                 .permissions(
@@ -50,9 +51,6 @@ fun FragmentActivity.permissionNecessary() = channelFlow<Boolean> {
                             R.string.open
                         ), getString(R.string.ignore)
                     )
-                    launch {
-                        send(false)
-                    }
 
 
                 }
@@ -63,20 +61,14 @@ fun FragmentActivity.permissionNecessary() = channelFlow<Boolean> {
                             R.string.confirm
                         ), getString(R.string.ignore)
                     )
-                    launch {
-                        send(false)
-                    }
                 }
                 .request { allGranted, grantedList, deniedList ->
                     Log.e("权限", "$allGranted, $grantedList, $deniedList")
-                    launch {
-                        send(true)
-                   }
+                    LiveEventBus.get(Constant.EventUI.permissionNecessary).post(true)
                 }
 
 
 
-    }
 
 
 

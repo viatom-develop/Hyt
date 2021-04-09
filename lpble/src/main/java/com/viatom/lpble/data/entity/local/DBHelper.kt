@@ -27,7 +27,7 @@ class DBHelper private constructor(application: Application) {
 
         deviceDao.getDevice(deviceEntity.deviceName)?.let { d ->
             Log.d("设备已存在，去更新", deviceEntity.toString())
-            deviceDao.updateDevice(d)
+            deviceDao.insertDevice(deviceEntity)
         }?: run {
 
             Log.d("设备不存在，去新增", deviceEntity.toString())
@@ -38,7 +38,7 @@ class DBHelper private constructor(application: Application) {
     suspend fun getCurrentDeviceDistinctUntilChanged(deviceDao: DeviceDao) =
             getCurrentDevice(deviceDao).distinctUntilChanged()
 
-    private suspend fun getCurrentDevice(deviceDao: DeviceDao): Flow<LpResult<DeviceEntity>> {
+    suspend fun getCurrentDevice(deviceDao: DeviceDao): Flow<LpResult<DeviceEntity>> {
         return flow{
             try {
                deviceDao.getCurrentDevices()?.collect {

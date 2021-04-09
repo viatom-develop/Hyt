@@ -68,6 +68,7 @@ class Constant{
     interface EventUI{
        companion object{
            val connectingLoading: String = "connecting_loading"
+           val permissionNecessary: String = "permission_necessary"
        }
 
     }
