@@ -9,7 +9,7 @@ public class DataController {
     public static int index = 0;
 
     public static int[] amp = {5, 10 ,20};
-    public static int ampKey = 1;
+    public static int ampKey = 0;
 
     public static int maxIndex;
     public static float mm2px;
@@ -49,6 +49,8 @@ public class DataController {
         if(dataSrc.length != 0) {
             index = (index + fs.length) % dataSrc.length;
         }
+        Log.d("dashboard", "DataController index: " + index+"maxIndex :" + maxIndex);
+
     }
 
     synchronized public static void receive(float[] fs) {
@@ -71,21 +73,11 @@ public class DataController {
             return null;
         }
 
-//        Log.d("Dashboard", "draw: " + n);
-
-//        float[] res = new float[n];
-//        float[] temp = new float[dataRec.length - n];
-//        System.arraycopy(dataRec, 0, res, 0, n);
-//        System.arraycopy(dataRec, n, temp, 0, dataRec.length-n);
-
         float[] res = new float[n];
         float[] temp = new float[dataRec.length - n];
         System.arraycopy(dataRec, 0, res, 0, n);
         System.arraycopy(dataRec, n, temp, 0, dataRec.length-n);
 
-
-//        float[] res = Arrays.copyOfRange(dataRec, 0, n-1);
-//        float[] temp = Arrays.copyOfRange(dataRec, n, dataRec.length);
 
         dataRec = temp;
 

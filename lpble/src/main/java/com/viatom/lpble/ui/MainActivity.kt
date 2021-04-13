@@ -1,16 +1,12 @@
 package com.viatom.lpble.ui
 
 import com.viatom.lpble.viewmodels.MainViewModel
-import android.annotation.SuppressLint
 import android.app.ProgressDialog
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.util.SparseArray
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
 import com.jeremyliao.liveeventbus.LiveEventBus
 import com.lepu.blepro.ble.data.LepuDevice
@@ -19,26 +15,19 @@ import com.lepu.blepro.event.InterfaceEvent
 import com.lepu.blepro.objs.Bluetooth
 import com.lepu.blepro.observer.BIOL
 import com.lepu.blepro.observer.BleChangeObserver
-import com.viatom.lpble.BuildConfig
 import com.viatom.lpble.R
-import com.viatom.lpble.ble.BleSO
+import com.viatom.lpble.ble.CollectUtil
 import com.viatom.lpble.ble.LpBleUtil
 import com.viatom.lpble.ble.LpBleUtil.State
-import com.viatom.lpble.ble.WaveFilter
 import com.viatom.lpble.constants.Constant
 import com.viatom.lpble.constants.Constant.BluetoothConfig.Companion.SUPPORT_MODEL
 import com.viatom.lpble.constants.Constant.BluetoothConfig.Companion.CHECK_BLE_REQUEST_CODE
-import com.viatom.lpble.constants.Constant.BluetoothConfig.Companion.isLpBleEnable
-import com.viatom.lpble.constants.Constant.Dir
 import com.viatom.lpble.data.entity.DeviceEntity
 import com.viatom.lpble.ext.checkBluetooth
 import com.viatom.lpble.ext.createDir
 import com.viatom.lpble.ext.permissionNecessary
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 class MainActivity : AppCompatActivity(), BleChangeObserver {
 
@@ -59,44 +48,13 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
     }
 
     /**
-     * 处理由SDK发送的通知
+     * 先检查蓝牙权限及状态 再初始化蓝牙服务， 之后再初始化自动采集服务
      */
     private fun initLiveEvent() {
-        //同步时间
-        LiveEventBus.get(InterfaceEvent.ER1.EventEr1SetTime)
-                .observe(this, Observer {
-                    LpBleUtil.getInfo(SUPPORT_MODEL)
 
-                })
-
-        // 设备信息通知
-        LiveEventBus.get(InterfaceEvent.ER1.EventEr1Info)
-                .observe(this, { event ->
-
-                    event as InterfaceEvent
-                    Log.d("EventEr1Info","currentDevice init")
-                   mainVM.toConnectDevice?.let {
-                        // 来自connectDialog 触发的通知
-
-                       //根目录下创建设备名文件夹
-                       mainVM.toConnectDevice.value?.device?.let { b ->
-                           b.name?.let {
-                               createDir(it)
-                           }
-
-                           //保存设备
-                           mainVM.saveDevice(application, DeviceEntity.convert2DeviceEntity(b, event.data as LepuDevice))
-
-                           //ui
-                           mainVM._toConnectDevice.value = null
-
-                       }
-                   }
-
-                })
-        LiveEventBus.get(Constant.EventUI.permissionNecessary).observe(this, { p ->
+        LiveEventBus.get(Constant.Event.permissionNecessary).observe(this, { p ->
             //权限OK, 检查蓝牙状态
-            if (p ==  true)
+            if (p == true)
                 checkBluetooth(CHECK_BLE_REQUEST_CODE).let {
                     Log.e("main", "蓝牙状态 $it")
                     mainVM._bleEnable.value = true
@@ -106,27 +64,79 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
                 }
         })
 
-    }
-
-    private fun subscribeUi(){
-
-         //手机ble状态
-        mainVM.bleEnable.observe(this, {
-            if (it){
-               if (isLpBleEnable) LpBleUtil.reInitBle() else  mainVM.initBle(application)
-            }
-        })
-
         // 当BleService onServiceConnected执行后发出通知 蓝牙sdk 初始化完成
         LiveEventBus.get(EventMsgConst.Ble.EventServiceConnectedAndInterfaceInit).observe(
-                this, {
-            isLpBleEnable = true
-            lifecycle.addObserver(BIOL(this, intArrayOf(SUPPORT_MODEL))) // ble service 初始完成后添加订阅才有效
+            this, {
+                mainVM._lpBleEnable.value = true
+                lifecycle.addObserver(
+                    BIOL(
+                        this,
+                        intArrayOf(SUPPORT_MODEL)
+                    )
+                ) // ble service 初始完成后添加订阅才有效
 
-            // 读取本地最近保存的设备
-            mainVM.getCurrentDevice(application)
+                //开启采集服务
+                CollectUtil.getInstance(application).initService()
+
+                // 读取本地最近保存的设备
+                mainVM.getCurrentDevice(application)
+
+
             }
         )
+
+        //同步时间
+        LiveEventBus.get(InterfaceEvent.ER1.EventEr1SetTime)
+            .observe(this, Observer {
+                LpBleUtil.getInfo(SUPPORT_MODEL)
+
+            })
+
+        // 设备信息通知
+        LiveEventBus.get(InterfaceEvent.ER1.EventEr1Info)
+            .observe(this, { event ->
+
+                event as InterfaceEvent
+                Log.d("main", "currentDevice init")
+                mainVM.toConnectDevice.let {
+                    // 来自connectDialog 触发的通知
+
+                    //根目录下创建设备名文件夹
+                    mainVM.toConnectDevice.value?.device?.let { b ->
+                        b.name?.let {
+                            createDir(it)
+                        }
+
+                        //保存设备
+                        mainVM.saveDevice(
+                            application,
+                            DeviceEntity.convert2DeviceEntity(b, event.data as LepuDevice)
+                        )
+
+                        //ui
+                        mainVM._toConnectDevice.value = null
+
+                    }
+                }
+
+            })
+
+        LiveEventBus.get(Constant.Event.collectServiceConnected).observe(this, {
+            // 采集服务已经初始化成功, 去运行自动采集
+            mainVM.runAutoCollect(application)
+        })
+
+
+    }
+
+    private fun subscribeUi() {
+
+        //手机ble状态
+        mainVM.bleEnable.observe(this, {
+            if (it) {
+                if (mainVM.lpBleEnable.value == true) LpBleUtil.reInitBle() else mainVM.initBle(application)
+            }
+        })
 
 
 
@@ -144,7 +154,7 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
             it?.let {
                 //表示正在连接
                 showConnecting(it)
-            }?: hideConnecting()
+            } ?: hideConnecting()
 
         })
     }
@@ -168,27 +178,32 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
 
         mainVM._connectState.value = state
 
-        when(state){
+        when (state) {
             State.DISCONNECTED -> {
                 LpBleUtil.stopRtTask(SUPPORT_MODEL)
                 mainVM.resetDashboard()
 
-                //如果断开 并且是需要重连时。（手动断开时会自动连接标志置为false）
-                if (LpBleUtil.isAutoConnect(SUPPORT_MODEL)){
-                    Log.d("main", "去重连....")
-                    mainVM.curBluetooth.value?.deviceName?.let { LpBleUtil.reconnect(SUPPORT_MODEL, it) }
-                }
+//                //如果断开 并且是需要重连时。（手动断开时会自动连接标志置为false）
+//                if (LpBleUtil.isAutoConnect(SUPPORT_MODEL)) {
+//                    Log.d("main", "去重连....")
+//                    mainVM.curBluetooth.value?.deviceName?.let {
+//                        LpBleUtil.reconnect(
+//                            SUPPORT_MODEL,
+//                            it
+//                        )
+//                    }
+//                }
 
 
             }
-            State.CONNECTED ->{
+            State.CONNECTED -> {
                 //去开启实时任务
                 if (LpBleUtil.isRtStop(SUPPORT_MODEL)) LpBleUtil.startRtTask(SUPPORT_MODEL, 200)
             }
         }
     }
 
-    private fun showConnecting(b : Bluetooth){
+    private fun showConnecting(b: Bluetooth) {
         if (!this::dialog.isInitialized)
             dialog = ProgressDialog(this)
         dialog.setMessage("正在连接 ${b.name}...")
@@ -196,7 +211,7 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
         dialog.show()
     }
 
-    private fun hideConnecting(){
-        if (this::dialog.isInitialized)dialog.dismiss()
+    private fun hideConnecting() {
+        if (this::dialog.isInitialized) dialog.dismiss()
     }
 }

@@ -9,9 +9,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.core.view.isGone
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.afollestad.materialdialogs.MaterialDialog
 import com.jeremyliao.liveeventbus.LiveEventBus
 import com.lepu.blepro.ble.cmd.Er1BleResponse
@@ -19,9 +23,11 @@ import com.lepu.blepro.event.EventMsgConst
 import com.lepu.blepro.event.InterfaceEvent
 import com.viatom.lpble.R
 import com.viatom.lpble.ble.BatteryInfo
+import com.viatom.lpble.ble.CollectUtil
 import com.viatom.lpble.ble.DataController
+import com.viatom.lpble.ble.LpBleUtil
 import com.viatom.lpble.constants.Constant
-import com.viatom.lpble.constants.Constant.BluetoothConfig.RunState
+import com.viatom.lpble.constants.Constant.RunState
 import com.viatom.lpble.constants.Constant.BluetoothConfig
 import com.viatom.lpble.databinding.FragmentDashboradBinding
 import com.viatom.lpble.viewmodels.DashboardViewModel
@@ -37,6 +43,8 @@ import kotlin.math.floor
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
 class DashboardFragment : Fragment() {
+    
+    val DASH: String = "dashFragment"
 
 
     private lateinit var binding: FragmentDashboradBinding
@@ -50,6 +58,16 @@ class DashboardFragment : Fragment() {
     lateinit var ecgView: EcgView
 
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Log.d(DASH, "onCreate")
+    }
+
+
+    override fun onDetach() {
+        super.onDetach()
+        Log.d(DASH, "onDetach")
+    }
 
 
     override fun onCreateView(
@@ -73,11 +91,16 @@ class DashboardFragment : Fragment() {
         initView()
         subscribeUi()
         initLiveEvent()
+        initData()
 
 
 //        view.findViewById<Button>(R.id.button_first).setOnClickListener {
 //            findNavController().navigate(R.id.action_DashboardFragment_to_SecondFragment)
 //        }
+    }
+
+    private fun initData() {
+
     }
 
     private fun initView() {
@@ -97,6 +120,8 @@ class DashboardFragment : Fragment() {
                 .setTitle(R.string.public_lead_off_tip)
                 .setMessage(R.string.public_lead_off_msg)
                 .create()
+
+
     }
 
     private fun calScreen() {
@@ -107,13 +132,45 @@ class DashboardFragment : Fragment() {
         val mm2px = 25.4.toFloat() / dm.xdpi
         DataController.mm2px = mm2px
     }
+
+
+    fun changeCollectTip(){
+        binding.collection.run {
+                isEnabled = (mainVM.connectState.value == LpBleUtil.State.CONNECTED) and  (viewModel.fingerState.value == true) and (viewModel.manualCollecting.value == false)
+                 if(isEnabled)text = getString(R.string.collection)
+                 else {
+                     if (mainVM.connectState.value != LpBleUtil.State.CONNECTED){
+                         text = "蓝牙未连接"
+                     }else if (viewModel.fingerState.value == false){
+                         text = "导联断开"
+                     }
+                }
+        }
+    }
     private fun subscribeUi() {
+        mainVM.connectState.observe(viewLifecycleOwner, {
+            //蓝牙断开时 采集UI
+           changeCollectTip()
+
+        })
+        viewModel.fingerState.observe(viewLifecycleOwner, {
+            //导联状态 采集UI
+            changeCollectTip()
+        })
+        viewModel.manualCollecting.observe(viewLifecycleOwner, {
+            Log.d(DASH, "手动采集状态变更: $it")
+            changeCollectTip()
+
+            binding.report.isVisible = !it
+        })
+
         //状态切换
         viewModel.runState.observe(viewLifecycleOwner, {
             binding.battery.visibility =  if(it in RunState.NONE..RunState.OFFLINE) View.INVISIBLE else View.VISIBLE
             binding.hr.visibility = if(it in RunState.NONE..RunState.PREPARING_TEST || it in RunState.SAVE_FAILED..RunState.LEAD_OFF) View.INVISIBLE else View.VISIBLE
             binding.bpmText.visibility = if(it in RunState.NONE..RunState.PREPARING_TEST || it in RunState.SAVE_FAILED..RunState.LEAD_OFF) View.INVISIBLE else View.VISIBLE
             binding.bpmImg.visibility = if(it in RunState.NONE..RunState.PREPARING_TEST || it in RunState.SAVE_FAILED..RunState.LEAD_OFF) View.INVISIBLE else View.VISIBLE
+
 
         })
 
@@ -149,6 +206,15 @@ class DashboardFragment : Fragment() {
 
 
 
+        viewModel.collectBtnText.observe(viewLifecycleOwner, {
+            //更新采集按钮UI
+            binding.collection.text = it
+        })
+
+
+
+
+
     }
 
 
@@ -169,11 +235,18 @@ class DashboardFragment : Fragment() {
                             synchronized(BluetoothConfig.currentRunState){
                                 BluetoothConfig.currentRunState.let { lastState->
 
-                                    Log.d("dashboard", "currentRunState = $this,lastState = $lastState")
+                                    Log.d(DASH, "currentRunState = $this,lastState = $lastState")
                                     if (this != lastState){
                                         ecgView.clear()
                                         ecgView.invalidate()
-                                        if (this in RunState.PREPARING_TEST..RunState.RECORDING) startTimer(ecgView) else stopTimer()
+                                        if (this in RunState.PREPARING_TEST..RunState.RECORDING) {
+                                            //进入到运行的导联状态
+                                            viewModel._fingerState.value = true
+                                            startTimer(ecgView)
+                                        } else {
+                                            viewModel._fingerState.value = false
+                                            stopTimer()
+                                        }
                                     }
                                 }
 
@@ -183,14 +256,14 @@ class DashboardFragment : Fragment() {
 
                             ecgView.setRunState(this)
 
-                            Log.d("dashboard runState", "$this")
+                            Log.d(DASH, " runState $this")
                         }
 
 
                         //电池
                         BatteryInfo(param.batteryState(), param.battery).run {
                             viewModel._battery.value = this
-                            Log.d("dashboard battery", "$this")
+                            Log.d(DASH, "battery $this")
                         }
 
                         //最大测量时长
@@ -198,7 +271,7 @@ class DashboardFragment : Fragment() {
 
                         //hr
                         viewModel._hr.value = param.hr
-                        Log.d("dashboard hr", "${param.hr}")
+                        Log.d(DASH, "hr  ${param.hr}")
 
                         //心电信号
                         viewModel._isSignalPoor.value = param.isSignalPoor()
@@ -222,7 +295,7 @@ class DashboardFragment : Fragment() {
 
 
     fun showDialog(){
-        if (!BluetoothConfig.isLpBleEnable){
+        if (mainVM.lpBleEnable.value != true){
             Toast.makeText(requireContext(), "初始化中，请稍候再试！", Toast.LENGTH_SHORT).show()
             return
         }
@@ -242,15 +315,35 @@ class DashboardFragment : Fragment() {
         waveTask = object : TimerTask() {
             override fun run() {
                 var temp: FloatArray? = DataController.draw(5)
-                Log.d("dashboard", "DataController.draw(5) == " + Arrays.toString(temp))
-                if (viewModel._runState.value !== RunState.RECORDING) {  // 非测试状态,画0
+                Log.d(DASH, "DataController.draw(5) == " + Arrays.toString(temp))
+                if (viewModel._runState.value != RunState.RECORDING) {  // 非测试状态,画0
                     temp = if (temp == null || temp.isEmpty()) {
                         FloatArray(0)
                     } else {
                         FloatArray(temp.size)
                     }
                 }
+
                 DataController.feed(temp)
+                Log.d(DASH, "DataController.draw(5) == " + Arrays.toString(temp))
+                // 采集数据 自动手动可能同时进行
+                CollectUtil.getInstance(requireActivity().application).run {
+                    if (viewModel._manualCollecting.value == true){
+                        temp?.let {
+                            this.actionCollect(Constant.Collection.TYPE_MANUAL, temp!!, DataController.index)
+                        }
+
+                    }
+
+                    if (viewModel._autoCollecting.value == true){
+                       this.actionCollect(Constant.Collection.TYPE_MANUAL, temp!!, DataController.index)
+                    }
+                }
+
+
+
+
+
                 ecgView.invalidate()
             }
         }
@@ -309,6 +402,14 @@ class DashboardFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         stopTimer()
+    }
+
+    fun toReport() {
+         findNavController().navigate(R.id.action_DashboardFragment_to_SecondFragment)
+    }
+
+    fun manualCollect(){
+        viewModel.manualCollect(requireActivity().application)
     }
 
 }

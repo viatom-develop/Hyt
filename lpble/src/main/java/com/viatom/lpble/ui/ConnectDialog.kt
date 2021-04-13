@@ -123,9 +123,11 @@ class ConnectDialog : DialogFragment(){
     private fun subscribeUi(){
         mainVM.bleEnable.observe(this, {
             // ble 状态可用即开始扫描
-            if (it)viewModel._scanning.value = true
+            if (mainVM.lpBleEnable.value == true)
+                if (it)viewModel._scanning.value = true
 
         })
+
 
         //更新扫描状态
         viewModel.scanning.observe(viewLifecycleOwner, {

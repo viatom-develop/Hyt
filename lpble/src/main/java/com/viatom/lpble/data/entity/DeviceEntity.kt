@@ -62,6 +62,47 @@ data class DeviceEntity(
         }
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as DeviceEntity
+
+        if (deviceName != other.deviceName) return false
+        if (deviceMacAddress != other.deviceMacAddress) return false
+        if (productTypeName != other.productTypeName) return false
+        if (hwVersion != other.hwVersion) return false
+        if (fwVersion != other.fwVersion) return false
+        if (blVersion != other.blVersion) return false
+        if (branchCode != other.branchCode) return false
+        if (deviceType != other.deviceType) return false
+        if (protocolVersion != other.protocolVersion) return false
+        if (currentTime != other.currentTime) return false
+        if (protocolDataMaxLen != other.protocolDataMaxLen) return false
+        if (serialNum != other.serialNum) return false
+        if (snLength != other.snLength) return false
+        if (!data.contentEquals(other.data)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = deviceName.hashCode()
+        result = 31 * result + deviceMacAddress.hashCode()
+        result = 31 * result + productTypeName.hashCode()
+        result = 31 * result + (hwVersion?.hashCode() ?: 0)
+        result = 31 * result + (fwVersion?.hashCode() ?: 0)
+        result = 31 * result + (blVersion?.hashCode() ?: 0)
+        result = 31 * result + (branchCode?.hashCode() ?: 0)
+        result = 31 * result + (deviceType ?: 0)
+        result = 31 * result + (protocolVersion?.hashCode() ?: 0)
+        result = 31 * result + (currentTime?.hashCode() ?: 0)
+        result = 31 * result + (protocolDataMaxLen ?: 0)
+        result = 31 * result + (serialNum?.hashCode() ?: 0)
+        result = 31 * result + (snLength ?: 0)
+        result = 31 * result + data.contentHashCode()
+        return result
+    }
 
 
 }

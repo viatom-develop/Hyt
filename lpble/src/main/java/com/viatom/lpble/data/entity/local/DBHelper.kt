@@ -25,17 +25,19 @@ class DBHelper private constructor(application: Application) {
 
     suspend fun insertOrUpdateDevice(deviceDao: DeviceDao, deviceEntity: DeviceEntity){
 
-        deviceDao.getDevice(deviceEntity.deviceName)?.let { d ->
-            Log.d("设备已存在，去更新", deviceEntity.toString())
-            deviceDao.insertDevice(deviceEntity)
-        }?: run {
+//        deviceDao.getDevice(deviceEntity.deviceName)?.let { d ->
+//            Log.d("设备已存在，去更新", deviceEntity.toString())
+//            deviceDao.insertDevice(deviceEntity)
+//        }?: run {
+//
+//            Log.d("设备不存在，去新增", deviceEntity.toString())
+//            deviceDao.insertDevice(deviceEntity)
+//        }
 
-            Log.d("设备不存在，去新增", deviceEntity.toString())
-            deviceDao.insertDevice(deviceEntity)
-        }
+        deviceDao.insertDevice(deviceEntity)
     }
 
-    suspend fun getCurrentDeviceDistinctUntilChanged(deviceDao: DeviceDao) =
+    suspend fun getCurrentDeviceDistinctUntilChanged(deviceDao: DeviceDao):Flow<LpResult<DeviceEntity>>   =
             getCurrentDevice(deviceDao).distinctUntilChanged()
 
     suspend fun getCurrentDevice(deviceDao: DeviceDao): Flow<LpResult<DeviceEntity>> {

@@ -1,15 +1,18 @@
 package com.viatom.lpble.viewmodels
 
+import android.app.Application
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.lepu.blepro.ble.cmd.Er1BleResponse
-import com.viatom.lpble.ble.BatteryInfo
-import com.viatom.lpble.ble.DataController
-import com.viatom.lpble.ble.WaveFilter
-import com.viatom.lpble.constants.Constant.BluetoothConfig.RunState
+import com.viatom.lpble.R
+import com.viatom.lpble.ble.*
+import com.viatom.lpble.constants.Constant
+import com.viatom.lpble.constants.Constant.RunState
 import com.viatom.lpble.widget.EcgView
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.*
 
 /**
@@ -46,6 +49,55 @@ class DashboardViewModel : ViewModel() {
     var isSignalPoor : LiveData<Boolean> = _isSignalPoor
 
 
+    /**
+     *  是否手动采集中
+     */
+    val _manualCollecting = MutableLiveData<Boolean>().apply {
+        value = false
+    }
+    var manualCollecting : LiveData<Boolean> = _manualCollecting
+
+
+    /**
+     *  是否自动采集中
+     */
+    val _autoCollecting = MutableLiveData<Boolean>().apply {
+        value = false
+    }
+    var autoCollecting : LiveData<Boolean> = _autoCollecting
+
+
+    /**
+     * 自动采集开始的时间
+     */
+    val _autoStartTime = MutableLiveData<Long>().apply {
+        value = 0L
+    }
+    var autoStartTime : LiveData<Long> = _autoStartTime
+
+    /**
+     * 手动采集开始的时间
+     */
+    val _manualStartTime = MutableLiveData<Long>().apply {
+        value = 0L
+    }
+    var manualStartTime : LiveData<Long> = _manualStartTime
+
+
+    val _collectBtnText = MutableLiveData<String>().apply {
+        value = "采集"
+    }
+    var collectBtnText : LiveData<String> = _collectBtnText
+
+
+
+    /**
+     *  实时任务时导联是否正常
+     */
+    val _fingerState = MutableLiveData<Boolean>().apply {
+        value = false
+    }
+    var fingerState : LiveData<Boolean> = _fingerState
 
     /**
      * 实时数据池添加数据
@@ -69,6 +121,18 @@ class DashboardViewModel : ViewModel() {
             }
         }
     }
+
+    fun manualCollect(application: Application){
+        if (LpBleUtil.isDisconnected(Constant.BluetoothConfig.SUPPORT_MODEL)){
+            Log.d("dash", "蓝牙断开， 无法开始手动采集")
+            return
+        }
+        GlobalScope.launch {
+            CollectUtil.getInstance(application).manualCollect(this@DashboardViewModel)
+        }
+    }
+
+
 
 
 

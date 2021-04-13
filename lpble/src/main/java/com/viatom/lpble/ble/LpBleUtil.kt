@@ -94,19 +94,6 @@ class LpBleUtil {
         @JvmOverloads
         fun startScan(scanModel: Int, needPair: Boolean = false) {
 
-            if (!Constant.BluetoothConfig.isLpBleEnable){
-                Log.d(TAG, "ble service un inited")
-                return
-            }
-            BleServiceHelper.BleServiceHelper.startScan(scanModel, needPair)
-        }
-
-        @JvmOverloads
-        fun startScan(scanModel: IntArray, needPair: Boolean = false) {
-            if (!Constant.BluetoothConfig.isLpBleEnable){
-                Log.d(TAG, "ble service un inited")
-                return
-            }
             BleServiceHelper.BleServiceHelper.startScan(scanModel, needPair)
         }
 

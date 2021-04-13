@@ -37,7 +37,8 @@
     <string name="i_know">我知道了</string>
     <string name="public_lead_off_tip">导联已断开，请检查</string>
     <string name="public_lead_off_msg">提示: 导联断开状态持续一分钟后主机会停止测量</string>
-    <string name="amp">25 mm/s 10 mm/mv</string>
+    <string name="amp">25 mm/s 5 mm/mv</string>
+    <string name="collection">采集</string>
 
 
 </resources>

@@ -1,21 +1,16 @@
 package com.viatom.lpble.viewmodels
 
-import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.Application
-import android.bluetooth.BluetoothDevice
-import android.content.Context
 import android.util.Log
 import android.util.SparseArray
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lepu.blepro.objs.Bluetooth
 import com.viatom.lpble.BuildConfig
-import com.viatom.lpble.R
 import com.viatom.lpble.ble.BleSO
+import com.viatom.lpble.ble.CollectUtil
 import com.viatom.lpble.ble.LpBleUtil
 import com.viatom.lpble.ble.WaveFilter
 import com.viatom.lpble.constants.Constant
@@ -26,6 +21,7 @@ import com.viatom.lpble.ext.createDir
 import com.viatom.lpble.util.doFailure
 import com.viatom.lpble.util.doSuccess
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -44,6 +40,25 @@ class MainViewModel: ViewModel() {
         value = false
     }
     var bleEnable : LiveData<Boolean> = _bleEnable
+
+    /**
+     * ble sdk 状态
+     */
+    val _lpBleEnable = MutableLiveData<Boolean>().apply {
+        value = false
+    }
+    var lpBleEnable : LiveData<Boolean> = _lpBleEnable
+
+    /**
+     * 自动采集服务可用状态
+     */
+    val _autoCollectEnable = MutableLiveData<Boolean>().apply {
+        value = false
+    }
+    var autoCollectEnable : LiveData<Boolean> = _autoCollectEnable
+
+
+
 
     /**
      * 连接过程中的蓝牙对象
@@ -71,9 +86,10 @@ class MainViewModel: ViewModel() {
     var connectState: LiveData<Int> = _connectState
 
 
-
-
-
+    /**
+     * 初始化蓝牙服务
+     * @param application Application
+     */
     fun initBle(application: Application){
 
         application.createDir(Constant.Dir.er1EcgDir)
@@ -90,6 +106,13 @@ class MainViewModel: ViewModel() {
                 application,
                 BleSO.getInstance(application)
             ) //必须在initModelConfig initRawFolder之后调用
+    }
+
+    fun runAutoCollect(application: Application){
+        GlobalScope.launch {
+            CollectUtil.getInstance(application).runAutoCollect()
+        }
+
     }
 
 
@@ -135,7 +158,7 @@ class MainViewModel: ViewModel() {
     //重置dashboard
     fun resetDashboard(){
 
-        Constant.BluetoothConfig.currentRunState = Constant.BluetoothConfig.RunState.NONE
+        Constant.BluetoothConfig.currentRunState = Constant.RunState.NONE
         WaveFilter.resetFilter()
 
 

@@ -13,7 +13,6 @@ import android.util.Log
 import android.view.WindowManager
 import androidx.core.content.ContextCompat.getExternalFilesDirs
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.lifecycleScope
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.MaterialDialog.SingleButtonCallback
@@ -22,8 +21,6 @@ import com.permissionx.guolindev.PermissionX
 import com.viatom.lpble.R
 import com.viatom.lpble.constants.Constant
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.launch
 import java.io.File
 
 /**
@@ -64,7 +61,7 @@ fun FragmentActivity.permissionNecessary() {
                 }
                 .request { allGranted, grantedList, deniedList ->
                     Log.e("权限", "$allGranted, $grantedList, $deniedList")
-                    LiveEventBus.get(Constant.EventUI.permissionNecessary).post(true)
+                    LiveEventBus.get(Constant.Event.permissionNecessary).post(true)
                 }
 
 
