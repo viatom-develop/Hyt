@@ -1,9 +1,11 @@
 package com.viatom.lpble.data.entity.local
 
 import android.app.Application
-import android.util.Log
+import android.content.Context
 import androidx.room.Room
 import com.viatom.lpble.data.entity.DeviceEntity
+import com.viatom.lpble.data.entity.RecordEntity
+import com.viatom.lpble.data.entity.ReportEntity
 import com.viatom.lpble.util.LpResult
 import com.viatom.lpble.util.SingletonHolder
 import kotlinx.coroutines.Dispatchers
@@ -14,11 +16,11 @@ import kotlinx.coroutines.flow.*
  * created on: 20214/6 10:28
  * description:
  */
-class DBHelper private constructor(application: Application) {
-    companion object : SingletonHolder<DBHelper, Application>(::DBHelper)
+class DBHelper private constructor(context: Context) {
+    companion object : SingletonHolder<DBHelper, Context>(::DBHelper)
 
     val db = Room.databaseBuilder(
-        application,
+        context,
         AppDataBase::class.java, "xphealth-db"
     ).build()
 
@@ -52,6 +54,47 @@ class DBHelper private constructor(application: Application) {
         }.flowOn(Dispatchers.IO)
 
     }
+
+
+    suspend fun insertRecord(recordDao: RecordDao, recordEntity: RecordEntity): Flow<LpResult<Long>> {
+        return flow{
+
+            try {
+                emit(LpResult.Success(recordDao.insertRecord(recordEntity)))
+            } catch (e: Exception) {
+                emit(LpResult.Failure(e.cause))
+            }
+        }.flowOn(Dispatchers.IO)
+
+    }
+
+
+
+    suspend fun insertReport(reportDao: ReportDao, reportEntity: ReportEntity): Flow<LpResult<Long>> {
+        return flow{
+            try {
+                emit(LpResult.Success(reportDao.insertReport(reportEntity)))
+            } catch (e: Exception) {
+                emit(LpResult.Failure(e.cause))
+            }
+        }.flowOn(Dispatchers.IO)
+
+    }
+
+    suspend fun updateRecordWithAi(recordDao: RecordDao, recordId: Long): Flow<LpResult<Int>> {
+        return flow {
+            try {
+            recordDao.updateWithAnalysed(recordId, true)
+                emit(LpResult.Success(recordDao.getRecord(recordId).collectType))
+            } catch (e: Exception) {
+                emit(LpResult.Failure(e.cause))
+            }
+
+        }.flowOn(Dispatchers.IO)
+
+    }
+
+
 
 
 

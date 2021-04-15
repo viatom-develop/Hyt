@@ -11,7 +11,7 @@ class Constant{
     interface Dir{
         companion object{
             val er1Dir: String = "/er1"
-            val er1EcgDir: String = "/$er1Dir/ecg"
+            val er1EcgDir: String = "/$er1Dir/ecg" //保存采集到的数据.txt
         }
 
     }
@@ -66,12 +66,12 @@ class Constant{
             val TYPE_MANUAL: Int = 1
             val TYPE_AUTO: Int = 0
 
-            val AUTO_INTERVAL: Long = 1 * 60 * 1000
-            val AUTO_DURATION: Long = 10 * 1000
+            val AUTO_INTERVAL: Long = 15 * 1000
+            val AUTO_DURATION: Long = 5 * 1000 //
             val AUTO_START: Int = 1001
             val AUTO_STOP: Int = 1000
 
-            val MANUAL_DURATION: Int = 10 //s
+            val MANUAL_DURATION: Int = 5 //s
             val MANUAL_START: Int = 2001
             val MANUAL_STOP: Int = 2000
 
@@ -93,7 +93,10 @@ class Constant{
            val permissionNecessary: String = "permission_necessary"
 
 
-           val collectServiceConnected: String = "collect_Service_Connected"
+           val collectServiceConnected: String = "collect_service_connected"
+
+           val analysisProcessFailed: String = "analysis_process_failed"
+           val analysisProcessSuccess: String = "analysis_process_success"
        }
 
     }

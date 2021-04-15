@@ -12,6 +12,7 @@ import android.view.GestureDetector;
 import android.view.View;
 
 import com.viatom.lpble.R;
+import com.viatom.lpble.ble.CollectUtil;
 import com.viatom.lpble.ble.DataController;
 import com.viatom.lpble.constants.Constant;
 
@@ -46,18 +47,25 @@ public class EcgView extends View{
 
     public int[] mBase = new int[cellSize];
 
+    private Context context;
+
     public EcgView(Context context) {
         super(context);
+        this.context = context;
         init(null, 0);
     }
 
     public EcgView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.context = context;
+
         init(attrs, 0);
     }
 
     public EcgView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        this.context = context;
+
         init(attrs, defStyle);
     }
 
@@ -159,6 +167,10 @@ public class EcgView extends View{
                     float y = (mBase[c] - (DataController.amp[DataController.ampKey]*DataController.dataSrc[i+4]/ DataController.mm2px));
 
                     float x = (float) (i - cellStartIndex +4)/5/ DataController.mm2px ;
+
+                    if (i == CollectUtil.Companion.getInstance(context.getApplicationContext()).getManualIndex()){
+                        
+                    }
 
                     p.moveTo(x , y);
                     i = i+4;

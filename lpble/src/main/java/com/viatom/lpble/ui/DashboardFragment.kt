@@ -137,14 +137,7 @@ class DashboardFragment : Fragment() {
     fun changeCollectTip(){
         binding.collection.run {
                 isEnabled = (mainVM.connectState.value == LpBleUtil.State.CONNECTED) and  (viewModel.fingerState.value == true) and (viewModel.manualCollecting.value == false)
-                 if(isEnabled)text = getString(R.string.collection)
-                 else {
-                     if (mainVM.connectState.value != LpBleUtil.State.CONNECTED){
-                         text = "蓝牙未连接"
-                     }else if (viewModel.fingerState.value == false){
-                         text = "导联断开"
-                     }
-                }
+
         }
     }
     private fun subscribeUi() {
@@ -160,6 +153,7 @@ class DashboardFragment : Fragment() {
         viewModel.manualCollecting.observe(viewLifecycleOwner, {
             Log.d(DASH, "手动采集状态变更: $it")
             changeCollectTip()
+            if (!it)binding.collection.text = "采集"
 
             binding.report.isVisible = !it
         })
@@ -291,6 +285,26 @@ class DashboardFragment : Fragment() {
         LiveEventBus.get(EventMsgConst.RealTime.EventRealTimeStop).observe(viewLifecycleOwner, {
 
         })
+
+        //保存及分析流程成功
+        LiveEventBus.get(Constant.Event.analysisProcessSuccess).observe(viewLifecycleOwner, {
+            if (it == Constant.Collection.TYPE_MANUAL){
+                Toast.makeText(requireContext(), "分析成功", Toast.LENGTH_SHORT).show()
+                viewModel._manualCollecting.value = false
+            }
+
+        })
+
+        //保存及分析流程失败
+        LiveEventBus.get(Constant.Event.analysisProcessFailed).observe(viewLifecycleOwner, {
+            if (it == Constant.Collection.TYPE_MANUAL){
+                Toast.makeText(requireContext(), "分析失败", Toast.LENGTH_SHORT).show()
+                viewModel._manualCollecting.value = false
+            }
+
+        })
+
+
     }
 
 
@@ -315,7 +329,7 @@ class DashboardFragment : Fragment() {
         waveTask = object : TimerTask() {
             override fun run() {
                 var temp: FloatArray? = DataController.draw(5)
-                Log.d(DASH, "DataController.draw(5) == " + Arrays.toString(temp))
+//                Log.d(DASH, "DataController.draw(5) == " + Arrays.toString(temp))
                 if (viewModel._runState.value != RunState.RECORDING) {  // 非测试状态,画0
                     temp = if (temp == null || temp.isEmpty()) {
                         FloatArray(0)
@@ -325,24 +339,16 @@ class DashboardFragment : Fragment() {
                 }
 
                 DataController.feed(temp)
-                Log.d(DASH, "DataController.draw(5) == " + Arrays.toString(temp))
+//                Log.d(DASH, "DataController.draw(5) == " + Arrays.toString(temp))
                 // 采集数据 自动手动可能同时进行
                 CollectUtil.getInstance(requireActivity().application).run {
-                    if (viewModel._manualCollecting.value == true){
-                        temp?.let {
-                            this.actionCollect(Constant.Collection.TYPE_MANUAL, temp!!, DataController.index)
-                        }
-
+                    if (viewModel._manualCollecting.value == true && this.manualCounting && temp != null){
+                        this.actionCollect(Constant.Collection.TYPE_MANUAL, temp, DataController.index)
                     }
-
-                    if (viewModel._autoCollecting.value == true){
-                       this.actionCollect(Constant.Collection.TYPE_MANUAL, temp!!, DataController.index)
+                    if (this.autoCounting  && temp != null){
+                        this.actionCollect(Constant.Collection.TYPE_AUTO, temp, DataController.index)
                     }
                 }
-
-
-
-
 
                 ecgView.invalidate()
             }
@@ -399,8 +405,9 @@ class DashboardFragment : Fragment() {
         startWaveTimer(ecgView)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        Log.d("dash", "onDestroyView")
         stopTimer()
     }
 
@@ -408,8 +415,19 @@ class DashboardFragment : Fragment() {
          findNavController().navigate(R.id.action_DashboardFragment_to_SecondFragment)
     }
 
+    /**
+     * 手动采集
+     */
     fun manualCollect(){
-        viewModel.manualCollect(requireActivity().application)
+        if (binding.collection.isEnabled)
+            viewModel.manualCollect(requireActivity().application)
+        else {
+             if (mainVM.connectState.value != LpBleUtil.State.CONNECTED){
+                 Toast.makeText(requireContext(), "蓝牙未连接，无法采集", Toast.LENGTH_SHORT).show()
+             }else if (viewModel.fingerState.value == false){
+                 Toast.makeText(requireContext(), "导联断开， 无法采集", Toast.LENGTH_SHORT).show()
+             }
+        }
     }
 
 }

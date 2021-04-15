@@ -73,12 +73,36 @@ class CollectService : Service(){
         }.flowOn(Dispatchers.Default)
 
     }
+//    suspend fun autoCount(): Flow<LpResult<Int>> {
+//        return flow{
+//            try {
+//                Log.d("manualCollect", " start.....")
+//                for (i in 0..MANUAL_DURATION){
+//
+//                    if (LpBleUtil.isDisconnected(Constant.BluetoothConfig.SUPPORT_MODEL)) {
+//                        emit(LpResult.Failure(Exception("蓝牙已断开, 采集失败")))
+//                        return@flow
+//                    }
+//
+//
+//                    emit(LpResult.Success(i))
+//                    delay(1000)
+//                }
+//
+//            } catch (e: Exception) {
+//                Log.d("manualCollect", "$e")
+//                emit(LpResult.Failure(e.cause))
+//            }
+//        }.flowOn(Dispatchers.IO)
+//
+//    }
+
 
     /**
      * 手动采集
      * @return Flow<LpResult<Int>>
      */
-    suspend fun manualCollect(vm: DashboardViewModel): Flow<LpResult<Int>> {
+    suspend fun manualCount(): Flow<LpResult<Int>> {
         return flow{
             try {
                 Log.d("manualCollect", " start.....")
@@ -89,8 +113,8 @@ class CollectService : Service(){
                         return@flow
                     }
 
-                    if (vm.fingerState.value == false) {
-                        emit(LpResult.Failure(Exception("导联断开, 采集失败")))
+                    if (Constant.BluetoothConfig.currentRunState !in  Constant.RunState.PREPARING_TEST..Constant.RunState.RECORDING) {
+                        emit(LpResult.Failure(Exception("导联断开, 停止采集")))
                         return@flow
                     }
 

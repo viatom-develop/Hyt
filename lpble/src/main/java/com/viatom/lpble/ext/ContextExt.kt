@@ -22,6 +22,7 @@ import com.viatom.lpble.R
 import com.viatom.lpble.constants.Constant
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.io.File
+import java.io.IOException
 
 /**
  * author: wujuan
@@ -130,7 +131,7 @@ fun Application.getExtraDir(): File?{
 }
 
 /**
- *
+ * 本项目使用专属存储空间
  * @receiver Context
  * @param filename String
  * @return File
@@ -138,13 +139,31 @@ fun Application.getExtraDir(): File?{
 fun Context.getFile(filename: String): File = File(getExternalFilesDir(null), filename)
 
 
-fun Context.createDir(filename: String){
-    getFile(filename).let {
+fun Context.createDir(path: String): Boolean{
+   getFile(path).let {
        if(!it.exists()) {
-            it.mkdirs()
-           Log.d("ContextExt.createFile", it.absolutePath)
+           it.mkdirs()
+           Log.d("createDir success", it.absolutePath)
+           return true
+        }
+       return true
+    }
+    return false
+}
+
+@Throws(IOException::class)
+fun Context.createFile(path: String, filename: String): Boolean{
+    "$path/$filename".run {
+        getFile(this).let {
+            if(!it.exists()) {
+                it.createNewFile()
+                Log.d("createFile success", it.absolutePath)
+                return true
+            }
+            return true
         }
     }
+    return false
 }
 
 

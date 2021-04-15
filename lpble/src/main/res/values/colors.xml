@@ -15,6 +15,7 @@
 
     <color name="color_dashboard_ruler">#666666</color>
     <color name="color_dashboard_ecg_wave">#29EF57</color>
+    <color name="color_dashboard_ecg_wave_collecting">#F5E62A</color>
 
 
     <color name="color_ecgbg">#000000</color>

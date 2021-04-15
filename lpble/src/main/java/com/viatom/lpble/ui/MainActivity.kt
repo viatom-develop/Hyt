@@ -214,4 +214,6 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
     private fun hideConnecting() {
         if (this::dialog.isInitialized) dialog.dismiss()
     }
+
+
 }
