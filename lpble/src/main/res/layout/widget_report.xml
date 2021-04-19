@@ -1,0 +1,699 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:paddingHorizontal="@dimen/public_report_padding"> <!-- 左右各空17.5mm -->
+
+
+    <!-- 标题 -->
+    <RelativeLayout
+        android:id="@+id/rl_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true">
+
+        <ImageView
+            android:id="@+id/tv_report"
+            style="@style/ReportTextLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:paddingBottom="9px"
+            android:text="@string/report"
+            android:src="@mipmap/report_logo"
+            android:textSize="32px"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_toEndOf="@+id/tv_report"
+            android:layout_alignBottom="@id/tv_report"
+            android:textColor="@color/title_report"
+            android:textSize="37px"
+            android:textStyle="bold"
+            android:text="@string/public_report_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <ImageView
+            android:id="@+id/iv_logo"
+            android:layout_width="228px"
+            android:layout_height="24px"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:visibility="invisible" />
+    </RelativeLayout>
+
+    <!-- 用户信息和诊断结果      android:layout_height="235px"-->
+    <RelativeLayout
+        android:id="@+id/rl_summary"
+        android:layout_width="@dimen/public_report_width"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rl_title"
+        android:background="@drawable/report_border_report_rect"
+        android:paddingLeft="15px"
+        android:paddingRight="15px">
+
+
+        <LinearLayout
+            android:id="@+id/ll_result1"
+            android:layout_width="match_parent"
+            android:layout_height="59px"
+            android:orientation="horizontal"
+            android:paddingLeft="7px"
+            android:paddingRight="7px">
+
+            <LinearLayout
+                android:id="@+id/ll_measure_date_time"
+                android:layout_width="0dp"
+                android:layout_height="59px"
+                android:layout_weight="5"
+                android:orientation="horizontal">
+
+                <!--姓名-->
+                <TextView
+                    style="@style/ReportTextLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="59px"
+                    android:gravity="center_vertical"
+                    android:singleLine="true"
+                    android:text="@string/public_name"
+                    android:textSize="21px"
+                    android:textStyle="bold" />
+
+                <include layout="@layout/report_comma" />
+
+
+                <TextView
+                    android:id="@+id/val_name"
+                    style="@style/ReportTextValue"
+                    android:layout_width="0dp"
+                    android:layout_height="59px"
+                    android:layout_weight="2"
+                    android:gravity="center_vertical"
+                    android:paddingEnd="7px"
+                    android:singleLine="true"
+                    android:textSize="21px"
+                    tools:text="用户12138" />
+                <!--性别-->
+
+                <TextView
+                    android:id="@+id/gender"
+                    style="@style/ReportTextLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="59px"
+                    android:gravity="center_vertical"
+                    android:paddingLeft="7px"
+                    android:singleLine="true"
+                    android:text="@string/public_gender"
+                    android:textSize="21px"
+                    android:textStyle="bold" />
+
+                <include layout="@layout/report_comma" />
+
+
+                <TextView
+                    android:id="@+id/val_gender"
+                    style="@style/ReportTextValue"
+                    android:layout_width="0dp"
+                    android:layout_height="59px"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:paddingEnd="7px"
+                    android:singleLine="true"
+                    android:textSize="21px"
+                    tools:text="男" />
+
+                <!--身高-->
+                <TextView
+                    style="@style/ReportTextLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="59px"
+                    android:gravity="center_vertical"
+                    android:paddingLeft="7px"
+                    android:singleLine="true"
+                    android:text="@string/public_height"
+                    android:textSize="21px"
+                    android:textStyle="bold" />
+
+                <include layout="@layout/report_comma" />
+
+
+                <TextView
+                    android:id="@+id/val_height"
+                    style="@style/ReportTextValue"
+                    android:layout_width="0dp"
+                    android:layout_height="59px"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:paddingEnd="7px"
+                    android:singleLine="true"
+                    android:textSize="21px"
+                    tools:text="175" />
+
+                <!--体重-->
+                <TextView
+                    style="@style/ReportTextLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="59px"
+                    android:gravity="center_vertical"
+                    android:paddingLeft="7px"
+                    android:singleLine="true"
+                    android:text="@string/public_weight"
+                    android:textSize="21px"
+                    android:textStyle="bold" />
+
+                <include layout="@layout/report_comma" />
+
+
+                <TextView
+                    android:id="@+id/val_weight"
+                    style="@style/ReportTextValue"
+                    android:layout_width="0dp"
+                    android:layout_height="59px"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:paddingEnd="7px"
+                    android:singleLine="true"
+                    android:textSize="21px"
+                    tools:text="80kg" />
+
+                <!--出生日期-->
+                <TextView
+                    style="@style/ReportTextLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="59px"
+                    android:gravity="center_vertical"
+                    android:paddingLeft="7px"
+                    android:singleLine="true"
+                    android:text="@string/public_birthday"
+                    android:textSize="21px"
+                    android:textStyle="bold" />
+
+<!--                <include layout="@layout/comma" />-->
+
+                <TextView
+                    android:id="@+id/val_birthday"
+                    style="@style/ReportTextValue"
+                    android:layout_width="0dp"
+                    android:layout_height="59px"
+                    android:layout_weight="2"
+                    android:gravity="center_vertical"
+                    android:paddingRight="7px"
+                    android:singleLine="true"
+                    android:textSize="21px"
+                    tools:text="2020-06-04" />
+
+
+            </LinearLayout>
+
+            <!-- 测量时长 -->
+            <LinearLayout
+                android:id="@+id/ll_recording_duration"
+                android:layout_width="0dp"
+                android:layout_height="59px"
+                android:layout_weight="4"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/tv_label_recording_duration"
+                    style="@style/ReportTextLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="59px"
+                    android:gravity="center_vertical"
+                    android:singleLine="true"
+                    android:text="@string/tv_label_recording_duration"
+                    android:textSize="21px"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_value_recording_duration"
+                    style="@style/ReportTextValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="59px"
+                    android:gravity="center_vertical"
+                    android:singleLine="true"
+                    android:textSize="21px" />
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <View
+            android:layout_below="@id/ll_result1"
+            android:layout_width="@dimen/dash_line_width"
+            android:layout_height="2dp"
+            android:background="@drawable/report_dash_line" />
+
+        <!-- 测量时长，开始时间，结束时间 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/ll_result2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ll_result1"
+            android:paddingLeft="7px"
+            android:paddingRight="7px">
+
+            <!--测量时间-->
+            <TextView
+                android:id="@+id/total_time_label"
+                style="@style/ReportTextLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="59px"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:gravity="center_vertical"
+                android:paddingRight="7px"
+                android:paddingEnd="0dp"
+                android:singleLine="true"
+                android:text="@string/public_ai_analyse_time"
+                android:textSize="21px"
+                android:textStyle="bold" />
+
+    <!--        <TextView
+                android:id="@+id/comma0"
+                style="@style/ReportTextLabel"
+                android:gravity="center_vertical"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@id/total_time_label"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="59px"
+                android:text=":"
+                android:textSize="21px" />
+-->
+            <TextView
+                android:id="@+id/total_time"
+                style="@style/ReportTextValue"
+                android:layout_width="wrap_content"
+                android:layout_height="59px"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@id/total_time_label"
+                android:gravity="center_vertical"
+                android:textSize="21px"
+                tools:text="52分钟30秒" />
+
+            <View
+                android:id="@+id/center"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_width="1dp"
+                android:layout_height="1dp"/>
+
+            <!--测量开始时间-->
+            <TextView
+                android:id="@+id/tv_label_measure_date_time"
+                style="@style/ReportTextLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="59px"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@id/center"
+                android:gravity="center_vertical"
+                android:singleLine="true"
+                android:text="@string/public_ai_start_time"
+                android:textSize="21px"
+                android:textStyle="bold" />
+
+<!--            <TextView
+                android:id="@+id/comma"
+                style="@style/ReportTextLabel"
+                android:gravity="center_vertical"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tv_label_measure_date_time"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="59px"
+                android:text=":"
+                android:textSize="21px" />-->
+
+<!--            <androidx.constraintlayout.widget.Group
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:constraint_referenced_ids=""/>-->
+
+            <TextView
+                android:id="@+id/val_start_time"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tv_label_measure_date_time"
+                style="@style/ReportTextValue"
+                android:layout_width="0dp"
+                android:layout_height="59px"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:paddingRight="7px"
+                android:singleLine="true"
+                android:textSize="21px"
+                tools:text="2020-0604 10:53:05" />
+
+            <!--测量结束时间-->
+            <TextView
+                android:id="@+id/ai_end_time"
+                style="@style/ReportTextLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="59px"
+                app:layout_constraintTop_toBottomOf="@id/tv_label_measure_date_time"
+                app:layout_constraintStart_toEndOf="@id/center"
+                android:gravity="center_vertical"
+                android:singleLine="true"
+                android:text="@string/public_ai_end_time"
+                android:textSize="21px"
+                android:textStyle="bold" />
+
+ <!--           <TextView
+                android:id="@+id/comma1"
+                style="@style/ReportTextLabel"
+                android:gravity="center_vertical"
+                app:layout_constraintTop_toBottomOf="@id/comma"
+                app:layout_constraintStart_toEndOf="@id/tv_label_measure_date_time"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="59px"
+                android:text=":"
+                android:textSize="21px" />-->
+
+            <TextView
+                android:id="@+id/val_end_time"
+                app:layout_constraintTop_toBottomOf="@id/val_start_time"
+                app:layout_constraintStart_toEndOf="@id/ai_end_time"
+                style="@style/ReportTextValue"
+                android:layout_width="0dp"
+                android:layout_height="59px"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:paddingRight="7px"
+                android:singleLine="true"
+                android:textSize="21px"
+                tools:text="2020-0604 10:53:05" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:layout_below="@id/ll_result2"
+            android:layout_width="@dimen/dash_line_width"
+            android:layout_height="2dp"
+            android:background="@drawable/report_dash_line" />
+
+        <!-- 用户信息 -->
+        <LinearLayout
+            android:id="@+id/ll_remark"
+            android:layout_width="match_parent"
+            android:layout_height="59px"
+            android:layout_below="@+id/ll_result2"
+            android:orientation="horizontal"
+            android:paddingLeft="7px"
+            android:paddingRight="7px">
+
+            <!--
+            <TextView style="@style/ReportTextLabel"
+                android:id="@+id/tv_label_record_note"
+                android:layout_width="wrap_content"
+                android:layout_height="48px"
+                android:singleLine="true"
+                android:text="@string/tv_label_record_note"
+                android:textSize="21px"
+                android:textStyle="bold" />
+            -->
+
+            <TextView
+                android:visibility="gone"
+                android:id="@+id/ai_time_label"
+                style="@style/ReportTextLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="59px"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:gravity="center_vertical"
+                android:paddingRight="7px"
+                android:singleLine="true"
+                android:text="@string/public_ai_time"
+                android:textSize="21px"
+                android:textStyle="bold" />
+
+            <TextView
+                android:visibility="gone"
+                android:id="@+id/comma3"
+                style="@style/ReportTextLabel"
+                android:gravity="center_vertical"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@id/ai_time_label"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="59px"
+                android:text=":"
+                android:textSize="21px" />
+
+            <TextView
+                android:visibility="gone"
+                android:id="@+id/ai_time"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="21px"
+                app:layout_constraintTop_toBottomOf="@id/report_time"
+                android:text="@string/public_first_five_min" />
+
+            <TextView
+                android:id="@+id/ai_get_label"
+                style="@style/ReportTextLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="59px"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:gravity="center_vertical"
+                android:singleLine="true"
+                android:text="@string/public_ai_get_time"
+                android:textSize="21px"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/comma4"
+                style="@style/ReportTextLabel"
+                android:gravity="center_vertical"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@id/ai_get_label"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="59px"
+                android:text=":"
+                android:textSize="21px" />
+
+            <TextView
+                android:id="@+id/val_ai_get_time"
+                style="@style/ReportTextValue"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:textSize="21px"
+                app:layout_constraintTop_toBottomOf="@id/report_time"
+                tools:text="2020-06-04" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_below="@id/ll_remark"
+            android:layout_width="@dimen/dash_line_width"
+            android:layout_height="2dp"
+            android:background="@drawable/report_dash_line" />
+
+        <!-- 心率 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/ll_remark"
+            android:layout_weight="5"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/hr"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                style="@style/ReportTextValue"
+                android:layout_width="wrap_content"
+                android:layout_height="59px"
+                android:gravity="center_vertical"
+                android:paddingLeft="7px"
+                android:singleLine="true"
+                android:text="@string/tv_label_record_hr"
+                android:textSize="21px"
+                android:textStyle="bold" />
+
+
+            <TextView
+                android:id="@+id/tv_label_record_hr"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/hr"
+                style="@style/ReportTextValue"
+                android:layout_width="wrap_content"
+                android:layout_height="59px"
+                android:gravity="center_vertical"
+                android:paddingLeft="7px"
+                android:singleLine="true"
+                android:textSize="21px" />
+
+            <TextView
+                android:id="@+id/status"
+                android:paddingLeft="7px"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/hr"
+                style="@style/ReportTextLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="59px"
+                android:gravity="center"
+                android:text="@string/public_status"
+                android:textSize="21px"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/comma2"
+                style="@style/ReportTextLabel"
+                android:gravity="center_vertical"
+                app:layout_constraintTop_toBottomOf="@id/hr"
+                app:layout_constraintStart_toEndOf="@id/status"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="59px"
+                android:text=":"
+                android:textSize="21px" />
+
+            <TextView
+                android:id="@+id/val_status"
+                app:layout_constraintTop_toBottomOf="@+id/hr"
+                app:layout_constraintStart_toEndOf="@id/comma2"
+                app:layout_constraintEnd_toStartOf="@id/icon_report"
+                style="@style/ReportTextLabel"
+                android:gravity="center_vertical"
+                android:layout_width="0dp"
+                android:layout_height="59px"
+                android:textSize="21px"
+                android:visibility="invisible"
+                tools:text="头晕,头痛" />
+
+            <ImageView
+                android:id="@+id/icon_report"
+                android:layout_width="228px"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:src="@mipmap/icon_report_device" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+    </RelativeLayout>
+
+
+
+    <!-- 时长及分析信息 -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/ll_outline"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:layout_width="@dimen/public_report_width"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rl_summary"
+        android:layout_marginTop="50px"
+        android:orientation="vertical">
+
+        <TextView
+            android:padding="3px"
+            android:id="@+id/ai_result"
+            tools:text="窦性心律过速"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/report_rec_black_line_bg"
+            android:textColor="@color/black"
+            android:textSize="21px"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <TextView
+            android:id="@+id/report_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:textSize="21px"
+            app:layout_constraintTop_toBottomOf="@id/ai_result"
+            tools:text="报告时长：52分钟30秒（2020-3-9 18:00:00 - 2020-3-10 18:52:30）" />
+
+
+        <TextView
+            android:id="@+id/ai_tip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/public_ai_tip"
+            android:textColor="@color/black"
+            android:textSize="21px"
+            app:layout_constraintTop_toBottomOf="@id/report_time" />
+
+        <TextView
+            android:id="@+id/phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/public_phone"
+            android:textColor="@color/black"
+            android:textSize="21px"
+            app:layout_constraintTop_toBottomOf="@id/ai_tip" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/ai_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:constraint_referenced_ids="ai_result,ai_tip"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- 标尺及带宽信息 -->
+    <RelativeLayout
+        android:id="@+id/rl_other_info"
+        android:visibility="gone"
+        android:layout_width="@dimen/public_report_width"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/rl_wave"
+        android:layout_marginTop="5px">
+
+        <TextView
+            android:id="@+id/tv_ruler"
+            style="@style/ReportTextLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:singleLine="true"
+            android:text="10mm/mV   25mm/s"
+            android:textColor="@color/black"
+            android:textSize="18px" />
+
+        <TextView
+            android:id="@+id/tv_report_page"
+            style="@style/ReportTextLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:textColor="@color/black"
+            android:textSize="18px" />
+
+    </RelativeLayout>
+    <!-- 波形layout，高度200mm，8行2.5mV, 7秒数据
+        android:layout_height="1180px"
+    -->
+    <LinearLayout
+        android:id="@+id/rl_wave"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ll_outline"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="31.5px">
+
+    </LinearLayout>
+
+</RelativeLayout>

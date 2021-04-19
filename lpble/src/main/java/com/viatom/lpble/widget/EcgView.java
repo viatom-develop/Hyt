@@ -16,22 +16,24 @@ import com.viatom.lpble.ble.CollectUtil;
 import com.viatom.lpble.ble.DataController;
 import com.viatom.lpble.constants.Constant;
 
+import java.util.ArrayList;
+
 /**
  * TODO: document your custom view class.
  */
-public class EcgView extends View{
+public class EcgView extends View {
 
     private TextPaint mTextPaint;
     private Paint bPaint;
     private Paint linePaint;
     private Paint wPaint;
+    private Paint cPaint;
 
     public int mWidth;
     public int mHeight;
 
 
     private int maxIndex;
-
 
 
     //设备状态
@@ -49,6 +51,9 @@ public class EcgView extends View{
 
     private Context context;
 
+    private CollectUtil collectUtil;
+
+
     public EcgView(Context context) {
         super(context);
         this.context = context;
@@ -58,7 +63,6 @@ public class EcgView extends View{
     public EcgView(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
-
         init(attrs, 0);
     }
 
@@ -78,16 +82,17 @@ public class EcgView extends View{
 
         // Set up a default TextPaint object
         iniPaint();
+        collectUtil = CollectUtil.Companion.getInstance(context.getApplicationContext());
     }
 
     private void iniPaint() {
         mTextPaint = new TextPaint();
         mTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
         mTextPaint.setTextAlign(Paint.Align.LEFT);
-		mTextPaint.setTextSize(24);
-		mTextPaint.setStyle(Paint.Style.FILL);
-		mTextPaint.setStrokeWidth((float) 1.5);
-		mTextPaint.setColor(getColor(R.color.color_dashboard_ruler));
+        mTextPaint.setTextSize(24);
+        mTextPaint.setStyle(Paint.Style.FILL);
+        mTextPaint.setStrokeWidth((float) 1.5);
+        mTextPaint.setColor(getColor(R.color.color_dashboard_ruler));
 
 
         linePaint = new Paint();
@@ -104,6 +109,14 @@ public class EcgView extends View{
         wPaint.setTextAlign(Paint.Align.LEFT);
         wPaint.setTextSize(32);
 
+
+        cPaint = new Paint();
+        cPaint.setColor(getColor(R.color.color_dashboard_ecg_wave_collecting/*colorWhite*/));
+        cPaint.setStyle(Paint.Style.STROKE);
+        cPaint.setStrokeWidth(4.0f);
+        cPaint.setTextAlign(Paint.Align.LEFT);
+        cPaint.setTextSize(32);
+
         bPaint = new Paint();
         bPaint.setTextAlign(Paint.Align.LEFT);
         bPaint.setTextSize(32);
@@ -119,7 +132,7 @@ public class EcgView extends View{
 
         iniParam();
 
-        if((runState == Constant.RunState.PREPARING_TEST || runState == Constant.RunState.RECORDING) && DataController.dataSrc.length > 0) {
+        if ((runState == Constant.RunState.PREPARING_TEST || runState == Constant.RunState.RECORDING) && DataController.dataSrc.length > 0) {
             drawWave(canvas);
         }
     }
@@ -137,15 +150,15 @@ public class EcgView extends View{
         mHeight = getHeight();
 
 
-        cellHeight = (mHeight - paddingTop* cellSize) /cellSize; // 每个单元的高度
-        float cellGridCount = cellHeight/(5/DataController.mm2px); //每个单元纵向格子数
-        for (int c= 0; c < cellSize; c++){
-            float baseIndex =  cellGridCount / 2;
-            if( baseIndex % 1 >= 0.5)
-                baseIndex ++;
-            baseIndex -= baseIndex%1;
+        cellHeight = (mHeight - paddingTop * cellSize) / cellSize; // 每个单元的高度
+        float cellGridCount = cellHeight / (5 / DataController.mm2px); //每个单元纵向格子数
+        for (int c = 0; c < cellSize; c++) {
+            float baseIndex = cellGridCount / 2;
+            if (baseIndex % 1 >= 0.5)
+                baseIndex++;
+            baseIndex -= baseIndex % 1;
 
-            mBase[c] = (int) (baseIndex * (5/DataController.mm2px)) + (c+1)* paddingTop+ c*cellHeight;
+            mBase[c] = (int) (baseIndex * (5 / DataController.mm2px)) + (c + 1) * paddingTop + c * cellHeight;
         }
 
 
@@ -153,44 +166,75 @@ public class EcgView extends View{
 
 
     private void drawWave(Canvas canvas) {
-        Path p = new Path();
-        for (int c = 0; c < cellSize; c++){
-            p.moveTo(0, mBase[c]);
 
-            int cellStartIndex =  maxIndex / cellSize * c;
-            int cellEndIndex = cellStartIndex +  maxIndex / cellSize;
+        Path p = new Path();
+        Path p1 = new Path();
+
+        for (int c = 0; c < cellSize; c++) {
+
+            p.moveTo(0, mBase[c]);
+            p1.moveTo(0, mBase[c]);
+
+
+            int cellStartIndex = maxIndex / cellSize * c;
+            int cellEndIndex = cellStartIndex + maxIndex / cellSize;
 
             for (int i = cellStartIndex; i < cellEndIndex; i++) {
+//                if (collectUtil.getManualData().length > 0) {
+//
+//                    if (i == collectUtil.getManualIndex()) {
+//                        float y = (mBase[c] - (DataController.amp[DataController.ampKey] * DataController.dataSrc[i + 4] / DataController.mm2px));
+//
+//                        float x = (float) (i - cellStartIndex + 4) / 5 / DataController.mm2px;
+//
+//
+//                        p1.moveTo(x, y);
+//                        p.moveTo(x, y);
+//                        i = i + 4;
+//
+//                    } else {
+//                        float y1 = mBase[c] - (DataController.amp[DataController.ampKey] * DataController.dataSrc[i] / DataController.mm2px);
+//                        float x1 = (float) (i - cellStartIndex) / 5 / DataController.mm2px;
+//
+//                        p1.lineTo(x1, y1);
+//                        p.moveTo(x1, y1);
+//                    }
+//
+//
+//                } else {
 
-                if (i == DataController.index  && i < cellEndIndex -5) {
+                    if (i == DataController.index && i < cellEndIndex - 5) {
+                        float y = (mBase[c] - (DataController.amp[DataController.ampKey] * DataController.dataSrc[i + 4] / DataController.mm2px));
 
-                    float y = (mBase[c] - (DataController.amp[DataController.ampKey]*DataController.dataSrc[i+4]/ DataController.mm2px));
+                        float x = (float) (i - cellStartIndex + 4) / 5 / DataController.mm2px;
 
-                    float x = (float) (i - cellStartIndex +4)/5/ DataController.mm2px ;
 
-                    if (i == CollectUtil.Companion.getInstance(context.getApplicationContext()).getManualIndex()){
-                        
+                        p.moveTo(x, y);
+                        p1.moveTo(x, y);
+                        i = i + 4;
+
+                    } else {
+                        float y1 = mBase[c] - (DataController.amp[DataController.ampKey] * DataController.dataSrc[i] / DataController.mm2px);
+                        float x1 = (float) (i - cellStartIndex) / 5 / DataController.mm2px;
+
+                        p.lineTo(x1, y1);
+                        p1.lineTo(x1, y1);
                     }
 
-                    p.moveTo(x , y);
-                    i = i+4;
-                } else {
-                    float y1 = mBase[c] - (DataController.amp[DataController.ampKey]*DataController.dataSrc[i] / DataController.mm2px);
 
-
-                    float x1 = (float) (i - cellStartIndex)/5/ DataController.mm2px;
-                    p.lineTo(x1 , y1);
                 }
 
-            }
+
+//            }
             canvas.drawPath(p, wPaint);
+//            canvas.drawPath(p1, cPaint);
+
         }
 
 
 
 
-
-    }
+}
 
     public void clear() {
         DataController.clear();

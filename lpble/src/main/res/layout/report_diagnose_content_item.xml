@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:paddingLeft="@dimen/public_report_padding"
+    android:paddingRight="@dimen/public_report_padding"
+    android:paddingBottom="30px"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:background="@drawable/report_rec_black_line_bg"
+        android:layout_width="@dimen/public_report_width"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rl_summary"
+        android:padding="10px"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/diagnose"
+            android:textStyle="bold"
+            tools:text="窦性心律过速"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:textSize="21px" />
+
+
+        <TextView
+            android:id="@+id/advice_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:textSize="21px"
+            tools:text="建议：多喝热水" />
+
+    </LinearLayout>
+
+</RelativeLayout>

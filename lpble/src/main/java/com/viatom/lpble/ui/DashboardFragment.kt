@@ -2,6 +2,7 @@ package com.viatom.lpble.ui
 
 import android.app.AlertDialog
 import android.app.ProgressDialog
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -15,6 +16,7 @@ import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.afollestad.materialdialogs.MaterialDialog
 import com.jeremyliao.liveeventbus.LiveEventBus
@@ -34,6 +36,7 @@ import com.viatom.lpble.viewmodels.DashboardViewModel
 import com.viatom.lpble.viewmodels.MainViewModel
 import com.viatom.lpble.widget.EcgBkg
 import com.viatom.lpble.widget.EcgView
+import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.experimental.and
@@ -70,18 +73,18 @@ class DashboardFragment : Fragment() {
     }
 
 
+
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_dashborad, container, false)
+        binding.lifecycleOwner = this
         binding.ctx = this
 
         activity?.window?.setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-
-
+        Log.d("dash", "onCreateView")
 
         return binding.root
     }
@@ -92,6 +95,8 @@ class DashboardFragment : Fragment() {
         subscribeUi()
         initLiveEvent()
         initData()
+
+
 
 
 //        view.findViewById<Button>(R.id.button_first).setOnClickListener {
@@ -134,29 +139,9 @@ class DashboardFragment : Fragment() {
     }
 
 
-    fun changeCollectTip(){
-        binding.collection.run {
-                isEnabled = (mainVM.connectState.value == LpBleUtil.State.CONNECTED) and  (viewModel.fingerState.value == true) and (viewModel.manualCollecting.value == false)
 
-        }
-    }
     private fun subscribeUi() {
-        mainVM.connectState.observe(viewLifecycleOwner, {
-            //蓝牙断开时 采集UI
-           changeCollectTip()
 
-        })
-        viewModel.fingerState.observe(viewLifecycleOwner, {
-            //导联状态 采集UI
-            changeCollectTip()
-        })
-        viewModel.manualCollecting.observe(viewLifecycleOwner, {
-            Log.d(DASH, "手动采集状态变更: $it")
-            changeCollectTip()
-            if (!it)binding.collection.text = "采集"
-
-            binding.report.isVisible = !it
-        })
 
         //状态切换
         viewModel.runState.observe(viewLifecycleOwner, {
@@ -290,7 +275,7 @@ class DashboardFragment : Fragment() {
         LiveEventBus.get(Constant.Event.analysisProcessSuccess).observe(viewLifecycleOwner, {
             if (it == Constant.Collection.TYPE_MANUAL){
                 Toast.makeText(requireContext(), "分析成功", Toast.LENGTH_SHORT).show()
-                viewModel._manualCollecting.value = false
+                binding.collection.text = "采集"
             }
 
         })
@@ -299,7 +284,7 @@ class DashboardFragment : Fragment() {
         LiveEventBus.get(Constant.Event.analysisProcessFailed).observe(viewLifecycleOwner, {
             if (it == Constant.Collection.TYPE_MANUAL){
                 Toast.makeText(requireContext(), "分析失败", Toast.LENGTH_SHORT).show()
-                viewModel._manualCollecting.value = false
+                binding.collection.text = "采集"
             }
 
         })
@@ -330,7 +315,7 @@ class DashboardFragment : Fragment() {
             override fun run() {
                 var temp: FloatArray? = DataController.draw(5)
 //                Log.d(DASH, "DataController.draw(5) == " + Arrays.toString(temp))
-                if (viewModel._runState.value != RunState.RECORDING) {  // 非测试状态,画0
+                if (viewModel._runState.value != RunState.RECORDING) {
                     temp = if (temp == null || temp.isEmpty()) {
                         FloatArray(0)
                     } else {
@@ -341,12 +326,22 @@ class DashboardFragment : Fragment() {
                 DataController.feed(temp)
 //                Log.d(DASH, "DataController.draw(5) == " + Arrays.toString(temp))
                 // 采集数据 自动手动可能同时进行
+
                 CollectUtil.getInstance(requireActivity().application).run {
-                    if (viewModel._manualCollecting.value == true && this.manualCounting && temp != null){
-                        this.actionCollect(Constant.Collection.TYPE_MANUAL, temp, DataController.index)
+                    if ( this.manualCounting){
+                        if(temp ==  null || temp.isEmpty()){
+                            this.actionCollectManual(FloatArray(5), DataController.index)
+                        }else{
+                            this.actionCollectManual(temp, DataController.index)
+                        }
                     }
-                    if (this.autoCounting  && temp != null){
-                        this.actionCollect(Constant.Collection.TYPE_AUTO, temp, DataController.index)
+                    if (this.autoCounting){
+                        if(temp ==  null || temp.isEmpty()){
+                            this.actionCollectAuto(FloatArray(5), DataController.index)
+                        }else{
+                            this.actionCollectAuto(temp, DataController.index)
+                        }
+
                     }
                 }
 
@@ -411,22 +406,33 @@ class DashboardFragment : Fragment() {
         stopTimer()
     }
 
-    fun toReport() {
-         findNavController().navigate(R.id.action_DashboardFragment_to_SecondFragment)
+//    fun toReport() {
+//         findNavController().navigate(R.id.action_DashboardFragment_to_ReportDetailFragment)
+//    }
+
+    fun toReportList() {
+        findNavController().navigate(R.id.dashboard_to_report_list)
+
     }
 
     /**
      * 手动采集
      */
     fun manualCollect(){
-        if (binding.collection.isEnabled)
-            viewModel.manualCollect(requireActivity().application)
-        else {
-             if (mainVM.connectState.value != LpBleUtil.State.CONNECTED){
-                 Toast.makeText(requireContext(), "蓝牙未连接，无法采集", Toast.LENGTH_SHORT).show()
-             }else if (viewModel.fingerState.value == false){
-                 Toast.makeText(requireContext(), "导联断开， 无法采集", Toast.LENGTH_SHORT).show()
-             }
+        if (mainVM.connectState.value != LpBleUtil.State.CONNECTED){
+            Toast.makeText(requireContext(), "蓝牙未连接，无法采集", Toast.LENGTH_SHORT).show()
+            return
+        }else if (viewModel.fingerState.value == false){
+            Toast.makeText(requireContext(), "导联断开， 无法采集", Toast.LENGTH_SHORT).show()
+            return
+        }else if (CollectUtil.getInstance(requireContext()).manualCounting) {
+            Toast.makeText(requireContext(), "正在采集/分析中", Toast.LENGTH_SHORT).show()
+            return
+        }else{
+            lifecycleScope.launch {
+                CollectUtil.getInstance(requireContext()).manualCollect(viewModel)
+            }
+
         }
     }
 

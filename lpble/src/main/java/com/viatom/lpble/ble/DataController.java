@@ -7,6 +7,7 @@ import java.util.Arrays;
 
 public class DataController {
     public static int index = 0;
+    public static int indexC = 0;
 
     public static int[] amp = {5, 10 ,20};
     public static int ampKey = 0;
@@ -21,6 +22,7 @@ public class DataController {
 
     // for wave
     public static float[] dataSrc;
+    public static float[] dataSrcCollect;
     // received from device
     public static float[] dataRec = new float[0];
 

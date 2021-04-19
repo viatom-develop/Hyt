@@ -2,6 +2,8 @@ package com.viatom.lpble.data.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * author: wujuan
@@ -13,7 +15,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "report")
 data class ReportEntity @JvmOverloads constructor(
     @PrimaryKey(autoGenerate = true)
-    val id : Long = 0,
+    val id: Long = 0,
     var recordId: Long,
     val fragmentList: List<Fragment>?,
     val aiDiagnosisCode: String,
@@ -28,6 +30,7 @@ data class ReportEntity @JvmOverloads constructor(
     val aiResultList: List<AiResult>?,
     val aiDiagnosis: String,
     val aiSuggestion: String,
+
 
     ) {
 
@@ -44,10 +47,14 @@ data class ReportEntity @JvmOverloads constructor(
      */
     data class Fragment(
         val startPose: String,
-       val code: String,
-       val name: String,
-       val endPose: String
-    )
+        val code: String,
+        val name: String,
+        val endPose: String
+    ){
+        override fun equals(obj: Any?): Boolean {
+            return if (obj !is Fragment) false else obj.startPose == startPose
+        }
+    }
 
     /**
      *  {
@@ -68,13 +75,14 @@ data class ReportEntity @JvmOverloads constructor(
      */
     data class AiResult(
         val aiDiagnosis: String,
-       val code: String,
-       val content: String,
-       val cover: String,
-       val phoneContent: String,
+        val code: String,
+        val content: String,
+        val cover: String,
+        val phoneContent: String,
         val video: String
     )
 
 
 
 }
+

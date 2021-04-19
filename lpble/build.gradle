@@ -106,6 +106,9 @@ dependencies {
     api "com.afollestad.material-dialogs:core:$rootProject.material_dialogs"
 
     api "com.github.CymChad:BaseRecyclerViewAdapterHelper:$rootProject.brvah"
+    implementation "com.itextpdf:itextg:$rootProject.pdf"
+    implementation "androidx.paging:paging-runtime:$rootProject.paging"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:$rootProject.swiperefreshlayout"
 
 
 

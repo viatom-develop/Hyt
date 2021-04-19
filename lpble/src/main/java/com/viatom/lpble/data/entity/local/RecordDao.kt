@@ -1,10 +1,11 @@
 package com.viatom.lpble.data.entity.local
 
+import androidx.paging.DataSource
+import androidx.paging.PagingSource
 import androidx.room.*
-import com.viatom.lpble.data.entity.DeviceEntity
 import com.viatom.lpble.data.entity.RecordAndReport
 import com.viatom.lpble.data.entity.RecordEntity
-import com.viatom.lpble.data.entity.ReportEntity
+import com.viatom.lpble.data.entity.ReportDetail
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -23,9 +24,27 @@ interface RecordDao {
 
     @Transaction
     @Query("SELECT* FROM record WHERE id=:recordId")
-    suspend fun getRecordAndReport(recordId: Long): RecordAndReport
+    suspend fun getRecordAndReport(recordId: Long): RecordAndReport?
 
     @Query("UPDATE record SET isAnalysed = :isAnalysed WHERE id= :recordId")
     suspend fun updateWithAnalysed(recordId: Long, isAnalysed: Boolean )
+
+//    @Transaction
+//    @Query("SELECT* FROM record WHERE isAnalysed = 1")
+//    fun getRecordAndReportList(): PagingSource<Int, RecordAndReport>
+
+
+//    @Query("SELECT* FROM reportdetail")
+//    fun getRecordAndReportList(): PagingSource<Int, ReportDetail>
+
+    @Query("SELECT* FROM reportdetail WHERE isAnalysed = 1")
+    fun getRecordAndReportList(): PagingSource<Int, ReportDetail>
+
+//
+//    @Query("SELECT* FROM record")
+//    fun getRecordAndReportList(): PagingSource<Int, RecordEntity>
+
+
+
 
 }

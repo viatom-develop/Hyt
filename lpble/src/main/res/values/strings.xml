@@ -19,6 +19,7 @@
     <!-- Strings used for fragments for navigation -->
     <string name="dashboard_fragment_label">Dashboard Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
+    <string name="report_list_fragment_label">Report List Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 
@@ -39,6 +40,34 @@
     <string name="public_lead_off_msg">提示: 导联断开状态持续一分钟后主机会停止测量</string>
     <string name="amp">25 mm/s 5 mm/mv</string>
     <string name="collection">采集</string>
+
+    <string name="public_report_title">乐普医疗心脏数据中心</string>
+    <string name="report">报告</string>
+    <string name="public_name">姓名</string>
+    <string name="public_height">身高</string>
+    <string name="public_weight">体重</string>
+    <string name="public_birthday">出生日期:</string>
+    <string name="public_gender">性别</string>
+    <string name="tv_label_recording_duration">记录持续时间:</string>
+    <string name="tv_label_record_hr">心率: </string>
+    <string name="tv_label_result">结果:</string>
+    <string name="tv_label_record_note">备忘: </string>
+    <string name="title_activity_history_detail">数据详情</string>
+    <string name="public_ai_analyse_time">AI分析波形时长: </string>
+    <string name="public_ai_start_time">开始时间:</string>
+    <string name="public_ai_end_time">结束时间:</string>
+    <string name="public_ai_time">AI分析时长</string>
+    <string name="public_first_five_min">前5分钟</string>
+    <string name="public_ai_get_time">AI分析日期</string>
+    <string name="public_status">状态</string>
+    <string name="public_ai_tip">*由于检测者基本健康情况、检测环境以及设备状态受多因素影响，本报告结果供参考，请您关注心脏健康，根据建议及时就医。
+        \n客服电话：400–622–1120</string>
+    <string name="public_phone">客服电话：400–622–1120</string>
+    <string name="time">时间</string>
+    <string name="comma">:</string>
+    <string name="report_attr">增益:10mm/mV</string>
+    <string name="report_speed">走速:25mm/s</string>
+    <string name="loacl_report">本地报告</string>
 
 
 </resources>

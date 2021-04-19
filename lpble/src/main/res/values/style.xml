@@ -37,4 +37,12 @@
     </declare-styleable>
 
 
+    <style name="ReportTextLabel">
+        <item name="android:textColor">@color/text_color_report_label</item>
+    </style>
+    <style name="ReportTextValue">
+        <item name="android:textColor">@color/text_color_report_value</item>
+    </style>
+
+
 </resources>

@@ -119,7 +119,7 @@ class MainViewModel: ViewModel() {
     fun getCurrentDevice(application: Application){
         DBHelper.getInstance(application).let {
             viewModelScope.launch {
-                it.getCurrentDevice(it.db.deviceDao())
+                it.getCurrentDevice()
                         .onStart {
                             Log.d("main", "开始查询当前设备")
                         }
@@ -149,7 +149,7 @@ class MainViewModel: ViewModel() {
         DBHelper.getInstance(application).let {
             viewModelScope.launch(Dispatchers.IO) {
                 Log.e("main", "saveDevice")
-                it.insertOrUpdateDevice(it.db.deviceDao(), deviceEntity)
+                it.insertOrUpdateDevice(deviceEntity)
             }
 
         }

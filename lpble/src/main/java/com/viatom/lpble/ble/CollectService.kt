@@ -8,15 +8,12 @@ import android.os.IBinder
 import android.util.Log
 import com.lepu.blepro.utils.LepuBleLog
 import com.viatom.lpble.constants.Constant
-import com.viatom.lpble.constants.Constant.Collection.Companion.AUTO_DURATION
+import com.viatom.lpble.constants.Constant.Collection.Companion.AUTO_DURATION_MILLS
 import com.viatom.lpble.constants.Constant.Collection.Companion.AUTO_INTERVAL
 import com.viatom.lpble.constants.Constant.Collection.Companion.AUTO_START
 import com.viatom.lpble.constants.Constant.Collection.Companion.AUTO_STOP
-import com.viatom.lpble.constants.Constant.Collection.Companion.MANUAL_DURATION
-import com.viatom.lpble.constants.Constant.Collection.Companion.MANUAL_START
-import com.viatom.lpble.constants.Constant.Collection.Companion.MANUAL_STOP
+import com.viatom.lpble.constants.Constant.Collection.Companion.MANUAL_DURATION_S
 import com.viatom.lpble.util.LpResult
-import com.viatom.lpble.viewmodels.DashboardViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
@@ -64,38 +61,16 @@ class CollectService : Service(){
                 while (true){
                     delay(AUTO_INTERVAL) //
                     emit(LpResult.Success(AUTO_START))
-                    delay(AUTO_DURATION)
+                    delay(AUTO_DURATION_MILLS)
                     emit(LpResult.Success(AUTO_STOP))
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
                 emit(LpResult.Failure(e.cause))
             }
-        }.flowOn(Dispatchers.Default)
+        }.flowOn(Dispatchers.IO)
 
     }
-//    suspend fun autoCount(): Flow<LpResult<Int>> {
-//        return flow{
-//            try {
-//                Log.d("manualCollect", " start.....")
-//                for (i in 0..MANUAL_DURATION){
-//
-//                    if (LpBleUtil.isDisconnected(Constant.BluetoothConfig.SUPPORT_MODEL)) {
-//                        emit(LpResult.Failure(Exception("蓝牙已断开, 采集失败")))
-//                        return@flow
-//                    }
-//
-//
-//                    emit(LpResult.Success(i))
-//                    delay(1000)
-//                }
-//
-//            } catch (e: Exception) {
-//                Log.d("manualCollect", "$e")
-//                emit(LpResult.Failure(e.cause))
-//            }
-//        }.flowOn(Dispatchers.IO)
-//
-//    }
 
 
     /**
@@ -106,7 +81,7 @@ class CollectService : Service(){
         return flow{
             try {
                 Log.d("manualCollect", " start.....")
-                for (i in 0..MANUAL_DURATION){
+                for (i in 0..MANUAL_DURATION_S){
 
                     if (LpBleUtil.isDisconnected(Constant.BluetoothConfig.SUPPORT_MODEL)) {
                         emit(LpResult.Failure(Exception("蓝牙已断开, 采集失败")))
@@ -123,6 +98,7 @@ class CollectService : Service(){
                 }
 
             } catch (e: Exception) {
+                e.printStackTrace()
                 Log.d("manualCollect", "$e")
                 emit(LpResult.Failure(e.cause))
             }

@@ -1,12 +1,13 @@
 package com.viatom.lpble.ui
 
-import com.viatom.lpble.viewmodels.MainViewModel
 import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
 import com.jeremyliao.liveeventbus.LiveEventBus
 import com.lepu.blepro.ble.data.LepuDevice
@@ -20,16 +21,21 @@ import com.viatom.lpble.ble.CollectUtil
 import com.viatom.lpble.ble.LpBleUtil
 import com.viatom.lpble.ble.LpBleUtil.State
 import com.viatom.lpble.constants.Constant
-import com.viatom.lpble.constants.Constant.BluetoothConfig.Companion.SUPPORT_MODEL
 import com.viatom.lpble.constants.Constant.BluetoothConfig.Companion.CHECK_BLE_REQUEST_CODE
+import com.viatom.lpble.constants.Constant.BluetoothConfig.Companion.SUPPORT_MODEL
 import com.viatom.lpble.data.entity.DeviceEntity
 import com.viatom.lpble.ext.checkBluetooth
 import com.viatom.lpble.ext.createDir
 import com.viatom.lpble.ext.permissionNecessary
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import com.viatom.lpble.viewmodels.MainViewModel
+
 
 class MainActivity : AppCompatActivity(), BleChangeObserver {
+
+    val fragment1: Fragment = DashboardFragment()
+    val fragment2: Fragment = ReportListFragment()
+    val fm: FragmentManager = supportFragmentManager
+
 
     val TAG: String = "MainActivity"
     private val mainVM: MainViewModel by viewModels()
@@ -39,6 +45,10 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+//
+//        fm.beginTransaction().add(R.id.content_main, fragment2, "2").hide(fragment2).commit()
+//        fm.beginTransaction().add(R.id.content_main, fragment1, "1").commit()
 
         subscribeUi()
         initLiveEvent()
@@ -134,7 +144,9 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
         //手机ble状态
         mainVM.bleEnable.observe(this, {
             if (it) {
-                if (mainVM.lpBleEnable.value == true) LpBleUtil.reInitBle() else mainVM.initBle(application)
+                if (mainVM.lpBleEnable.value == true) LpBleUtil.reInitBle() else mainVM.initBle(
+                    application
+                )
             }
         })
 

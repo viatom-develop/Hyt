@@ -69,13 +69,6 @@ class DashboardViewModel : ViewModel() {
     var isSignalPoor : LiveData<Boolean> = _isSignalPoor
 
 
-    /**
-     *  是否手动采集中
-     */
-    val _manualCollecting = MutableLiveData<Boolean>().apply {
-        value = false
-    }
-    var manualCollecting : LiveData<Boolean> = _manualCollecting
 
 
 //

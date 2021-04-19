@@ -66,12 +66,12 @@ class Constant{
             val TYPE_MANUAL: Int = 1
             val TYPE_AUTO: Int = 0
 
-            val AUTO_INTERVAL: Long = 15 * 1000
-            val AUTO_DURATION: Long = 5 * 1000 //
+            val AUTO_INTERVAL: Long = 30 * 60 * 1000
+            val AUTO_DURATION_MILLS: Long = 5 * 1000 //ms
             val AUTO_START: Int = 1001
             val AUTO_STOP: Int = 1000
 
-            val MANUAL_DURATION: Int = 5 //s
+            val MANUAL_DURATION_S: Int = 30 //s
             val MANUAL_START: Int = 2001
             val MANUAL_STOP: Int = 2000
 
@@ -99,5 +99,14 @@ class Constant{
            val analysisProcessSuccess: String = "analysis_process_success"
        }
 
+    }
+
+    interface Report{
+        companion object{
+            const val A4_WIDTH = 2520 / 2 // 210 * 6
+
+            const val  A4_HEIGHT = 3564 / 2 // 297 * 6
+
+        }
     }
 }

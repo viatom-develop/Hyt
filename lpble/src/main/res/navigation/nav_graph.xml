@@ -3,26 +3,29 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/DashboardFragment">
+    app:startDestination="@id/dashboard">
 
     <fragment
-        android:id="@+id/DashboardFragment"
+        android:id="@+id/dashboard"
         android:name="com.viatom.lpble.ui.DashboardFragment"
-        android:label="@string/dashboard_fragment_label"
         tools:layout="@layout/fragment_dashborad">
-
         <action
-            android:id="@+id/action_DashboardFragment_to_SecondFragment"
-            app:destination="@id/SecondFragment" />
+            android:id="@+id/dashboard_to_report_list"
+            app:destination="@+id/report_list"
+            />
+
     </fragment>
     <fragment
-        android:id="@+id/SecondFragment"
-        android:name="com.viatom.lpble.ui.SecondFragment"
-        android:label="@string/second_fragment_label"
-        tools:layout="@layout/fragment_second">
+        android:id="@+id/report_list"
+        android:name="com.viatom.lpble.ui.ReportListFragment"
+        >
+       <action
+           android:id="@+id/report_list_to_dashboard"
+           app:destination="@+id/dashboard"
+           app:popUpTo="@id/dashboard"
+           app:popUpToInclusive="true"
+           />
 
-        <action
-            android:id="@+id/action_SecondFragment_to_FirstFragment"
-            app:destination="@id/DashboardFragment" />
     </fragment>
+
 </navigation>

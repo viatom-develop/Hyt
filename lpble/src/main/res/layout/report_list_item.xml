@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/public_report_padding"
+    android:paddingEnd="@dimen/public_report_padding"
+    android:layout_gravity="center_horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- 标尺及带宽信息 -->
+    <RelativeLayout
+        android:id="@+id/rl_other_info"
+        android:layout_alignParentTop="true"
+        android:layout_width="@dimen/public_report_width"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25px">
+
+        <TextView
+            android:id="@+id/tv_time"
+            style="@style/ReportTextLabel"
+            android:layout_alignParentStart="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="@string/time"
+            android:textColor="@color/black"
+            android:textSize="@dimen/public_text_size_report" />
+
+        <TextView
+            android:id="@+id/comma"
+            style="@style/ReportTextLabel"
+            android:layout_toEndOf="@id/tv_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="@string/comma"
+            android:textColor="@color/black"
+            android:textSize="@dimen/public_text_size_report" />
+
+        <TextView
+            android:id="@+id/time_val"
+            style="@style/ReportTextLabel"
+            android:layout_toEndOf="@id/comma"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            tools:text="2010-07-22 14:00:00"
+            android:textColor="@color/black"
+            android:textSize="@dimen/public_text_size_report" />
+        <TextView
+            android:id="@+id/name_val"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/time_val"
+            android:textColor="@color/black"
+            android:textSize="@dimen/public_text_size_report"
+            android:layout_marginStart="25px"
+            tools:text="最大心率"
+            />
+
+
+        <TextView
+            android:id="@+id/tv_ruler"
+            style="@style/ReportTextLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/tv_report_page"
+            android:singleLine="true"
+            android:text="@string/report_attr"
+            android:textColor="@color/black"
+            android:textSize="@dimen/public_text_size_report" />
+
+        <TextView
+            android:id="@+id/tv_report_page"
+            style="@style/ReportTextLabel"
+            android:layout_marginStart="25px"
+            android:layout_alignParentEnd="true"
+            android:text="@string/report_speed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:textColor="@color/black"
+            android:textSize="@dimen/public_text_size_report" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rl_wave"
+        android:layout_below="@+id/rl_other_info"
+        android:orientation="vertical"
+        android:layout_width="@dimen/public_report_width"
+        android:layout_height="360px">
+
+    </RelativeLayout>
+
+</RelativeLayout>

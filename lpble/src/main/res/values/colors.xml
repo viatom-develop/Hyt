@@ -11,6 +11,9 @@
     <color name="color_2E747480">#2E747480</color>
     <color name="color_99EBEBF5">#99EBEBF5</color>
     <color name="color_545458">#545458</color>
+    <color name="color_EBEBF5">#EBEBF5</color>
+    <color name="color_2C2C2E">#2C2C2E</color>
+    <color name="color_3D5AFE">#3D5AFE</color>
 
 
     <color name="color_dashboard_ruler">#666666</color>
@@ -25,6 +28,12 @@
 
 
     <color name="color_363636">#363636</color>
+    <!-- report start-->
+    <color name="text_color_report_label">#313131</color>
+    <color name="text_color_report_value">#454545</color>
+    <color name="title_report">#0075c1</color>
+
+    <!-- report end-->
 
 
 

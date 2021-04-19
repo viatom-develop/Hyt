@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+
+    <data>
+
+        <variable
+            name="report"
+            type="com.viatom.lpble.model.ReportItemModel" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/public_shape_corner_10"
+        android:paddingBottom="@dimen/dp_10"
+        android:layout_marginTop="5dp"
+        android:layout_marginHorizontal="16dp"
+        app:bindClick="@{report}"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/time"
+            android:textColor="@color/color_EBEBF5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="@dimen/dp_10"
+            android:layout_marginTop="@dimen/dp_10"
+            android:textSize="@dimen/sp_14"
+            tools:text="2021-03-30 10:29"
+            android:text="@{report.createTime}"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/type"
+            app:layout_constraintTop_toTopOf="@id/time"
+            app:layout_constraintStart_toEndOf="@id/time"
+            tools:text="@{report.type == 0? `自动采集` : `手动采集`}"
+            android:textSize="@dimen/sp_14"
+            android:textColor="@{report.type == 0? @color/color_dashboard_ecg_wave_collecting : @color/color_3D5AFE}"
+            android:layout_marginStart="10dp"
+
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/time"
+            android:id="@+id/label"
+            android:text="平均心率"
+            android:textColor="@color/color_EBEBF5"
+            android:textSize="@dimen/sp_14"
+            android:layout_marginEnd="16dp"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/label"
+            app:layout_constraintEnd_toEndOf="@id/label"
+            app:layout_constraintTop_toBottomOf="@id/label"
+            android:id="@+id/hr"
+            tools:text="@{report.hr}"
+            android:textColor="@color/white"
+            android:textSize="30sp"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/hr"
+            app:layout_constraintStart_toStartOf="@id/hr"
+            app:layout_constraintEnd_toEndOf="@id/hr"
+            android:text="bpm"
+            android:id="@+id/bpm"
+            android:textColor="@color/color_EBEBF5"
+            android:textSize="16sp"
+            />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/hr"
+            app:layout_constraintBottom_toBottomOf="@id/bpm"
+            app:layout_constraintTop_toBottomOf="@id/time"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="20dp"
+            android:ellipsize="end"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:text="@{report.aiDiagnosis}"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

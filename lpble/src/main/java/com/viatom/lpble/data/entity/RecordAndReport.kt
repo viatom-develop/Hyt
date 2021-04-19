@@ -1,6 +1,7 @@
 package com.viatom.lpble.data.entity
 
 import androidx.room.Embedded
+import androidx.room.Entity
 import androidx.room.Relation
 
 /**
@@ -15,5 +16,7 @@ data class RecordAndReport(
         entityColumn = "recordId"
 
     )
-    val reportEntity: ReportEntity
-)
+    val reportEntity: ReportEntity,
+){
+
+}

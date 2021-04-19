@@ -7,6 +7,8 @@ import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Environment
 import android.util.DisplayMetrics
 import android.util.Log
@@ -16,13 +18,20 @@ import androidx.fragment.app.FragmentActivity
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.MaterialDialog.SingleButtonCallback
+import com.itextpdf.text.Document
+import com.itextpdf.text.PageSize
+import com.itextpdf.text.pdf.BaseFont
+import com.itextpdf.text.pdf.PdfWriter
 import com.jeremyliao.liveeventbus.LiveEventBus
 import com.permissionx.guolindev.PermissionX
 import com.viatom.lpble.R
 import com.viatom.lpble.constants.Constant
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
+import java.util.*
 
 /**
  * author: wujuan
@@ -33,8 +42,6 @@ import java.io.IOException
 
 @ExperimentalCoroutinesApi
 fun FragmentActivity.permissionNecessary() {
-
-
 
         PermissionX.init(this@permissionNecessary)
                 .permissions(
@@ -64,13 +71,6 @@ fun FragmentActivity.permissionNecessary() {
                     Log.e("权限", "$allGranted, $grantedList, $deniedList")
                     LiveEventBus.get(Constant.Event.permissionNecessary).post(true)
                 }
-
-
-
-
-
-
-
 
 }
 
@@ -152,18 +152,23 @@ fun Context.createDir(path: String): Boolean{
 }
 
 @Throws(IOException::class)
-fun Context.createFile(path: String, filename: String): Boolean{
-    "$path/$filename".run {
-        getFile(this).let {
-            if(!it.exists()) {
-                it.createNewFile()
-                Log.d("createFile success", it.absolutePath)
-                return true
+fun Context.createFile(path: String, filename: String): File?{
+    try {
+        "$path/$filename".run {
+            getFile(this).let {
+                if(!it.exists()) {
+                    it.createNewFile()
+                    Log.d("createFile success", it.absolutePath)
+                    return it
+                }
+                return it
             }
-            return true
         }
+    }catch (e: IOException){
+        e.printStackTrace()
+        return null
     }
-    return false
+
 }
 
 
@@ -177,6 +182,9 @@ fun Context.deleteFile(filename: String) {
 
 
 fun Context.hasFile(filename: String): Boolean  = File(getExternalFilesDir(null), filename).exists()
+
+
+
 
 
 /**
