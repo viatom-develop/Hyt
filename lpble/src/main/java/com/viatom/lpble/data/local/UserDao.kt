@@ -1,4 +1,4 @@
-package com.viatom.lpble.data.entity.local
+package com.viatom.lpble.data.local
 
 import androidx.room.Dao
 import androidx.room.Insert

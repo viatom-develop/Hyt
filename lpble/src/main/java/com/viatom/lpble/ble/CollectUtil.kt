@@ -6,20 +6,20 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import android.util.Log
-import android.widget.Toast
 import com.jeremyliao.liveeventbus.LiveEventBus
+import com.viatom.lpble.constants.Constant
 import com.viatom.lpble.constants.Constant.*
 import com.viatom.lpble.constants.Constant.Collection.Companion.AUTO_DURATION_MILLS
 import com.viatom.lpble.constants.Constant.Collection.Companion.AUTO_START
 import com.viatom.lpble.constants.Constant.Collection.Companion.AUTO_STOP
+import com.viatom.lpble.constants.Constant.Collection.Companion.AUTO_EXIT
 import com.viatom.lpble.constants.Constant.Collection.Companion.MANUAL_DURATION_S
 import com.viatom.lpble.constants.Constant.Collection.Companion.TYPE_AUTO
 import com.viatom.lpble.constants.Constant.Collection.Companion.TYPE_MANUAL
 import com.viatom.lpble.data.entity.RecordEntity
 import com.viatom.lpble.data.entity.ReportEntity
-import com.viatom.lpble.data.entity.local.DBHelper
+import com.viatom.lpble.data.local.DBHelper
 import com.viatom.lpble.ext.createFile
-import com.viatom.lpble.ext.getFile
 import com.viatom.lpble.net.RetrofitManager
 import com.viatom.lpble.net.RetrofitResponse
 import com.viatom.lpble.net.isSuccess
@@ -28,7 +28,6 @@ import com.viatom.lpble.viewmodels.DashboardViewModel
 import com.viatom.lpble.viewmodels.MainViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -41,6 +40,7 @@ import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 /**
@@ -60,7 +60,8 @@ class CollectUtil private constructor(val context: Context) {
 
 
     var manualData: FloatArray = FloatArray(0)
-    var manualIndex: Int = 0 // 手动采集到的数据在总数据池中的index
+    var manualIndex: ArrayList<Int> = ArrayList() // 手动采集到的数据在总数据池中的index
+    var index:Int = 0 // 手动采集到的数据在总数据池中的index
     var manualCreateTime: Long = 0L
     var manualCounting: Boolean = false
 
@@ -123,39 +124,34 @@ class CollectUtil private constructor(val context: Context) {
                     finishCollecting(false, TYPE_AUTO)
                 }
                 result.doSuccess {
+
+                    Log.d(
+                        C_TAG,
+                        "自动采集 doSuccess $it"
+                    )
                     when (it) {
                         AUTO_START -> {
                             //检查当前设备实时状态， 只要这一刻是测量准备和测量中 就开始采集， 否则这30分钟不进行采集
                             Log.d(
                                 C_TAG,
-                                "自动 此时的实时状态::$BluetoothConfig.currentRunState  autoCounting $autoCounting"
+                                "自动采集 autoCreateTime$autoCreateTime  autoCounting $autoCounting"
                             )
-                            Log.d(C_TAG, "launch...  currentThread：${Thread.currentThread().name}")
 
-                            if (BluetoothConfig.currentRunState in RunState.PREPARING_TEST..RunState.RECORDING) {
+                            cleanAutoData()
+                            autoCreateTime = System.currentTimeMillis()
+                            autoCounting = true
 
-                                cleanAutoData()
 
-                                autoCreateTime = System.currentTimeMillis()
-                                autoCounting = true
-                                Log.d(
-                                    C_TAG,
-                                    "自动 autoCreateTime$autoCreateTime  autoCounting $autoCounting"
-                                )
-
-                            }
 
                         }
                         AUTO_STOP -> {
                             //停止采集 去分析
-                            Log.d(C_TAG, "自动采集倒计时结束，去分析")
+                            Log.d(C_TAG, "自动采集倒计时结束，去分析  autoCreateTime$autoCreateTime  autoCounting $autoCounting")
+                            if (!autoCounting || autoCreateTime == 0L){
+                                Log.d(C_TAG, "30秒前 不满足执行采集条件")
+                                return@doSuccess
+                            }
                             autoCounting = false
-
-                            Log.d(
-                                C_TAG,
-                                "自动 autoCreateTime$autoCreateTime  autoCounting $autoCounting"
-                            )
-
 
                             if (this::mainViewModel.isInitialized) {
                                 mainViewModel._curBluetooth.value?.deviceName?.let { deviceName ->
@@ -177,6 +173,10 @@ class CollectUtil private constructor(val context: Context) {
                                 }
                             }
 
+                        }
+                        AUTO_EXIT ->{
+                            Log.e(C_TAG, "自动采集中断  等待下一次执行")
+                            finishCollecting(false, TYPE_AUTO)
                         }
                     }
 
@@ -266,6 +266,7 @@ class CollectUtil private constructor(val context: Context) {
 
 
     fun insertRecord(file: File, type: Int, userId: Long, deviceName: String) {
+        Log.d(C_TAG, "into insertRecord... ")
         val bytes: ByteArray = FileIOUtils.readFile2BytesByStream(file.absoluteFile)
         RecordEntity.convert2RecordEntity(
             if (type == TYPE_AUTO) autoCreateTime else manualCreateTime,
@@ -450,7 +451,8 @@ class CollectUtil private constructor(val context: Context) {
         }
 
         Log.d(C_TAG, "复制后 手动 ，manualData Size = ${manualData.size}")
-        manualIndex = index
+        this.index  = index
+        manualIndex.add(index)
         Log.d(C_TAG, "添加到的手动  index： $index")
 
 
@@ -472,7 +474,8 @@ class CollectUtil private constructor(val context: Context) {
             return null
         }
 
-        "$manualCreateTime.txt".run {
+        val fileName = if (type == TYPE_MANUAL) "$manualCreateTime.txt" else "$autoCreateTime.txt"
+       fileName.run {
             context.createFile(Dir.er1EcgDir, this)?.let { file ->
 //        context.getFile("${Dir.er1EcgDir}/20210412162855.txt").let { file ->
 
@@ -483,15 +486,18 @@ class CollectUtil private constructor(val context: Context) {
                 try {
                     BufferedWriter(FileWriter(file)).use { bufferedWriter ->
 
-                        (manualData.size - 1).also {
+                        val data = if (type == TYPE_MANUAL)manualData else autoData
+
+                        (data.size - 1).also {
                             bufferedWriter.write("125,II,405,")
                             for (i in 0 until it) {
-                                bufferedWriter.write(manualData[i].toString())
+                                bufferedWriter.write(data[i].toString())
                                 bufferedWriter.write(",")
                             }
-                            bufferedWriter.write(manualData[it - 1].toString())
+                            bufferedWriter.write(data[it - 1].toString())
                         }
                         bufferedWriter.close()
+
                         Log.d(C_TAG, "数据文件保存完成，${file.name} ")
                         return file
 
@@ -510,7 +516,8 @@ class CollectUtil private constructor(val context: Context) {
 
     fun cleanData() {
         manualData = FloatArray(0)
-        manualIndex = 0
+        manualIndex.clear()
+        index = 0
         manualCreateTime = 0L
         Log.d(C_TAG, "autoCreateTime")
     }

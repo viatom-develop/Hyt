@@ -17,9 +17,8 @@ import com.viatom.lpble.constants.Constant
 import com.viatom.lpble.constants.Constant.BluetoothConfig.Companion.SUPPORT_MODEL
 import com.viatom.lpble.data.entity.DeviceEntity
 import com.viatom.lpble.data.entity.UserEntity
-import com.viatom.lpble.data.entity.local.DBHelper
+import com.viatom.lpble.data.local.DBHelper
 import com.viatom.lpble.ext.createDir
-import com.viatom.lpble.util.LpResult
 import com.viatom.lpble.util.doFailure
 import com.viatom.lpble.util.doSuccess
 import kotlinx.coroutines.Dispatchers

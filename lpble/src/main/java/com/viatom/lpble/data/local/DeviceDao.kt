@@ -1,4 +1,4 @@
-package com.viatom.lpble.data.entity.local
+package com.viatom.lpble.data.local
 
 import androidx.room.*
 import com.viatom.lpble.data.entity.DeviceEntity

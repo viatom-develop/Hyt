@@ -1,8 +1,6 @@
-package com.viatom.lpble.data.entity.local
+package com.viatom.lpble.data.local
 
-import android.app.Application
 import android.content.Context
-import androidx.lifecycle.LiveData
 import androidx.paging.*
 import androidx.room.Room
 import com.viatom.lpble.data.entity.*

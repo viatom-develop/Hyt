@@ -9,6 +9,7 @@ import android.util.Log
 import com.lepu.blepro.utils.LepuBleLog
 import com.viatom.lpble.constants.Constant
 import com.viatom.lpble.constants.Constant.Collection.Companion.AUTO_DURATION_MILLS
+import com.viatom.lpble.constants.Constant.Collection.Companion.AUTO_EXIT
 import com.viatom.lpble.constants.Constant.Collection.Companion.AUTO_INTERVAL
 import com.viatom.lpble.constants.Constant.Collection.Companion.AUTO_START
 import com.viatom.lpble.constants.Constant.Collection.Companion.AUTO_STOP
@@ -60,9 +61,36 @@ class CollectService : Service(){
             try {
                 while (true){
                     delay(AUTO_INTERVAL) //
-                    emit(LpResult.Success(AUTO_START))
-                    delay(AUTO_DURATION_MILLS)
-                    emit(LpResult.Success(AUTO_STOP))
+                    for (i in 0..AUTO_DURATION_MILLS){
+                        Log.d("collectUtil", "自动 读秒 $i")
+
+                        if (i == 0L){
+                            Log.d("collectUtil", "自动 AUTO_START")
+                            emit(LpResult.Success(AUTO_START))
+                        }else {
+                            Log.d("collectUtil", "自动 AUTO_START-------")
+                        }
+                        if (i == 5L)  {
+                            emit(LpResult.Success(AUTO_STOP))
+                            Log.d("collectUtil", "自动AUTO_STOP")
+                        }
+                        if (LpBleUtil.isDisconnected(Constant.BluetoothConfig.SUPPORT_MODEL)) {
+                            Log.e("collectUtil", "自动蓝牙已断开, 停止采集")
+                            LpResult.Success(AUTO_EXIT)
+                            break
+                        }
+
+                        if (Constant.BluetoothConfig.currentRunState !in  Constant.RunState.PREPARING_TEST..Constant.RunState.RECORDING) {
+                            Log.e("collectUtil","自动 导联断开, 停止采集")
+                            LpResult.Success(AUTO_EXIT)
+                            break
+                        }
+
+                        delay(1000)
+
+                    }
+
+
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

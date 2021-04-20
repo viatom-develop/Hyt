@@ -14,7 +14,7 @@ import com.viatom.lpble.R
 import com.viatom.lpble.constants.Constant
 import com.viatom.lpble.data.entity.RecordAndReport
 import com.viatom.lpble.data.entity.UserEntity
-import com.viatom.lpble.data.entity.local.DBHelper
+import com.viatom.lpble.data.local.DBHelper
 import com.viatom.lpble.ecg.FilterECGReportWave
 import com.viatom.lpble.ecg.ReportUtil
 import com.viatom.lpble.util.doFailure

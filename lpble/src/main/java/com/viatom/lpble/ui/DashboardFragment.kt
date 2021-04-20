@@ -70,6 +70,8 @@ class DashboardFragment : Fragment() {
     override fun onDetach() {
         super.onDetach()
         Log.d(DASH, "onDetach")
+        stopTimer()
+        mainVM.resetDashboard()
     }
 
 

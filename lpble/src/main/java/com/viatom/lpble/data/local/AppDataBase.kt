@@ -1,8 +1,7 @@
-package com.viatom.lpble.data.entity.local
+package com.viatom.lpble.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 import com.viatom.lpble.data.entity.*
 

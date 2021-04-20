@@ -1,39 +1,12 @@
 package com.viatom.lpble.viewmodels
 
-import android.app.Application
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.google.gson.Gson
 import com.lepu.blepro.ble.cmd.Er1BleResponse
-import com.viatom.lpble.R
 import com.viatom.lpble.ble.*
-import com.viatom.lpble.constants.Constant
 import com.viatom.lpble.constants.Constant.RunState
-import com.viatom.lpble.data.entity.RecordEntity
-import com.viatom.lpble.data.entity.local.DBHelper
-import com.viatom.lpble.net.RetrofitManager
-import com.viatom.lpble.util.doFailure
-import com.viatom.lpble.util.doSuccess
-import com.viatom.lpble.widget.EcgView
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody
-import okhttp3.ResponseBody
-import org.json.JSONObject
-import retrofit2.Call
-import retrofit2.Response
-import java.io.File
-import java.util.*
 
 /**
  * author: wujuan
