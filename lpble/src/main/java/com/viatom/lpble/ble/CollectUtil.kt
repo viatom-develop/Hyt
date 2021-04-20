@@ -60,8 +60,6 @@ class CollectUtil private constructor(val context: Context) {
 
 
     var manualData: FloatArray = FloatArray(0)
-    var manualIndex: ArrayList<Int> = ArrayList() // 手动采集到的数据在总数据池中的index
-    var index:Int = 0 // 手动采集到的数据在总数据池中的index
     var manualCreateTime: Long = 0L
     var manualCounting: Boolean = false
 
@@ -451,12 +449,13 @@ class CollectUtil private constructor(val context: Context) {
         }
 
         Log.d(C_TAG, "复制后 手动 ，manualData Size = ${manualData.size}")
-        this.index  = index
-        manualIndex.add(index)
+
         Log.d(C_TAG, "添加到的手动  index： $index")
 
 
     }
+
+
 
     fun saveCollectEcg(type: Int): File? {
 
@@ -516,8 +515,6 @@ class CollectUtil private constructor(val context: Context) {
 
     fun cleanData() {
         manualData = FloatArray(0)
-        manualIndex.clear()
-        index = 0
         manualCreateTime = 0L
         Log.d(C_TAG, "autoCreateTime")
     }

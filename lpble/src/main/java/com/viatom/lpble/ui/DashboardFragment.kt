@@ -328,11 +328,14 @@ class DashboardFragment : Fragment() {
                     }
                 }
 
-                DataController.feed(temp)
+
+
 //                Log.d(DASH, "DataController.draw(5) == " + Arrays.toString(temp))
                 // 采集数据 自动手动可能同时进行
 
                 CollectUtil.getInstance(requireActivity().application).run {
+                    DataController.feed(temp,  this.manualCounting)
+
                     if ( this.manualCounting){
                         if(temp ==  null || temp.isEmpty()){
                             this.actionCollectManual(FloatArray(5), DataController.index)

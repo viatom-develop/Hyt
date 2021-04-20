@@ -22,11 +22,11 @@ public class DataController {
 
     // for wave
     public static float[] dataSrc;
-    public static float[] dataSrcCollect;
+    public static float[] dataSrcCollect; //用于显示采集时的高亮
     // received from device
     public static float[] dataRec = new float[0];
 
-    public static void feed(float[] fs) {
+    public static void feed(float[] fs, boolean collecting) {
         if (fs == null || fs.length == 0) {
             fs = new float[5];
         }
@@ -37,6 +37,13 @@ public class DataController {
             dataSrc = new float[maxIndex];
         }
 
+        if (dataSrcCollect == null) {
+            dataSrcCollect = new float[maxIndex];
+
+        } else if (dataSrcCollect.length == 0) {
+            dataSrcCollect = new float[maxIndex];
+        }
+
         if(maxIndex == 0) {
             return;
         }
@@ -45,6 +52,17 @@ public class DataController {
             if(dataSrc.length != 0) {
                 int tempIndex = (index + i) % dataSrc.length;
                 dataSrc[tempIndex] = fs[i];
+            }
+        }
+
+        for (int i = 0; i < fs.length; i++) {
+            if (dataSrcCollect.length != 0) {
+                int tempIndex = (index + i) % dataSrcCollect.length;
+                if (collecting) {
+                    dataSrcCollect[tempIndex] = 900;
+                }else {
+                    dataSrcCollect[tempIndex] = 0;
+                }
             }
         }
 

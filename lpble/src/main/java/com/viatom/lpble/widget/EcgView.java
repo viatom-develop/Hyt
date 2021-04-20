@@ -164,89 +164,57 @@ public class EcgView extends View {
 
     }
 
-
-    private void drawWave(Canvas canvas) {
+        private void drawWave(Canvas canvas) {
 
         Path p = new Path();
+        Path p1 = new Path();
         for (int c = 0; c < cellSize; c++) {
 
             p.moveTo(0, mBase[c]);
+            p1.moveTo(0, mBase[c]);
 
             int cellStartIndex = maxIndex / cellSize * c;
             int cellEndIndex = cellStartIndex + maxIndex / cellSize;
 
             for (int i = cellStartIndex; i < cellEndIndex; i++) {
-                if (i == DataController.index && i < cellEndIndex - 5) {
-                    float y = (mBase[c] - (DataController.amp[DataController.ampKey] * DataController.dataSrc[i + 4] / DataController.mm2px));
-                    float x = (float) (i - cellStartIndex + 4) / 5 / DataController.mm2px;
-                    p.moveTo(x, y);
-                    i = i + 4;
+                if (DataController.dataSrcCollect[i] != 0 ){
+                    //手动
+                    if (i == DataController.index && i < cellEndIndex - 5) {
+                        float y = (mBase[c] - (DataController.amp[DataController.ampKey] * DataController.dataSrc[i + 4] / DataController.mm2px));
+                        float x = (float) (i - cellStartIndex + 4) / 5 / DataController.mm2px;
+                        p.moveTo(x, y);
+                        p1.moveTo(x, y);
+                        i = i + 4;
 
-                } else {
-                    float y1 = mBase[c] - (DataController.amp[DataController.ampKey] * DataController.dataSrc[i] / DataController.mm2px);
-                    float x1 = (float) (i - cellStartIndex) / 5 / DataController.mm2px;
-                    p.lineTo(x1, y1);
+                    } else {
+                        float y1 = mBase[c] - (DataController.amp[DataController.ampKey] * DataController.dataSrc[i] / DataController.mm2px);
+                        float x1 = (float) (i - cellStartIndex) / 5 / DataController.mm2px;
+                        p.moveTo(x1, y1);
+                        p1.lineTo(x1, y1);
+                    }
+                }else{
+                    if (i == DataController.index && i < cellEndIndex - 5) {
+                        float y = (mBase[c] - (DataController.amp[DataController.ampKey] * DataController.dataSrc[i + 4] / DataController.mm2px));
+                        float x = (float) (i - cellStartIndex + 4) / 5 / DataController.mm2px;
+                        p.moveTo(x, y);
+                        p1.moveTo(x, y);
+                        i = i + 4;
+
+                    } else {
+                        float y1 = mBase[c] - (DataController.amp[DataController.ampKey] * DataController.dataSrc[i] / DataController.mm2px);
+                        float x1 = (float) (i - cellStartIndex) / 5 / DataController.mm2px;
+                        p.lineTo(x1, y1);
+                        p1.moveTo(x1, y1);
+                    }
                 }
             }
             canvas.drawPath(p, wPaint);
+            canvas.drawPath(p1, cPaint);
 
         }
     }
 
 
-
-//    private void drawWave(Canvas canvas) {
-//
-//        Path p = new Path();
-//        Path p1 = new Path();
-//
-//
-//        for (int c = 0; c < cellSize; c++) {
-//
-//            p.moveTo(0, mBase[c]);
-//
-//            p1.moveTo(0, mBase[c]);
-//
-//            int cellStartIndex = maxIndex / cellSize * c;
-//            int cellEndIndex = cellStartIndex + maxIndex / cellSize;
-//
-//            for (int i = cellStartIndex; i < cellEndIndex; i++) {
-//                if (collectUtil.getManualIndex().isEmpty()){
-//
-//                    if (i == DataController.index && i < cellEndIndex - 5) {
-//                        float y = (mBase[c] - (DataController.amp[DataController.ampKey] * DataController.dataSrc[i + 4] / DataController.mm2px));
-//                        float x = (float) (i - cellStartIndex + 4) / 5 / DataController.mm2px;
-//                        p.moveTo(x, y);
-//                        i = i + 4;
-//
-//                    } else {
-//                        float y1 = mBase[c] - (DataController.amp[DataController.ampKey] * DataController.dataSrc[i] / DataController.mm2px);
-//                        float x1 = (float) (i - cellStartIndex) / 5 / DataController.mm2px;
-//                        p.lineTo(x1, y1);
-//                    }
-//
-//                }else {
-//                    //如果手动采集中
-//                    if (i == collectUtil.getIndex() && i < cellEndIndex - 5) {
-//                        float y = (mBase[c] - (DataController.amp[DataController.ampKey] * DataController.dataSrc[i + 4] / DataController.mm2px));
-//                        float x = (float) (i - cellStartIndex + 4) / 5 / DataController.mm2px;
-//                        p1.moveTo(x, y);
-//                        i = i + 4;
-//
-//                    } else {
-//                        float y1 = mBase[c] - (DataController.amp[DataController.ampKey] * DataController.dataSrc[i] / DataController.mm2px);
-//                        float x1 = (float) (i - cellStartIndex) / 5 / DataController.mm2px;
-//                        p1.moveTo(x1, y1);
-//                        p1.lineTo(x1, y1);
-//                    }
-//
-//                }
-//            }
-//            canvas.drawPath(p, wPaint);
-//            canvas.drawPath(p1, cPaint);
-//
-//        }
-//    }
 
     public void clear() {
         DataController.clear();
