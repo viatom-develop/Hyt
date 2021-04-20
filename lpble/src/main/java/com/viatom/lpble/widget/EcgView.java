@@ -177,7 +177,7 @@ public class EcgView extends View {
             int cellEndIndex = cellStartIndex + maxIndex / cellSize;
 
             for (int i = cellStartIndex; i < cellEndIndex; i++) {
-                if (DataController.dataSrcCollect[i] != 0 ){
+                if (DataController.dataSrcCollect != null && DataController.dataSrcCollect[i] != 0 ){
                     //手动
                     if (i == DataController.index && i < cellEndIndex - 5) {
                         float y = (mBase[c] - (DataController.amp[DataController.ampKey] * DataController.dataSrc[i + 4] / DataController.mm2px));

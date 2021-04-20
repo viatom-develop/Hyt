@@ -488,7 +488,7 @@ class CollectUtil private constructor(val context: Context) {
                         val data = if (type == TYPE_MANUAL)manualData else autoData
 
                         (data.size - 1).also {
-                            bufferedWriter.write("125,II,405,")
+                            bufferedWriter.write("125,II,1,")
                             for (i in 0 until it) {
                                 bufferedWriter.write(data[i].toString())
                                 bufferedWriter.write(",")
@@ -516,6 +516,7 @@ class CollectUtil private constructor(val context: Context) {
     fun cleanData() {
         manualData = FloatArray(0)
         manualCreateTime = 0L
+        DataController.dataSrcCollect = null
         Log.d(C_TAG, "autoCreateTime")
     }
 
