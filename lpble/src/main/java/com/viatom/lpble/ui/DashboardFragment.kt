@@ -273,19 +273,22 @@ class DashboardFragment : Fragment() {
 
         //保存及分析流程成功
         LiveEventBus.get(Constant.Event.analysisProcessSuccess).observe(viewLifecycleOwner, {
-            if (it == Constant.Collection.TYPE_MANUAL){
-                Toast.makeText(requireContext(), "分析成功", Toast.LENGTH_SHORT).show()
-                binding.collection.text = "采集"
+            it?.let {
+                if ((it as String).isNotEmpty())
+                    Toast.makeText(requireContext(), it , Toast.LENGTH_SHORT).show()
             }
+
+            binding.collection.text = "采集"
 
         })
 
         //保存及分析流程失败
         LiveEventBus.get(Constant.Event.analysisProcessFailed).observe(viewLifecycleOwner, {
-            if (it == Constant.Collection.TYPE_MANUAL){
-                Toast.makeText(requireContext(), "分析失败", Toast.LENGTH_SHORT).show()
-                binding.collection.text = "采集"
+            it?.let {
+                if ((it as String).isNotEmpty())
+                    Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
             }
+           binding.collection.text = "采集"
 
         })
 
@@ -404,6 +407,7 @@ class DashboardFragment : Fragment() {
         super.onDestroyView()
         Log.d("dash", "onDestroyView")
         stopTimer()
+        mainVM.resetDashboard()
     }
 
 //    fun toReport() {
@@ -430,7 +434,7 @@ class DashboardFragment : Fragment() {
             return
         }else{
             lifecycleScope.launch {
-                CollectUtil.getInstance(requireContext()).manualCollect(viewModel)
+                CollectUtil.getInstance(requireContext()).manualCollect(viewModel, mainVM)
             }
 
         }

@@ -21,11 +21,8 @@ import kotlinx.coroutines.launch
 class ReportListViewModel: ViewModel() {
 
 
-//    fun queryData(context: Context, entity2ItemModelMapper: Entity2ItemModelMapper, pagingConfig: PagingConfig){
-//    }
-
-    fun queryData(context: Context, entity2ItemModelMapper: Entity2ItemModelMapper, pagingConfig: PagingConfig): LiveData<PagingData<ReportItemModel>> =
-      DBHelper.getInstance(context).queryRecordAndReportList(entity2ItemModelMapper, pagingConfig ).cachedIn(viewModelScope).asLiveData()
+    fun queryData(context: Context, userId: Long,  entity2ItemModelMapper: Entity2ItemModelMapper, pagingConfig: PagingConfig): LiveData<PagingData<ReportItemModel>> =
+      DBHelper.getInstance(context).queryRecordAndReportList(userId, entity2ItemModelMapper, pagingConfig ).cachedIn(viewModelScope).asLiveData()
 
 
 

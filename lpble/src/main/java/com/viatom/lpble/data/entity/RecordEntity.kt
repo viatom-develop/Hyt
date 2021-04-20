@@ -25,6 +25,8 @@ data class RecordEntity(
         val dataCrc: Int = 0,
         val magic: Int = 0,
         val fileVersion: String = "",
+        val deviceName: String,
+        val userId: Long,
 
 ) {
         companion object {
@@ -64,7 +66,9 @@ data class RecordEntity(
                         filename: String,
                         type: Int,
                         d: ByteArray,
-                        duration: Int
+                        duration: Int,
+                        deviceName: String,
+                        userId: Long,
                 ): RecordEntity {
 
                         return RecordEntity(
@@ -72,7 +76,9 @@ data class RecordEntity(
                                 fileName = filename,
                                 collectType = type,
                                 data = d,
-                                duration = duration
+                                duration = duration,
+                                deviceName = deviceName,
+                                userId = userId
                         )
                 }
 

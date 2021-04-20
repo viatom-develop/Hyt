@@ -25,18 +25,17 @@ class DBHelper private constructor(context: Context) {
         context,
         AppDataBase::class.java, "xphealth-db"
     ).build()
-
+    suspend fun insertOrUpdateUser(userEntity: UserEntity):Flow<LpResult<Boolean>> =
+        flow{
+            try {
+                db.userDao().insertUser(userEntity)
+                emit(LpResult.Success(true))
+            } catch (e: Exception) {
+                emit(LpResult.Failure(e.cause))
+            }
+        }.flowOn(Dispatchers.IO)
 
     suspend fun insertOrUpdateDevice(deviceEntity: DeviceEntity){
-
-//        deviceDao.getDevice(deviceEntity.deviceName)?.let { d ->
-//            Log.d("设备已存在，去更新", deviceEntity.toString())
-//            deviceDao.insertDevice(deviceEntity)
-//        }?: run {
-//
-//            Log.d("设备不存在，去新增", deviceEntity.toString())
-//            deviceDao.insertDevice(deviceEntity)
-//        }
 
         db.deviceDao().insertDevice(deviceEntity)
     }
@@ -110,10 +109,10 @@ class DBHelper private constructor(context: Context) {
     }
 
 
-     fun queryRecordAndReportList(mapper2ItemModel: Mapper<ReportDetail, ReportItemModel>, pageConfig: PagingConfig): Flow<PagingData<ReportItemModel>> {
+     fun queryRecordAndReportList(userId: Long, mapper2ItemModel: Mapper<ReportDetail, ReportItemModel>, pageConfig: PagingConfig): Flow<PagingData<ReportItemModel>> {
         return Pager(pageConfig) {
             // 加载数据库的数据
-            db.recordDao().getRecordAndReportList()
+            db.recordDao().getRecordAndReportList(userId)
         }.flow.map { pagingData ->
 
             pagingData.map { mapper2ItemModel.map(it) }

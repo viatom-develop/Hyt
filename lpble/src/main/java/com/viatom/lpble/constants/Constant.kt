@@ -1,6 +1,7 @@
 package com.viatom.lpble.constants
 
 import com.lepu.blepro.objs.Bluetooth
+import com.viatom.lpble.data.entity.UserEntity
 
 /**
  * author: wujuan
@@ -21,13 +22,7 @@ class Constant{
             val SUPPORT_MODEL: Int = Bluetooth.MODEL_ER1
             val TIME_OUT_MILLIS: Long = 2000 //s
             val CHECK_BLE_REQUEST_CODE = 6001
-
-
             var currentRunState: Int = RunState.NONE // 设备实时状态
-
-
-
-
 
         }
     }
@@ -66,7 +61,7 @@ class Constant{
             val TYPE_MANUAL: Int = 1
             val TYPE_AUTO: Int = 0
 
-            val AUTO_INTERVAL: Long = 30 * 60 * 1000
+            val AUTO_INTERVAL: Long = 5 * 60 * 1000
             val AUTO_DURATION_MILLS: Long = 5 * 1000 //ms
             val AUTO_START: Int = 1001
             val AUTO_STOP: Int = 1000
@@ -107,6 +102,12 @@ class Constant{
 
             const val  A4_HEIGHT = 3564 / 2 // 297 * 6
 
+        }
+    }
+
+    interface User{
+        companion object{
+           var currentUser: UserEntity? = null
         }
     }
 }

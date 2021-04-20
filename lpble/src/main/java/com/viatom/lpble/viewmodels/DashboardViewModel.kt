@@ -120,19 +120,6 @@ class DashboardViewModel : ViewModel() {
         }
     }
 
-    fun manualCollect(application: Application){
-        if (LpBleUtil.isDisconnected(Constant.BluetoothConfig.SUPPORT_MODEL)){
-            Log.d("dash", "蓝牙断开， 无法开始手动采集")
-            return
-        }
-        GlobalScope.launch {
-            CollectUtil.getInstance(application).manualCollect(this@DashboardViewModel)
-        }
-    }
-    
-
-
-
 
 
 

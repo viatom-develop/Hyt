@@ -18,12 +18,14 @@ import com.viatom.lpble.constants.Constant.Collection.Companion.TYPE_MANUAL
 import com.viatom.lpble.data.entity.RecordEntity
 import com.viatom.lpble.data.entity.ReportEntity
 import com.viatom.lpble.data.entity.local.DBHelper
+import com.viatom.lpble.ext.createFile
 import com.viatom.lpble.ext.getFile
 import com.viatom.lpble.net.RetrofitManager
 import com.viatom.lpble.net.RetrofitResponse
 import com.viatom.lpble.net.isSuccess
 import com.viatom.lpble.util.*
 import com.viatom.lpble.viewmodels.DashboardViewModel
+import com.viatom.lpble.viewmodels.MainViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -34,7 +36,9 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Response
+import java.io.BufferedWriter
 import java.io.File
+import java.io.FileWriter
 import java.io.IOException
 import java.util.*
 
@@ -62,6 +66,9 @@ class CollectUtil private constructor(val context: Context) {
 
 
     lateinit var collectService: CollectService
+
+    lateinit var mainViewModel: MainViewModel
+
 
     private val con = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -97,7 +104,8 @@ class CollectUtil private constructor(val context: Context) {
 
     }
 
-    suspend fun runAutoCollect() {
+    suspend fun runAutoCollect(mainViewModel: MainViewModel) {
+        this.mainViewModel = mainViewModel
         collectService.autoCollect()
             .onStart {
                 Log.d("actionCollect", "自动采集服务已经运行")
@@ -147,9 +155,27 @@ class CollectUtil private constructor(val context: Context) {
                                 C_TAG,
                                 "自动 autoCreateTime$autoCreateTime  autoCounting $autoCounting"
                             )
-                            saveCollectEcg(TYPE_AUTO)?.let { file ->
-                                insertRecord(file, TYPE_AUTO)
-                            }?: finishCollecting(false, TYPE_AUTO)
+
+
+                            if (this::mainViewModel.isInitialized) {
+                                mainViewModel._curBluetooth.value?.deviceName?.let { deviceName ->
+
+                                    saveCollectEcg(TYPE_AUTO)?.let {
+                                        //检查deviceName  userId  保存到数据库 并分析
+                                        mainViewModel._currentUser.value?.userId?.let { userId ->
+                                            insertRecord(it, TYPE_AUTO, userId, deviceName)
+                                        } ?: run {
+                                            Log.e(C_TAG, "userId is null ")
+                                        }
+
+                                    } ?: run{
+                                        Log.e(C_TAG, "saveCollectEcg return null ")
+                                        finishCollecting(false, TYPE_AUTO)
+                                    }
+                                } ?: run {
+                                    Log.e(C_TAG, "deviceName is null ")
+                                }
+                            }
 
                         }
                     }
@@ -160,14 +186,14 @@ class CollectUtil private constructor(val context: Context) {
 
     }
 
-
+    // 将每个步骤写到一个flow中 应该会更好
     fun allFlow(): Flow<LpResult<Boolean>> = flow {
 
     }
 
 
-    suspend fun manualCollect(vm: DashboardViewModel) {
-
+    suspend fun manualCollect(vm: DashboardViewModel, mainViewModel: MainViewModel) {
+        this.mainViewModel = mainViewModel
 
         collectService.manualCount()
             .onStart {
@@ -183,14 +209,14 @@ class CollectUtil private constructor(val context: Context) {
 
             }
             .catch {
-                Log.d(C_TAG, "读秒异常终止")
+                Log.e(C_TAG, "读秒异常终止")
 
-                finishCollecting(false, TYPE_MANUAL)
+                finishCollecting(false, TYPE_MANUAL,"采集异常终止")
 
             }
             .collect { result ->
                 result.doFailure {
-                    Log.d(C_TAG, "读秒 doFailure， $it")
+                    Log.e(C_TAG, "读秒 doFailure， $it")
                     finishCollecting(false, TYPE_MANUAL)
                 }
                 result.doSuccess { res ->
@@ -204,10 +230,29 @@ class CollectUtil private constructor(val context: Context) {
                         Log.d(C_TAG, "读秒30 manualData :${manualData.size}")
 
                         //保存txt -> record保存到DB -> 上传txt,等待返回分析结果 -> report保存到DB -> record更新DB 分析状态
-                        saveCollectEcg(TYPE_MANUAL)?.let {
-                            //保存到数据库 并分析
-                            insertRecord(it, TYPE_MANUAL)
-                        } ?: finishCollecting(false, TYPE_MANUAL)
+
+                        if (this::mainViewModel.isInitialized) {
+                            mainViewModel._curBluetooth.value?.deviceName?.let { deviceName ->
+
+                                saveCollectEcg(TYPE_MANUAL)?.let {
+                                    //检查deviceName  userId  保存到数据库 并分析
+                                    mainViewModel._currentUser.value?.userId?.let { userId ->
+                                        insertRecord(it, TYPE_MANUAL, userId, deviceName)
+                                    } ?: run {
+                                        Log.e(C_TAG, "userId is null ")
+                                    }
+
+
+                                } ?: {
+                                    Log.e(C_TAG, "TYPE_MANUAL: saveCollectEcg is null  ")
+                                    finishCollecting(false, TYPE_MANUAL, "文件保存失败")
+                                }
+                            } ?: run {
+                                Log.e(C_TAG, "deviceName is null ")
+                            }
+
+
+                        }
 
 
                     }
@@ -220,7 +265,7 @@ class CollectUtil private constructor(val context: Context) {
     }
 
 
-    fun insertRecord(file: File, type: Int) {
+    fun insertRecord(file: File, type: Int, userId: Long, deviceName: String) {
         val bytes: ByteArray = FileIOUtils.readFile2BytesByStream(file.absoluteFile)
         RecordEntity.convert2RecordEntity(
             if (type == TYPE_AUTO) autoCreateTime else manualCreateTime,
@@ -228,16 +273,18 @@ class CollectUtil private constructor(val context: Context) {
             type,
             bytes,
             if (type == TYPE_AUTO) (AUTO_DURATION_MILLS / 1000).toInt() else MANUAL_DURATION_S,
+            deviceName,
+            userId
 
-            )?.let { record ->
-            // parse
+        ).let { record ->
             DBHelper.getInstance(context).let {
                 GlobalScope.launch {
                     it.insertRecord(
                         record
                     ).collect { result ->
                         result.doFailure {
-                            finishCollecting(false, type)
+                            Log.e(C_TAG, "数据库存储失败")
+                            finishCollecting(false, type, "数据库存储失败")
                         }
                         result.doSuccess { id ->
                             Log.d(C_TAG, "保存心电记录到数据库成功, id: $id")
@@ -249,9 +296,6 @@ class CollectUtil private constructor(val context: Context) {
                 }
             }
 
-        }?: run{
-            finishCollecting(false, type)
-            Toast.makeText(context, "心电文件异常, 无法保存", Toast.LENGTH_SHORT).show()
         }
 
     }
@@ -292,8 +336,9 @@ class CollectUtil private constructor(val context: Context) {
                                                         }
                                                         else -> {
                                                             // 文件异常等
+                                                            Log.e(C_TAG, "分析失败 采集类型$type")
                                                             updateRecordWithAi(recordId, type)
-                                                            finishCollecting(false, type)
+                                                            finishCollecting(false, type, "文件异常，分析失败")
                                                         }
                                                     }
 
@@ -305,8 +350,8 @@ class CollectUtil private constructor(val context: Context) {
                                             call: Call<RetrofitResponse<ReportEntity?>>,
                                             t: Throwable
                                         ) {
-                                            Log.d(C_TAG, "分析接口请求失败 $t")
-                                            finishCollecting(false, type)
+                                            Log.e(C_TAG, "分析接口请求失败 $t")
+                                            finishCollecting(false, type, "接口响应异常")
                                         }
 
 
@@ -332,7 +377,8 @@ class CollectUtil private constructor(val context: Context) {
                     reportEntity
                 ).collect { result ->
                     result.doFailure {
-                        finishCollecting(false, type)
+                        Log.e(C_TAG, "保存分析结果保存到数据库失败, id: $it")
+                        finishCollecting(false, type, "分析结果存储失败")
                     }
                     result.doSuccess {
                         Log.d(C_TAG, "保存分析结果到数据库成功, id: $it")
@@ -352,12 +398,13 @@ class CollectUtil private constructor(val context: Context) {
                     recordId
                 ).collect { result ->
                     result.doFailure {
-                        finishCollecting(false, type)
+                        Log.e(C_TAG, "分析结果状更新失败, 采集类型： $it")
+                        finishCollecting(false, type, "分析结果状更新失败")
                     }
                     result.doSuccess {
                         Log.d(C_TAG, "心电记录分析状态更新成功, 采集类型： $it")
                         //结束了整个上传分析流程
-                        finishCollecting(true, type)
+                        finishCollecting(true, type, "分析成功")
 
                     }
                 }
@@ -376,35 +423,35 @@ class CollectUtil private constructor(val context: Context) {
     fun actionCollectAuto(feed: FloatArray, index: Int) {
 
         Log.d(C_TAG, " feed size = ${feed.size}, index = $index")
-            if (!autoCounting) {
-                Log.d(C_TAG, "自动读秒已结束 不能再添加数据")
-                return
-            }
-            autoData = FloatArray(autoData.size + feed.size).apply {
-                autoData.copyInto(this)
-                feed.copyInto(this, autoData.size)
-            }
-
-            Log.d(C_TAG, "复制后，自动 Size = ${autoData.size} $autoCreateTime  $autoCounting")
+        if (!autoCounting) {
+            Log.e(C_TAG, "自动读秒已结束 不能再添加数据")
+            return
         }
+        autoData = FloatArray(autoData.size + feed.size).apply {
+            autoData.copyInto(this)
+            feed.copyInto(this, autoData.size)
+        }
+
+        Log.d(C_TAG, "复制后，自动 Size = ${autoData.size} $autoCreateTime  $autoCounting")
+    }
 
 
     fun actionCollectManual(feed: FloatArray, index: Int) {
 
         Log.d(C_TAG, " feed size = ${feed.size}, index = $index")
-            if (!manualCounting) {
-                Log.d(C_TAG, "手动读秒已结束 不能再添加数据")
-                return
-            }
+        if (!manualCounting) {
+            Log.e(C_TAG, "手动读秒已结束 不能再添加数据")
+            return
+        }
 
-            manualData = FloatArray(manualData.size + feed.size).apply {
-                manualData.copyInto(this)
-                feed.copyInto(this, manualData.size)
-            }
+        manualData = FloatArray(manualData.size + feed.size).apply {
+            manualData.copyInto(this)
+            feed.copyInto(this, manualData.size)
+        }
 
-            Log.d(C_TAG, "复制后 手动 ，manualData Size = ${manualData.size}")
-            manualIndex = index
-            Log.d(C_TAG, "添加到的手动  index： $index")
+        Log.d(C_TAG, "复制后 手动 ，manualData Size = ${manualData.size}")
+        manualIndex = index
+        Log.d(C_TAG, "添加到的手动  index： $index")
 
 
     }
@@ -425,38 +472,36 @@ class CollectUtil private constructor(val context: Context) {
             return null
         }
 
-//        "$manualCreateTime.txt".run {
-//            if (context.createFile(Dir.er1EcgDir, this)) {
-        context.getFile("${Dir.er1EcgDir}/20210412162855.txt").let { file ->
+        "$manualCreateTime.txt".run {
+            context.createFile(Dir.er1EcgDir, this)?.let { file ->
+//        context.getFile("${Dir.er1EcgDir}/20210412162855.txt").let { file ->
 
-            if (!file.exists()) {
-                Log.d(C_TAG, "saveCollectEcg  !file.exists")
-                return null
+                if (!file.exists()) {
+                    Log.d(C_TAG, "saveCollectEcg  !file.exists")
+                    return null
+                }
+                try {
+                    BufferedWriter(FileWriter(file)).use { bufferedWriter ->
+
+                        (manualData.size - 1).also {
+                            bufferedWriter.write("125,II,405,")
+                            for (i in 0 until it) {
+                                bufferedWriter.write(manualData[i].toString())
+                                bufferedWriter.write(",")
+                            }
+                            bufferedWriter.write(manualData[it - 1].toString())
+                        }
+                        bufferedWriter.close()
+                        Log.d(C_TAG, "数据文件保存完成，${file.name} ")
+                        return file
+
+                    }
+                } catch (e: IOException) {
+                    Log.e(C_TAG, "write txt ai file error")
+                    return null
+                }
+
             }
-            try {
-//                        BufferedWriter(FileWriter(file)).use { bufferedWriter ->
-//
-//                            (manualData.size - 1).also {
-//                                bufferedWriter.write("125,II,405,")
-//                                for (i in 0 until it) {
-//                                    bufferedWriter.write(manualData[i].toString())
-//                                    bufferedWriter.write(",")
-//                                }
-//                                bufferedWriter.write(manualData[it - 1].toString())
-//                            }
-//                            bufferedWriter.close()
-                Log.d(C_TAG, "数据文件保存完成，${file.name} ")
-                return file
-
-//                        }
-            } catch (e: IOException) {
-                Log.d(C_TAG, "write txt ai file error")
-                return null
-            }
-
-
-//                }
-//            }
 
         }
         return null
@@ -475,13 +520,13 @@ class CollectUtil private constructor(val context: Context) {
         autoCreateTime = 0L
     }
 
-    fun finishCollecting(isSuccess: Boolean, type: Int) {
+    fun finishCollecting(isSuccess: Boolean, type: Int, msg: String = "") {
         Log.d(C_TAG, "finishCollecting $isSuccess, $type")
         if (type == TYPE_MANUAL) {
             if (isSuccess) {
-                LiveEventBus.get(Event.analysisProcessSuccess).post(type)
+                LiveEventBus.get(Event.analysisProcessSuccess).post(msg)
             } else {
-                LiveEventBus.get(Event.analysisProcessFailed).post(type)
+                LiveEventBus.get(Event.analysisProcessFailed).post(msg)
             }
             cleanData()
             manualCounting = false

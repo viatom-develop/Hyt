@@ -1,7 +1,9 @@
 package com.viatom.lpble.data.entity
 
+import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.android.parcel.Parcelize
 
 /**
  * author: wujuan
@@ -9,12 +11,13 @@ import androidx.room.PrimaryKey
  * description:
  */
 @Entity(tableName = "user")
+@Parcelize
 data class UserEntity(
     @PrimaryKey
-    val id: Long,
+    val userId: Long = 0,
     val name: String,
     val height: String,
     val weight: String,
     val birthday: String,
     val gender: String
-)
+) : Parcelable

@@ -29,20 +29,9 @@ interface RecordDao {
     @Query("UPDATE record SET isAnalysed = :isAnalysed WHERE id= :recordId")
     suspend fun updateWithAnalysed(recordId: Long, isAnalysed: Boolean )
 
-//    @Transaction
-//    @Query("SELECT* FROM record WHERE isAnalysed = 1")
-//    fun getRecordAndReportList(): PagingSource<Int, RecordAndReport>
 
-
-//    @Query("SELECT* FROM reportdetail")
-//    fun getRecordAndReportList(): PagingSource<Int, ReportDetail>
-
-    @Query("SELECT* FROM reportdetail WHERE isAnalysed = 1")
-    fun getRecordAndReportList(): PagingSource<Int, ReportDetail>
-
-//
-//    @Query("SELECT* FROM record")
-//    fun getRecordAndReportList(): PagingSource<Int, RecordEntity>
+    @Query("SELECT* FROM reportdetail WHERE isAnalysed = 1 AND userId=:userId")
+    fun getRecordAndReportList(userId: Long): PagingSource<Int, ReportDetail>
 
 
 

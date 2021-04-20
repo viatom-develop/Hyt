@@ -19,6 +19,7 @@ import com.viatom.lpble.adapter.ReportAdapter
 import com.viatom.lpble.adapter.ReportViewHolder
 import com.viatom.lpble.databinding.FragmentReportListBinding
 import com.viatom.lpble.mapper.Entity2ItemModelMapper
+import com.viatom.lpble.viewmodels.MainViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -30,6 +31,7 @@ import kotlinx.coroutines.launch
 class ReportListFragment : Fragment() {
     private lateinit var binding: FragmentReportListBinding
     private val viewModel: ReportListViewModel by activityViewModels()
+    private val mainViewModel: MainViewModel by activityViewModels()
     private val adapter by lazy { ReportAdapter() }
     private val pagingConfig = PagingConfig(
         // 每页显示的数据的大小
@@ -82,14 +84,17 @@ class ReportListFragment : Fragment() {
         binding.rcv.adapter = adapter
 
 
-        viewModel.queryData(requireContext(), Entity2ItemModelMapper(), pagingConfig).observe(viewLifecycleOwner, {
+        mainViewModel._currentUser.value?.userId?.let { userId ->
+            viewModel.queryData(requireContext(), userId, Entity2ItemModelMapper(), pagingConfig).observe(viewLifecycleOwner, {
 
-            adapter.submitData(lifecycle, it)
-            binding.swiperRefresh.isEnabled = false
+                adapter.submitData(lifecycle, it)
+                adapter.notifyDataSetChanged()
+//                binding.swiperRefresh.isEnabled = false
 
 
-            binding.size.text = "当前显示例/共${adapter.itemCount}"
-        })
+                binding.size.text = "当前显示例/共${adapter.itemCount}"
+            })
+        }
 
         lifecycleScope.launchWhenCreated {
             adapter.loadStateFlow.collectLatest { state ->

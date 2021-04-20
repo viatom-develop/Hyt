@@ -84,7 +84,7 @@ class CollectService : Service(){
                 for (i in 0..MANUAL_DURATION_S){
 
                     if (LpBleUtil.isDisconnected(Constant.BluetoothConfig.SUPPORT_MODEL)) {
-                        emit(LpResult.Failure(Exception("蓝牙已断开, 采集失败")))
+                        emit(LpResult.Failure(Exception("蓝牙已断开, 停止采集")))
                         return@flow
                     }
 

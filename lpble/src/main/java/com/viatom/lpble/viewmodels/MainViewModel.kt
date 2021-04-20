@@ -16,8 +16,10 @@ import com.viatom.lpble.ble.WaveFilter
 import com.viatom.lpble.constants.Constant
 import com.viatom.lpble.constants.Constant.BluetoothConfig.Companion.SUPPORT_MODEL
 import com.viatom.lpble.data.entity.DeviceEntity
+import com.viatom.lpble.data.entity.UserEntity
 import com.viatom.lpble.data.entity.local.DBHelper
 import com.viatom.lpble.ext.createDir
+import com.viatom.lpble.util.LpResult
 import com.viatom.lpble.util.doFailure
 import com.viatom.lpble.util.doSuccess
 import kotlinx.coroutines.Dispatchers
@@ -63,18 +65,14 @@ class MainViewModel: ViewModel() {
     /**
      * 连接过程中的蓝牙对象
      */
-    val _toConnectDevice = MutableLiveData<Bluetooth?>().apply {
-        value = null
-    }
+    val _toConnectDevice = MutableLiveData<Bluetooth?>()
     var toConnectDevice: LiveData<Bluetooth?> = _toConnectDevice
 
 
     /**
      * 当前蓝牙
      */
-    val _curBluetooth = MutableLiveData<DeviceEntity?>().apply {
-        value = null
-    }
+    val _curBluetooth = MutableLiveData<DeviceEntity?>()
     var curBluetooth: LiveData<DeviceEntity?> = _curBluetooth
 
     /**
@@ -84,6 +82,11 @@ class MainViewModel: ViewModel() {
         value = LpBleUtil.State.DISCONNECTED
     }
     var connectState: LiveData<Int> = _connectState
+
+    val _currentUser = MutableLiveData<UserEntity?>()
+
+    var currentUser: LiveData<UserEntity?> = _currentUser
+
 
 
     /**
@@ -108,9 +111,13 @@ class MainViewModel: ViewModel() {
             ) //必须在initModelConfig initRawFolder之后调用
     }
 
+    /**
+     * 应该保证自动采集时 deviceName及UserId已经存在
+     * @param application Application
+     */
     fun runAutoCollect(application: Application){
         GlobalScope.launch {
-            CollectUtil.getInstance(application).runAutoCollect()
+            CollectUtil.getInstance(application).runAutoCollect(this@MainViewModel)
         }
 
     }
@@ -154,6 +161,25 @@ class MainViewModel: ViewModel() {
 
         }
     }
+
+    fun saveUser(application: Application, userEntity: UserEntity){
+        DBHelper.getInstance(application).let {
+            viewModelScope.launch(Dispatchers.IO) {
+                Log.e("main", "saveUser..$userEntity")
+                it.insertOrUpdateUser(userEntity)
+                    .collectLatest {
+                        it.doSuccess {
+                            _currentUser.postValue(userEntity)
+                        }
+                        it.doFailure {
+
+                        }
+                    }
+            }
+
+        }
+    }
+
 
     //重置dashboard
     fun resetDashboard(){

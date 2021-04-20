@@ -24,6 +24,7 @@ import com.viatom.lpble.constants.Constant
 import com.viatom.lpble.constants.Constant.BluetoothConfig.Companion.CHECK_BLE_REQUEST_CODE
 import com.viatom.lpble.constants.Constant.BluetoothConfig.Companion.SUPPORT_MODEL
 import com.viatom.lpble.data.entity.DeviceEntity
+import com.viatom.lpble.data.entity.UserEntity
 import com.viatom.lpble.ext.checkBluetooth
 import com.viatom.lpble.ext.createDir
 import com.viatom.lpble.ext.permissionNecessary
@@ -32,9 +33,6 @@ import com.viatom.lpble.viewmodels.MainViewModel
 
 class MainActivity : AppCompatActivity(), BleChangeObserver {
 
-    val fragment1: Fragment = DashboardFragment()
-    val fragment2: Fragment = ReportListFragment()
-    val fm: FragmentManager = supportFragmentManager
 
 
     val TAG: String = "MainActivity"
@@ -46,9 +44,15 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-//
-//        fm.beginTransaction().add(R.id.content_main, fragment2, "2").hide(fragment2).commit()
-//        fm.beginTransaction().add(R.id.content_main, fragment1, "1").commit()
+        // 跳转传入UserEntity， userId 应为医汇通平台的id
+        intent.getParcelableExtra<UserEntity>("userEntity")?.let {
+            // 将用户更新到db 及viewmodel
+            mainVM.saveUser(application, it)
+        }?: run{
+            //测试
+            mainVM.saveUser(application, UserEntity(userId = 1002, name = "李四", height = "176", weight = "70" , birthday = "1994-05-6", gender = "男"))
+
+        }
 
         subscribeUi()
         initLiveEvent()
@@ -205,7 +209,6 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
 //                        )
 //                    }
 //                }
-
 
             }
             State.CONNECTED -> {
