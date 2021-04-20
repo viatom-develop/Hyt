@@ -72,7 +72,9 @@ class DBHelper private constructor(context: Context) {
     suspend fun insertReport( reportEntity: ReportEntity): Flow<LpResult<Long>> {
         return flow{
             try {
-                emit(LpResult.Success(db.reportDao().insertReport(reportEntity)))
+
+                db.reportDao().insertReport(reportEntity)
+                emit(LpResult.Success(reportEntity.recordId))
             } catch (e: Exception) {
                 emit(LpResult.Failure(e.cause))
             }
@@ -83,7 +85,7 @@ class DBHelper private constructor(context: Context) {
     suspend fun updateRecordWithAi(recordId: Long): Flow<LpResult<Int>> {
         return flow {
             try {
-            db.recordDao().updateWithAnalysed(recordId, true)
+                db.recordDao().updateWithAnalysed(recordId, true)
                 emit(LpResult.Success(db.recordDao().getRecord(recordId).collectType))
             } catch (e: Exception) {
                 emit(LpResult.Failure(e.cause))

@@ -333,12 +333,12 @@ class CollectUtil private constructor(val context: Context) {
                                                                 Log.d(C_TAG, "分析成功 采集类型$type")
                                                                 this.recordId = recordId
                                                                 insertReport(this, type)
+
                                                             }
                                                         }
                                                         else -> {
                                                             // 文件异常等
                                                             Log.e(C_TAG, "分析失败 采集类型$type")
-                                                            updateRecordWithAi(recordId, type)
                                                             finishCollecting(false, type, "文件异常，分析失败")
                                                         }
                                                     }
@@ -378,7 +378,7 @@ class CollectUtil private constructor(val context: Context) {
                     reportEntity
                 ).collect { result ->
                     result.doFailure {
-                        Log.e(C_TAG, "保存分析结果保存到数据库失败, id: $it")
+                        Log.e(C_TAG, "保存分析结果保存到数据库失败, recordId: $it")
                         finishCollecting(false, type, "分析结果存储失败")
                     }
                     result.doSuccess {
