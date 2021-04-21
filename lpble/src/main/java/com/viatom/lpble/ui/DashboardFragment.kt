@@ -213,11 +213,12 @@ class DashboardFragment : Fragment() {
 
                             //判断状态是否切换了
 
-                            synchronized(BluetoothConfig.currentRunState){
                                 BluetoothConfig.currentRunState.let { lastState->
 
                                     Log.d(DASH, "currentRunState = $this,lastState = $lastState")
                                     if (this != lastState){
+                                        Log.d(DASH, "currentRunState = $this,lastState = $lastState--------------切换")
+
                                         ecgView.clear()
                                         ecgView.invalidate()
                                         if (this in RunState.PREPARING_TEST..RunState.RECORDING) {
@@ -233,9 +234,7 @@ class DashboardFragment : Fragment() {
 
                                 //更新记录为最新的状态
                                 BluetoothConfig.currentRunState = this
-                            }
 
-                            ecgView.setRunState(this)
 
                             Log.d(DASH, " runState $this")
                         }

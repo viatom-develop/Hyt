@@ -2,6 +2,7 @@ package com.viatom.lpble.ui
 
 import com.viatom.lpble.viewmodels.ReportListViewModel
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,6 +30,8 @@ import kotlinx.coroutines.launch
  * description:
  */
 class ReportListFragment : Fragment() {
+    val re_log: String ="ReportListFragment"
+
     private lateinit var binding: FragmentReportListBinding
     private val viewModel: ReportListViewModel by activityViewModels()
     private val mainViewModel: MainViewModel by activityViewModels()
@@ -68,10 +71,11 @@ class ReportListFragment : Fragment() {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_report_list, container, false)
         binding.lifecycleOwner = this
         binding.ctx = this
-
+        Log.d(re_log, "onCreateView")
 
         return binding.root
     }
+    
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -110,6 +114,11 @@ class ReportListFragment : Fragment() {
     }
     fun back(){
         findNavController().navigate(R.id.report_list_to_dashboard)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        Log.d(re_log, "onDestroyView")
     }
 
 }

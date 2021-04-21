@@ -36,9 +36,6 @@ public class EcgView extends View {
     private int maxIndex;
 
 
-    //设备状态
-    private int runState;
-
     //单元高度
     private int cellHeight;
 
@@ -132,7 +129,8 @@ public class EcgView extends View {
 
         iniParam();
 
-        if ((runState == Constant.RunState.PREPARING_TEST || runState == Constant.RunState.RECORDING) && DataController.dataSrc.length > 0) {
+        if ((Constant.BluetoothConfig.Companion.getCurrentRunState() == Constant.RunState.PREPARING_TEST ||
+                Constant.BluetoothConfig.Companion.getCurrentRunState()  == Constant.RunState.RECORDING) && DataController.dataSrc.length > 0) {
             drawWave(canvas);
         }
     }
@@ -225,8 +223,5 @@ public class EcgView extends View {
         return getResources().getColor(resource_id);
     }
 
-    public void setRunState(int runState) {
-        this.runState = runState;
-    }
 
 }

@@ -17,7 +17,7 @@ data class RecordEntity(
         @PrimaryKey(autoGenerate = true)
         val id: Long = 0,
         val createTime: Long,
-        var isAnalysed: Boolean = false,
+        var isAnalysed: Boolean = false, //是否分析过 不代表是否分析成功
         val fileName: String, //本地源文件
         val collectType: Int = 0, //0 自动  1 手动
         val duration: Int = 0, // s

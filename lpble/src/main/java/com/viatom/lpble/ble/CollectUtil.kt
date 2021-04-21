@@ -337,6 +337,7 @@ class CollectUtil private constructor(val context: Context) {
                                                         else -> {
                                                             // 文件异常等
                                                             Log.e(C_TAG, "分析失败 采集类型$type")
+                                                            updateRecordWithAi(recordId, type)
                                                             finishCollecting(false, type, "文件异常，分析失败")
                                                         }
                                                     }
