@@ -114,7 +114,7 @@ class ReportListFragment : Fragment() {
 
     }
     fun back(){
-        findNavController().navigate(R.id.report_list_to_dashboard)
+        findNavController().popBackStack()
     }
 
     override fun onDestroyView() {

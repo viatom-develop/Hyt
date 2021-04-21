@@ -18,4 +18,5 @@ data class ReportDetail (
     val recordId: Long,
     val isAnalysed: Boolean,
     val userId: Long,
+
 )

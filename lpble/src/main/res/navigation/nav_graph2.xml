@@ -2,47 +2,46 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav_graph"
-    app:startDestination="@id/dashboard">
+    android:id="@+id/nav_graph2"
+    app:startDestination="@id/report_list">
 
-    <tab_fragment
-        android:id="@+id/dashboard"
-        android:name="com.viatom.lpble.ui.DashboardFragment"
-        android:label="dashboard"
-        tools:layout="@layout/fragment_dashborad">
-        <action
-            android:id="@+id/dashboard_to_report_list"
-            app:destination="@id/report_list"
-            />
-
-    </tab_fragment>
-    <tab_fragment
+    <fragment
         android:id="@+id/report_list"
         android:name="com.viatom.lpble.ui.ReportListFragment"
         tools:layout="@layout/fragment_report_list"
         android:label="report_list"
 
         >
+       <action
+           android:id="@+id/report_list_to_dashboard"
+           app:destination="@+id/dashboard"
+           app:popUpTo="@id/dashboard"
+           app:popUpToInclusive="true"
+           />
 
         <action
             android:id="@+id/report_list_to_report_detail"
             app:destination="@+id/report_detail"
             />
 
-    </tab_fragment>
+    </fragment>
 
-    <tab_fragment
+    <fragment
         android:id="@+id/report_detail"
         android:name="com.viatom.lpble.ui.ReportDetailFragment"
         tools:layout="@layout/fragment_report_detail"
         android:label="report_detail"
 
         >
+        <action
+            android:id="@+id/report_detail_to_report_list"
+            app:destination="@+id/report_list"
+            />
         <argument
             android:name="recordId"
             app:argType="long"
             android:defaultValue="0L" />
 
-    </tab_fragment>
+    </fragment>
 
 </navigation>

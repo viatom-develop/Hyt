@@ -30,8 +30,7 @@ data class ReportEntity @JvmOverloads constructor(
     val aiResultList: List<AiResult>?,
     val aiDiagnosis: String,
     val aiSuggestion: String,
-
-
+//    val pdfPath: String,
     ) {
 
     /**

@@ -75,7 +75,7 @@ class ReportDetailFragment : Fragment() {
     }
 
     fun back(){
-        findNavController().navigate(R.id.report_detail_to_report_list)
+        findNavController().popBackStack()
     }
 
 
