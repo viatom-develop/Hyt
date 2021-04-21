@@ -14,8 +14,8 @@ data class RecordAndReport(
     @Relation(
         parentColumn = "id",
         entityColumn = "recordId"
-
     )
+
     val reportEntity: ReportEntity,
 ){
 

@@ -507,6 +507,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/ll_remark"
             android:layout_weight="5"
+            android:paddingVertical="10px"
             android:orientation="horizontal">
 
             <TextView
@@ -536,43 +537,43 @@
                 android:singleLine="true"
                 android:textSize="21px" />
 
-            <TextView
-                android:id="@+id/status"
-                android:paddingLeft="7px"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/hr"
-                style="@style/ReportTextLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="59px"
-                android:gravity="center"
-                android:text="@string/public_status"
-                android:textSize="21px"
-                android:textStyle="bold" />
+<!--            <TextView-->
+<!--                android:id="@+id/status"-->
+<!--                android:paddingLeft="7px"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintTop_toBottomOf="@+id/hr"-->
+<!--                style="@style/ReportTextLabel"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="59px"-->
+<!--                android:gravity="center"-->
+<!--                android:text="@string/public_status"-->
+<!--                android:textSize="21px"-->
+<!--                android:textStyle="bold" />-->
 
-            <TextView
-                android:id="@+id/comma2"
-                style="@style/ReportTextLabel"
-                android:gravity="center_vertical"
-                app:layout_constraintTop_toBottomOf="@id/hr"
-                app:layout_constraintStart_toEndOf="@id/status"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="59px"
-                android:text=":"
-                android:textSize="21px" />
+<!--            <TextView-->
+<!--                android:id="@+id/comma2"-->
+<!--                style="@style/ReportTextLabel"-->
+<!--                android:gravity="center_vertical"-->
+<!--                app:layout_constraintTop_toBottomOf="@id/hr"-->
+<!--                app:layout_constraintStart_toEndOf="@id/status"-->
+<!--                android:textStyle="bold"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="59px"-->
+<!--                android:text=":"-->
+<!--                android:textSize="21px" />-->
 
-            <TextView
-                android:id="@+id/val_status"
-                app:layout_constraintTop_toBottomOf="@+id/hr"
-                app:layout_constraintStart_toEndOf="@id/comma2"
-                app:layout_constraintEnd_toStartOf="@id/icon_report"
-                style="@style/ReportTextLabel"
-                android:gravity="center_vertical"
-                android:layout_width="0dp"
-                android:layout_height="59px"
-                android:textSize="21px"
-                android:visibility="invisible"
-                tools:text="头晕,头痛" />
+<!--            <TextView-->
+<!--                android:id="@+id/val_status"-->
+<!--                app:layout_constraintTop_toBottomOf="@+id/hr"-->
+<!--                app:layout_constraintStart_toEndOf="@id/comma2"-->
+<!--                app:layout_constraintEnd_toStartOf="@id/icon_report"-->
+<!--                style="@style/ReportTextLabel"-->
+<!--                android:gravity="center_vertical"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_height="59px"-->
+<!--                android:textSize="21px"-->
+<!--                android:visibility="invisible"-->
+<!--                tools:text="头晕,头痛" />-->
 
             <ImageView
                 android:id="@+id/icon_report"

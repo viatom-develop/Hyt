@@ -95,7 +95,7 @@ class DBHelper private constructor(context: Context) {
 
     }
 
-    suspend fun queryRecordAndReport(recordId: Long): Flow<LpResult<RecordAndReport?>> {
+    suspend fun queryRecordAndReport(recordId: Long): Flow<LpResult<RecordAndReport>> {
         return flow {
             try {
 

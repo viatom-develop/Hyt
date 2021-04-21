@@ -11,6 +11,7 @@ import android.view.View;
 
 import com.viatom.lpble.data.entity.RecordEntity;
 import com.viatom.lpble.data.entity.ReportEntity;
+import com.viatom.lpble.ui.ReportListFragment;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,9 +40,11 @@ public class FilterECGReportWave extends View {
     private float xDis;//未抽点画图点距离
 
     private int source = 1;
-    private int fragmentIndex = 0; // 当前报告页码
+//    private int fragmentIndex = 0; // 当前报告页码
     private int startPoint = 0;   // 开始取点位置
     private int drawDataSize = 0; // 当前绘图取点长度
+
+    private ReportEntity.Fragment fragment;
 
     //画笔
     private Paint labelPaint;
@@ -54,15 +57,15 @@ public class FilterECGReportWave extends View {
     private ReportEntity report;
     private RecordEntity record;
 
-    public FilterECGReportWave(Context context,RecordEntity record, ReportEntity report,
-                               float imgWidth, float imgHeight, int source, int fragmentIndex, int startPoint) {
+    public FilterECGReportWave(Context context, RecordEntity record, ReportEntity report,
+                               float imgWidth, float imgHeight, int source, ReportEntity.Fragment fragment, int startPoint) {
         super(context);
         this.imgWidth = imgWidth;
         this.imgHeight = imgHeight;
         this.report = report;
         this.record = record;
         this.source = source;
-        this.fragmentIndex = fragmentIndex;
+        this.fragment = fragment;
         this.startPoint = startPoint;
 
         xDis = 1f / ECG_DATA_SAMPLING_FREQUENCY * 25 * grid1mmLength; //25mm/s,未抽点的
@@ -94,12 +97,12 @@ public class FilterECGReportWave extends View {
     }
 
     private void drawLabels(Canvas canvas) {
-        ReportEntity.Fragment item = report.getFragmentList().get(fragmentIndex);
-        int startIndex = Collections.binarySearch(report.getPosList(), Integer.valueOf(item.getStartPose()), Integer::compareTo);
+//        ReportEntity.Fragment item = report.getFragmentList().get(fragmentIndex);
+        int startIndex = Collections.binarySearch(report.getPosList(), Integer.valueOf(fragment.getStartPose()), Integer::compareTo);
         //第一个标记的index为第一个大于或等于startPose的pos值的index;
         int startLabelIndex = startIndex >= 0 ? startIndex : (Math.abs(startIndex) - 1);
         //最后一个标记的index为第一个大于或等于endPose的pos值的index - 1;
-        int endIndex = Collections.binarySearch(report.getPosList(), Integer.valueOf(item.getEndPose()), Integer::compareTo);
+        int endIndex = Collections.binarySearch(report.getPosList(), Integer.valueOf(fragment.getEndPose()), Integer::compareTo);
         int endLabelIndex = endIndex >= 0 ? endIndex : (Math.abs(endIndex) - 1) - 1;
 
         //从 startLabelIndex 遍历到endLabelIndex;
@@ -251,7 +254,8 @@ public class FilterECGReportWave extends View {
         linePaint.setColor(Color.argb(255, 0, 0, 0));
 
         //数据
-        short[] chartY = RecordEntity.Companion.getFilterWaveData(record);
+//        short[] chartY = RecordEntity.Companion.getFilterWaveData(record);
+        float[] chartY = record.getData();
         Log.d(TAG, "drawWave");
         Log.d(TAG, "chartY.length == " + chartY.length);
         float preTempX = 0, preTempY = 0, preChartY = 0;
@@ -272,7 +276,8 @@ public class FilterECGReportWave extends View {
             if (chartY[i] == NULL_VALUE)
                 Log.d(TAG, "null value found");
 
-            float yVal = (float) (chartY[i] * (1.0035 * 1800) / (4096 * 178.74));
+//            float yVal = (float) (chartY[i] * (1.0035 * 1800) / (4096 * 178.74));
+            float yVal = chartY[i];
             float tempY = (perLineHeight - zeroLineVal * grid1mmLength * 10)
                     - (yVal/*chartY[i]*/) * grid1mmLength * 10 + lineNum * perLineHeight;
 

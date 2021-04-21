@@ -13,6 +13,7 @@ class Constant{
         companion object{
             val er1Dir: String = "/er1"
             val er1EcgDir: String = "/$er1Dir/ecg" //保存采集到的数据.txt
+            val er1PdfDir: String = "/$er1Dir/pdf" //保存报告
         }
 
     }
@@ -101,7 +102,7 @@ class Constant{
         companion object{
             const val A4_WIDTH = 2520 / 2 // 210 * 6
 
-            const val  A4_HEIGHT = 3564 / 2 // 297 * 6
+            var  A4_HEIGHT = 3564 / 2 // 297 * 6
 
         }
     }

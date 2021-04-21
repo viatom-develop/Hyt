@@ -20,6 +20,7 @@ import com.viatom.lpble.data.entity.RecordEntity
 import com.viatom.lpble.data.entity.ReportEntity
 import com.viatom.lpble.data.local.DBHelper
 import com.viatom.lpble.ext.createFile
+import com.viatom.lpble.ext.getFile
 import com.viatom.lpble.net.RetrofitManager
 import com.viatom.lpble.net.RetrofitResponse
 import com.viatom.lpble.net.isSuccess
@@ -265,12 +266,17 @@ class CollectUtil private constructor(val context: Context) {
 
     fun insertRecord(file: File, type: Int, userId: Long, deviceName: String) {
         Log.d(C_TAG, "into insertRecord... ")
-        val bytes: ByteArray = FileIOUtils.readFile2BytesByStream(file.absoluteFile)
+//        val bytes: ByteArray = FileIOUtils.readFile2BytesByStream(file.absoluteFile)
+        if (type == TYPE_AUTO && autoData.isEmpty()  || type == TYPE_MANUAL && manualData.isEmpty()){
+            Log.d(C_TAG, "into insertRecord type =$type, data isEmpty ")
+            return
+        }
         RecordEntity.convert2RecordEntity(
             if (type == TYPE_AUTO) autoCreateTime else manualCreateTime,
             file.name,
             type,
-            bytes,
+//            bytes,
+            if (type == TYPE_AUTO) autoData else manualData,
             if (type == TYPE_AUTO) (AUTO_DURATION_MILLS / 1000).toInt() else MANUAL_DURATION_S,
             deviceName,
             userId
@@ -476,36 +482,36 @@ class CollectUtil private constructor(val context: Context) {
 
         val fileName = if (type == TYPE_MANUAL) "$manualCreateTime.txt" else "$autoCreateTime.txt"
        fileName.run {
-            context.createFile(Dir.er1EcgDir, this)?.let { file ->
-//        context.getFile("${Dir.er1EcgDir}/20210412162855.txt").let { file ->
+//            context.createFile(Dir.er1EcgDir, this)?.let { file ->
+        context.getFile("${Dir.er1EcgDir}/20210412162855.txt").let { file ->
 
                 if (!file.exists()) {
                     Log.d(C_TAG, "saveCollectEcg  !file.exists")
                     return null
                 }
-                try {
-                    BufferedWriter(FileWriter(file)).use { bufferedWriter ->
-
-                        val data = if (type == TYPE_MANUAL)manualData else autoData
-
-                        (data.size - 1).also {
-                            bufferedWriter.write("125,II,1,")
-                            for (i in 0 until it) {
-                                bufferedWriter.write(data[i].toString())
-                                bufferedWriter.write(",")
-                            }
-                            bufferedWriter.write(data[it - 1].toString())
-                        }
-                        bufferedWriter.close()
+//                try {
+//                    BufferedWriter(FileWriter(file)).use { bufferedWriter ->
+//
+//                        val data = if (type == TYPE_MANUAL)manualData else autoData
+//
+//                        (data.size - 1).also {
+//                            bufferedWriter.write("125,II,1,")
+//                            for (i in 0 until it) {
+//                                bufferedWriter.write(data[i].toString())
+//                                bufferedWriter.write(",")
+//                            }
+//                            bufferedWriter.write(data[it - 1].toString())
+//                        }
+//                        bufferedWriter.close()
 
                         Log.d(C_TAG, "数据文件保存完成，${file.name} ")
                         return file
 
-                    }
-                } catch (e: IOException) {
-                    Log.e(C_TAG, "write txt ai file error")
-                    return null
-                }
+//                    }
+//                } catch (e: IOException) {
+//                    Log.e(C_TAG, "write txt ai file error")
+//                    return null
+//                }
 
             }
 

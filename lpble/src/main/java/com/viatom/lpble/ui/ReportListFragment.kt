@@ -35,7 +35,7 @@ class ReportListFragment : Fragment() {
     private lateinit var binding: FragmentReportListBinding
     private val viewModel: ReportListViewModel by activityViewModels()
     private val mainViewModel: MainViewModel by activityViewModels()
-    private val adapter by lazy { ReportAdapter() }
+    private val adapter by lazy { ReportAdapter(this) }
     private val pagingConfig = PagingConfig(
         // 每页显示的数据的大小
         pageSize = 10,
@@ -83,6 +83,7 @@ class ReportListFragment : Fragment() {
         LinearLayoutManager(context).apply {
             this.orientation = LinearLayoutManager.VERTICAL
             binding.rcv.layoutManager = this
+
         }
 
         binding.rcv.adapter = adapter
@@ -101,7 +102,7 @@ class ReportListFragment : Fragment() {
                 binding.swiperRefresh.isRefreshing = state.refresh is LoadState.Loading
 
                 if (state.append is LoadState.NotLoading){
-                    binding.size.text = "当前显示例/共${adapter.itemCount}"
+                    binding.size.text = "当前共${adapter.itemCount}例"
                 }
             }
         }

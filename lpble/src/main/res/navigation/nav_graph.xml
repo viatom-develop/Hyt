@@ -13,8 +13,6 @@
         <action
             android:id="@+id/dashboard_to_report_list"
             app:destination="@+id/report_list"
-            app:popUpTo="@id/dashboard"
-            app:popUpToInclusive="true"
             />
 
     </tab_fragment>
@@ -28,9 +26,30 @@
        <action
            android:id="@+id/report_list_to_dashboard"
            app:destination="@+id/dashboard"
-           app:popUpTo="@id/report_list"
-           app:popUpToInclusive="true"
            />
+
+        <action
+            android:id="@+id/report_list_to_report_detail"
+            app:destination="@+id/report_detail"
+            />
+
+    </tab_fragment>
+
+    <tab_fragment
+        android:id="@+id/report_detail"
+        android:name="com.viatom.lpble.ui.ReportDetailFragment"
+        tools:layout="@layout/fragment_report_detail"
+        android:label="report_detail"
+
+        >
+        <action
+            android:id="@+id/report_detail_to_report_list"
+            app:destination="@+id/report_list"
+            />
+        <argument
+            android:name="recordId"
+            app:argType="long"
+            android:defaultValue="0L" />
 
     </tab_fragment>
 

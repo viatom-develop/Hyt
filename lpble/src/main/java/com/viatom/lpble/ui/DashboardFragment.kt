@@ -96,19 +96,9 @@ class DashboardFragment : Fragment() {
         initView()
         subscribeUi()
         initLiveEvent()
-        initData()
-
-
-
-
-//        view.findViewById<Button>(R.id.button_first).setOnClickListener {
-//            findNavController().navigate(R.id.action_DashboardFragment_to_SecondFragment)
-//        }
-    }
-
-    private fun initData() {
 
     }
+
 
     private fun initView() {
         calScreen()
@@ -407,16 +397,6 @@ class DashboardFragment : Fragment() {
         startWaveTimer(ecgView)
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        Log.d("dash", "onDestroyView")
-        stopTimer()
-        mainVM.resetDashboard()
-    }
-
-//    fun toReport() {
-//         findNavController().navigate(R.id.action_DashboardFragment_to_ReportDetailFragment)
-//    }
 
     fun toReportList() {
         findNavController().navigate(R.id.dashboard_to_report_list)

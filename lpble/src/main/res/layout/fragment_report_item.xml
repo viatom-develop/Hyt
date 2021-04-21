@@ -9,6 +9,9 @@
         <variable
             name="report"
             type="com.viatom.lpble.model.ReportItemModel" />
+        <variable
+            name="ctx"
+            type="com.viatom.lpble.ui.ReportListFragment" />
 
     </data>
 
@@ -20,6 +23,7 @@
         android:layout_marginTop="5dp"
         android:layout_marginHorizontal="16dp"
         app:bindClick="@{report}"
+        app:fragment="@{ctx}"
         >
         <TextView
             android:layout_width="wrap_content"

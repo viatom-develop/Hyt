@@ -68,6 +68,7 @@
     <string name="report_attr">增益:10mm/mV</string>
     <string name="report_speed">走速:25mm/s</string>
     <string name="loacl_report">本地报告</string>
+    <string name="aiReport">AI报告</string>
 
 
 </resources>

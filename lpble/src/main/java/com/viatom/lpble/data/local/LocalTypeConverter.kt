@@ -12,6 +12,7 @@ import com.viatom.lpble.ext.typeToJson
  * description:
  */
 open class LocalTypeConverter {
+
     @TypeConverter
     fun json2FragmentEntity(src: String): List<ReportEntity.Fragment>? =
         GsonBuilder().create().fromJson(src)
@@ -44,5 +45,14 @@ open class LocalTypeConverter {
 
     @TypeConverter
     fun labelList2Json(data: List<String>):String =
+        GsonBuilder().create().typeToJson(data)
+
+
+    @TypeConverter
+    fun json2RecordData(src: String): FloatArray =
+        GsonBuilder().create().fromJson(src)
+
+    @TypeConverter
+    fun RecordData2Json(data: FloatArray):String =
         GsonBuilder().create().typeToJson(data)
 }

@@ -2,6 +2,7 @@ package com.viatom.lpble.data.entity
 
 import android.util.Log
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.viatom.lpble.ecg.DataConvert
 import java.text.SimpleDateFormat
@@ -21,7 +22,7 @@ data class RecordEntity(
         val fileName: String, //本地源文件
         val collectType: Int = 0, //0 自动  1 手动
         val duration: Int = 0, // s
-        val data: ByteArray,
+        val data: FloatArray,
         val dataCrc: Int = 0,
         val magic: Int = 0,
         val fileVersion: String = "",
@@ -65,7 +66,7 @@ data class RecordEntity(
                         createTime: Long,
                         filename: String,
                         type: Int,
-                        d: ByteArray,
+                        data: FloatArray,
                         duration: Int,
                         deviceName: String,
                         userId: Long,
@@ -75,32 +76,33 @@ data class RecordEntity(
                                 createTime = createTime,
                                 fileName = filename,
                                 collectType = type,
-                                data = d,
+                                data = data,
                                 duration = duration,
                                 deviceName = deviceName,
                                 userId = userId
                         )
                 }
+//                fun getFilterWaveData(recordEntity: RecordEntity): ShortArray {
+//                        Log.d("setFilterWaveData", "into...${recordEntity.data.size}");
+//                        var index = 0
+//                        recordEntity.data.let {
+//                                val length = it.size - 30
+//                                return ShortArray(length).apply {
+//                                        val convert = DataConvert()
+//                                        for (i in 0 until length -30 ) {
+//                                                val tmp: Short = convert.unCompressAlgECG(it[10 + i])
+//                                                if (tmp.toInt() != -32768) {
+//                                                        this[index] = tmp
+//                                                        index ++
+//                                                }
+//                                        }
+//                                }
+//                        }
+//
+//                }
 
 
-                fun getFilterWaveData(recordEntity: RecordEntity): ShortArray {
-                        Log.d("setFilterWaveData", "into...");
-                        recordEntity.data.let {
-                                (it.size - 30).let { length ->
-                                        return ShortArray(length).apply {
-                                                val convert = DataConvert()
-                                                for (i in 0 until length - 30) {
-                                                        val tmp: Short =
-                                                                convert.unCompressAlgECG(it[10 + i])
-                                                        if (tmp.toInt() != -32768) {
-                                                                this[i] =
-                                                                        tmp /* == 32767 ? 0 : tmp*/ /* (float) (tmp * (1.0035 * 1800) / (4096 * 178.74))*/
-                                                        }
-                                                }
-                                        }
-                                }
-                        }
-                }
+
 
 
         }
@@ -128,6 +130,8 @@ fun RecordEntity.getProcessDuration(position: Int): Int{
         }
         return (second - start);
 }
+
+
 
 
 

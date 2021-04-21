@@ -24,7 +24,7 @@ interface RecordDao {
 
     @Transaction
     @Query("SELECT* FROM record WHERE id=:recordId")
-    suspend fun getRecordAndReport(recordId: Long): RecordAndReport?
+    suspend fun getRecordAndReport(recordId: Long): RecordAndReport
 
     @Query("UPDATE record SET isAnalysed = :isAnalysed WHERE id= :recordId")
     suspend fun updateWithAnalysed(recordId: Long, isAnalysed: Boolean )

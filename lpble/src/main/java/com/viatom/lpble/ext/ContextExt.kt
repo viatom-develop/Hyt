@@ -152,20 +152,24 @@ fun Context.createDir(path: String): Boolean{
 }
 
 @Throws(IOException::class)
-fun Context.createFile(path: String, filename: String): File?{
+fun Context.createFile(dir: String, filename: String): File?{
     try {
-        "$path/$filename".run {
+        "$dir/$filename".run {
             getFile(this).let {
                 if(!it.exists()) {
-                    it.createNewFile()
-                    Log.d("createFile success", it.absolutePath)
-                    return it
+                    if (createDir(dir)) {
+                        it.createNewFile()
+                        Log.d("createFile success", it.absolutePath)
+                        return it
+                    }
+                    return null
                 }
                 return it
             }
         }
     }catch (e: IOException){
         e.printStackTrace()
+        Log.e("createFile", "e")
         return null
     }
 

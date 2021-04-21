@@ -4,24 +4,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
+import androidx.fragment.app.Fragment
 import androidx.paging.PagingDataAdapter
-import androidx.recyclerview.widget.DiffUtil
 import com.hi.dhl.jdatabinding.DataBindingViewHolder
 import com.hi.dhl.jdatabinding.dowithTry
 import com.viatom.lpble.R
-import com.viatom.lpble.data.entity.RecordAndReport
-import com.viatom.lpble.databinding.FragmentReportLitemBinding
+import com.viatom.lpble.databinding.FragmentReportItemBinding
 import com.viatom.lpble.model.ReportItemModel
+import com.viatom.lpble.ui.ReportListFragment
 
 /**
  * author: wujuan
  * created on: 2021/4/16 19:52
  * description:
  */
-class ReportAdapter :
+class ReportAdapter(val fragment: Fragment) :
     PagingDataAdapter<ReportItemModel, ReportViewHolder>(ReportItemModel.diffCallback) {
 
-    lateinit var viewHolder: ReportViewHolder
 
     var total: Int = 0
 
@@ -36,8 +35,8 @@ class ReportAdapter :
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReportViewHolder {
-        val view = inflateView(parent, R.layout.fragment_report_litem)
-        return ReportViewHolder(view)
+        val view = inflateView(parent, R.layout.fragment_report_item)
+        return ReportViewHolder(view, fragment)
     }
 
     private fun inflateView(viewGroup: ViewGroup, @LayoutRes viewType: Int): View {
@@ -52,14 +51,15 @@ class ReportAdapter :
 
 }
 
-class ReportViewHolder(view: View) : DataBindingViewHolder<ReportItemModel>(view) {
-    val mBinding: FragmentReportLitemBinding by viewHolderBinding(view)
+class ReportViewHolder(view: View, val fragment: Fragment) : DataBindingViewHolder<ReportItemModel>(view) {
+    val mBinding: FragmentReportItemBinding by viewHolderBinding(view)
 
 
     override fun bindData(data: ReportItemModel, position: Int) {
         mBinding.apply {
             data.id = "#${position + 1}"
             report = data
+            ctx = fragment as ReportListFragment
             executePendingBindings()
         }
     }
