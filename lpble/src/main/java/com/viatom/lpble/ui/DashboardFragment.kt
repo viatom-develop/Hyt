@@ -86,7 +86,7 @@ class DashboardFragment : Fragment() {
         binding.ctx = this
 
         activity?.window?.setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        Log.d("dash", "onCreateView")
+        Log.d(DASH, "onCreateView")
 
         return binding.root
     }

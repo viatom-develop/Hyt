@@ -89,16 +89,16 @@ class ReportListFragment : Fragment() {
 
                 adapter.submitData(lifecycle, it)
                 adapter.notifyDataSetChanged()
-//                binding.swiperRefresh.isEnabled = false
-
-
-                binding.size.text = "当前显示例/共${adapter.itemCount}"
             })
         }
 
         lifecycleScope.launchWhenCreated {
             adapter.loadStateFlow.collectLatest { state ->
                 binding.swiperRefresh.isRefreshing = state.refresh is LoadState.Loading
+
+                if (state.append is LoadState.NotLoading){
+                    binding.size.text = "当前显示例/共${adapter.itemCount}"
+                }
             }
         }
         binding.swiperRefresh.setOnRefreshListener {

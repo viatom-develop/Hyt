@@ -59,8 +59,11 @@ dependencies {
     api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$rootProject.coroutines"
     api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.coroutines"
 
-    api "androidx.navigation:navigation-fragment-ktx:$rootProject.nav_version"
-    api "androidx.navigation:navigation-ui-ktx:$rootProject.nav_version"
+//    api "androidx.navigation:navigation-fragment-ktx:$rootProject.nav_version"
+//    api "androidx.navigation:navigation-ui-ktx:$rootProject.nav_version"
+
+    api "android.arch.navigation:navigation-fragment-ktx:$nav_version" // use -ktx for Kotlin
+    api "android.arch.navigation:navigation-ui-ktx:$nav_version" // use -ktx for Kotlin
 
     api "androidx.core:core-ktx:$rootProject.core_ktx"
     api "androidx.appcompat:appcompat:$rootProject.appcompat"

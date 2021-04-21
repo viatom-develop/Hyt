@@ -5,27 +5,33 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/dashboard">
 
-    <fragment
+    <tab_fragment
         android:id="@+id/dashboard"
         android:name="com.viatom.lpble.ui.DashboardFragment"
+        android:label="dashboard"
         tools:layout="@layout/fragment_dashborad">
         <action
             android:id="@+id/dashboard_to_report_list"
             app:destination="@+id/report_list"
+            app:popUpTo="@id/dashboard"
+            app:popUpToInclusive="true"
             />
 
-    </fragment>
-    <fragment
+    </tab_fragment>
+    <tab_fragment
         android:id="@+id/report_list"
         android:name="com.viatom.lpble.ui.ReportListFragment"
+        tools:layout="@layout/fragment_report_list"
+        android:label="report_list"
+
         >
        <action
            android:id="@+id/report_list_to_dashboard"
            app:destination="@+id/dashboard"
-           app:popUpTo="@id/dashboard"
+           app:popUpTo="@id/report_list"
            app:popUpToInclusive="true"
            />
 
-    </fragment>
+    </tab_fragment>
 
 </navigation>
