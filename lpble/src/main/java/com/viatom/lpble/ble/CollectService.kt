@@ -64,13 +64,11 @@ class CollectService : Service(){
                     for (i in 0..AUTO_DURATION_MILLS){
                         Log.d("collectUtil", "自动 读秒 $i")
 
-                        if (i == 0L){
+                        if (i == 0L) {
                             Log.d("collectUtil", "自动 AUTO_START")
                             emit(LpResult.Success(AUTO_START))
-                        }else {
-                            Log.d("collectUtil", "自动 AUTO_START-------")
                         }
-                        if (i == 5L)  {
+                        if (i == AUTO_DURATION_MILLS)  {
                             emit(LpResult.Success(AUTO_STOP))
                             Log.d("collectUtil", "自动AUTO_STOP")
                         }

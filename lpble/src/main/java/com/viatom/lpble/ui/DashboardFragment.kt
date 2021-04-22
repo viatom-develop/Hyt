@@ -56,6 +56,13 @@ class DashboardFragment : Fragment() {
 
     lateinit var ecgView: EcgView
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        activity?.window?.setFlags(
+            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+        )
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -4,10 +4,9 @@ import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
 import com.jeremyliao.liveeventbus.LiveEventBus
 import com.lepu.blepro.ble.data.LepuDevice
@@ -61,9 +60,19 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
             mainVM.saveUser(application, it)
         }?: run{
             //测试
-            mainVM.saveUser(application, UserEntity(userId = 1002, name = "李四", height = "176", weight = "70" , birthday = "1994-05-6", gender = "男"))
+            mainVM.saveUser(
+                application, UserEntity(
+                    userId = 1002,
+                    name = "李四",
+                    height = "176",
+                    weight = "70",
+                    birthday = "1994-05-6",
+                    gender = "男"
+                )
+            )
 
         }
+
 
         subscribeUi()
         initLiveEvent()
@@ -211,7 +220,7 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
                 mainVM.resetDashboard()
 
                 //app 运行时如果断开 去重连。
-                if (LpBleUtil.isAutoConnect(SUPPORT_MODEL) ) { //默认自动重连开启
+                if (LpBleUtil.isAutoConnect(SUPPORT_MODEL)) { //默认自动重连开启
                     mainVM.curBluetooth.value?.deviceName?.let {
                         LpBleUtil.reconnect(
                             SUPPORT_MODEL,
