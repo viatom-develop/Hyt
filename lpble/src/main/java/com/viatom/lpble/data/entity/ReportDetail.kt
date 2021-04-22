@@ -9,7 +9,7 @@ import androidx.room.DatabaseView
  */
 
 @Suppress("AndroidUnresolvedRoomSqlReference")
-@DatabaseView("SELECT record.userId, report.recordId,record.createTime,record.isAnalysed, record.collectType, report.hr, report.aiDiagnosis FROM record INNER JOIN report ON record.id = report.recordId ")
+@DatabaseView("SELECT record.userId, report.recordId,record.createTime,record.isAnalysed, record.collectType, report.hr, report.aiDiagnosis, report.aiResult FROM record INNER JOIN report ON record.id = report.recordId ")
 data class ReportDetail (
     val createTime: Long,
     val collectType: Int,
@@ -18,5 +18,5 @@ data class ReportDetail (
     val recordId: Long,
     val isAnalysed: Boolean,
     val userId: Long,
-
+    val aiResult: String,
 )

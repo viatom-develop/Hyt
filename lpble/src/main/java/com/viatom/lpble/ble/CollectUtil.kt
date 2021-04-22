@@ -336,6 +336,7 @@ class CollectUtil private constructor(val context: Context) {
                                                             it.data?.run {
                                                                 Log.d(C_TAG, "分析成功 采集类型$type")
                                                                 this.recordId = recordId
+                                                                this.pdfPath =""
                                                                 insertReport(this, type)
 
                                                             }

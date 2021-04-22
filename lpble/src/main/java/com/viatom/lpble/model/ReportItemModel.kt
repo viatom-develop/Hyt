@@ -17,6 +17,7 @@ data class ReportItemModel (
     val hr: String,
     val aiDiagnosis: String,
     val recordId: Long,
+    val aiResult: String, //2 数据质量差
 
     ): Parcelable {
     companion object {

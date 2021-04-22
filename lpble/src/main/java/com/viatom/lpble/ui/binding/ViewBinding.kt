@@ -13,6 +13,10 @@ import com.viatom.lpble.model.ReportItemModel
 @BindingAdapter("fragment", "bindClick")
 fun reportItemClick(view: View, fragment: Fragment, model: ReportItemModel) {
     view.setOnClickListener {
+        if (model.aiResult == "2"){
+            return@setOnClickListener
+        }
+
         Bundle().apply {
             this.putLong("recordId", model.recordId)
             Log.d("bindclick", "$this")

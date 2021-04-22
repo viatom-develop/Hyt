@@ -68,7 +68,7 @@
             app:layout_constraintEnd_toEndOf="@id/label"
             app:layout_constraintTop_toBottomOf="@id/label"
             android:id="@+id/hr"
-            tools:text="@{report.hr}"
+            tools:text="@{report.hr.equals(`0`)? `--`: report.hr}"
             android:textColor="@color/white"
             android:textSize="30sp"
             />
@@ -87,7 +87,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/hr"
+            app:layout_constraintEnd_toStartOf="@id/label"
             app:layout_constraintBottom_toBottomOf="@id/bpm"
             app:layout_constraintTop_toBottomOf="@id/time"
             android:layout_marginTop="8dp"
