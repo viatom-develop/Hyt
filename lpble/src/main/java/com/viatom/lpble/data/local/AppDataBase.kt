@@ -6,7 +6,7 @@ import androidx.room.TypeConverters
 import com.viatom.lpble.data.entity.*
 
 @Database(
-    entities = [DeviceEntity::class, RecordEntity::class, ReportEntity::class, UserEntity::class, PagingKeysEntity::class],
+    entities = [DeviceEntity::class, RecordEntity::class, ReportEntity::class, UserEntity::class],
     views = arrayOf(ReportDetail::class),
     version = 2, exportSchema = false
 )

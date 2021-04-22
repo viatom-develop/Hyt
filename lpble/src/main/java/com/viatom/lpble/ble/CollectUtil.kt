@@ -276,9 +276,8 @@ class CollectUtil private constructor(val application: Context) {
             if (type == TYPE_AUTO) autoCreateTime else manualCreateTime,
             file.name,
             type,
-//            bytes,
             if (type == TYPE_AUTO) autoData else manualData,
-            if (type == TYPE_AUTO) (AUTO_DURATION_MILLS / 1000).toInt() else MANUAL_DURATION_S,
+            if (type == TYPE_AUTO) AUTO_DURATION_MILLS else MANUAL_DURATION_S,
             deviceName,
             userId
 
@@ -345,7 +344,7 @@ class CollectUtil private constructor(val application: Context) {
                                                         else -> {
                                                             // 文件异常等
                                                             Log.e(C_TAG, "分析失败 采集类型$type")
-                                                            updateRecordWithAi(recordId, type)
+                                                            updateRecordWithAi(recordId, type) //  根据自己的业务决定 请求异常是否更新状态
                                                             finishCollecting(false, type, "文件异常，分析失败")
                                                         }
                                                     }

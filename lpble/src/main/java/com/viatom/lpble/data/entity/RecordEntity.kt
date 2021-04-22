@@ -23,44 +23,11 @@ data class RecordEntity(
         val collectType: Int = 0, //0 自动  1 手动
         val duration: Int = 0, // s
         val data: FloatArray,
-        val dataCrc: Int = 0,
-        val magic: Int = 0,
-        val fileVersion: String = "",
         val deviceName: String,
         val userId: Long,
 
 ) {
         companion object {
-//                fun convert2RecordEntity(createTime: Long, filename: String, type: Int, d: ByteArray, duration: Int): RecordEntity? {
-//                        d.size.let { length ->
-//                                if (length < 30) {
-//                                        Log.d("parseData", "文件大小错误")
-//                                        return null
-//                                }
-//                                val magic = ((d[length - 1].toInt() and 0xFF shl 24) + (d[length - 2].toInt() and 0xFF shl 16)
-//                                        + (d[length - 3].toInt() and 0xFF shl 8) + (d[length - 4].toInt() and 0xFF))
-//
-//                                Log.d("parseData ", "magic $magic")
-//                                if (magic != -0x5aa5fbc8) {
-//                                        Log.d("parseData", "文件标志错误")
-//                                        return null
-//                                }
-//                                val dataCrc = (d[length - 15].toInt() and 0xFF shl 8) + (d[length - 16].toInt() and 0xFF)
-//
-//                                val fileVersion = "V" + d[0].toString()
-//
-//                                return  RecordEntity(
-//                                        createTime = createTime,
-//                                        fileName = filename,
-//                                        collectType = type,
-//                                        data = d,
-//                                        dataCrc = dataCrc,
-//                                        magic = magic,
-//                                        fileVersion = fileVersion,
-//                                        duration = duration
-//                                )
-//                        }
-//
 
                 fun convert2RecordEntity(
                         createTime: Long,
@@ -82,24 +49,6 @@ data class RecordEntity(
                                 userId = userId
                         )
                 }
-//                fun getFilterWaveData(recordEntity: RecordEntity): ShortArray {
-//                        Log.d("setFilterWaveData", "into...${recordEntity.data.size}");
-//                        var index = 0
-//                        recordEntity.data.let {
-//                                val length = it.size - 30
-//                                return ShortArray(length).apply {
-//                                        val convert = DataConvert()
-//                                        for (i in 0 until length -30 ) {
-//                                                val tmp: Short = convert.unCompressAlgECG(it[10 + i])
-//                                                if (tmp.toInt() != -32768) {
-//                                                        this[index] = tmp
-//                                                        index ++
-//                                                }
-//                                        }
-//                                }
-//                        }
-//
-//                }
 
 
 
@@ -107,7 +56,37 @@ data class RecordEntity(
 
         }
 
+        override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (javaClass != other?.javaClass) return false
 
+                other as RecordEntity
+
+                if (id != other.id) return false
+                if (createTime != other.createTime) return false
+                if (isAnalysed != other.isAnalysed) return false
+                if (fileName != other.fileName) return false
+                if (collectType != other.collectType) return false
+                if (duration != other.duration) return false
+                if (!data.contentEquals(other.data)) return false
+                if (deviceName != other.deviceName) return false
+                if (userId != other.userId) return false
+
+                return true
+        }
+
+        override fun hashCode(): Int {
+                var result = id.hashCode()
+                result = 31 * result + createTime.hashCode()
+                result = 31 * result + isAnalysed.hashCode()
+                result = 31 * result + fileName.hashCode()
+                result = 31 * result + collectType
+                result = 31 * result + duration
+                result = 31 * result + data.contentHashCode()
+                result = 31 * result + deviceName.hashCode()
+                result = 31 * result + userId.hashCode()
+                return result
+        }
 
 
 }

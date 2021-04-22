@@ -63,7 +63,7 @@ class Constant{
             val TYPE_AUTO: Int = 0
 
             val AUTO_INTERVAL: Long = 30 * 60 * 1000
-            val AUTO_DURATION_MILLS: Long = 30 //s
+            val AUTO_DURATION_MILLS: Int = 30 //s
             val AUTO_START: Int = 1000
             val AUTO_EXIT: Int = 1002
             val AUTO_STOP: Int = 1001

@@ -75,7 +75,7 @@ class CollectService : Service(){
                             break
                         }
 
-                        if (i == 0L) {
+                        if (i == 0) {
                             Log.d("collectUtil", "自动 AUTO_START")
                             emit(LpResult.Success(AUTO_START))
                         }
