@@ -60,7 +60,7 @@ class ReportListFragment : Fragment() {
          * internal const val DEFAULT_INITIAL_PAGE_MULTIPLIER = 3
          * val initialLoadSize: Int = pageSize * DEFAULT_INITIAL_PAGE_MULTIPLIER
          */
-        initialLoadSize = 10
+        initialLoadSize = 30
     )
 
     override fun onCreateView(
@@ -92,9 +92,7 @@ class ReportListFragment : Fragment() {
         mainViewModel._currentUser.value?.userId?.let { userId ->
             activity?.let {
                 viewModel.queryData(it.application, userId, Entity2ItemModelMapper(), pagingConfig).observe(viewLifecycleOwner, {
-
                     adapter.submitData(lifecycle, it)
-                    adapter.notifyDataSetChanged()
                 })
             }
         }
@@ -121,11 +119,6 @@ class ReportListFragment : Fragment() {
     }
     fun back(){
         findNavController().popBackStack()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        Log.d(re_log, "onDestroyView")
     }
 
 }

@@ -20,7 +20,7 @@ class Constant{
 
     interface BluetoothConfig{
         companion object{
-            val SUPPORT_MODEL: Int = Bluetooth.MODEL_ER1
+            val SUPPORT_MODEL: Int = Bluetooth.MODEL_ER1 //ble sdk 支持的设备
             val TIME_OUT_MILLIS: Long = 2000 //s
             val CHECK_BLE_REQUEST_CODE = 6001
             var currentRunState: Int = RunState.NONE // 设备实时状态
@@ -62,13 +62,13 @@ class Constant{
             val TYPE_MANUAL: Int = 1
             val TYPE_AUTO: Int = 0
 
-            val AUTO_INTERVAL: Long = 30 * 60 * 1000
-            val AUTO_DURATION_MILLS: Int = 30 //s
+            val AUTO_INTERVAL: Long = 30 * 60 * 1000 // 自动采集间歇时长
+            val AUTO_DURATION_MILLS: Int = 30 //s   自动采集时长
             val AUTO_START: Int = 1000
             val AUTO_EXIT: Int = 1002
             val AUTO_STOP: Int = 1001
 
-            val MANUAL_DURATION_S: Int = 30 //s
+            val MANUAL_DURATION_S: Int = 30 //s 手动采集时长
         }
     }
 
