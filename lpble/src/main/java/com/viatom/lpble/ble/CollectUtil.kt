@@ -336,7 +336,7 @@ class CollectUtil private constructor(val context: Context) {
                                                             it.data?.run {
                                                                 Log.d(C_TAG, "分析成功 采集类型$type")
                                                                 this.recordId = recordId
-                                                                this.pdfPath =""
+                                                                this.pdfName =""
                                                                 insertReport(this, type)
 
                                                             }
@@ -484,7 +484,7 @@ class CollectUtil private constructor(val context: Context) {
         val fileName = if (type == TYPE_MANUAL) "$manualCreateTime.txt" else "$autoCreateTime.txt"
        fileName.run {
             context.createFile(Dir.er1EcgDir, this)?.let { file ->
-//        context.getFile("${Dir.er1EcgDir}/20210412162855.txt").let { file ->
+//        context.getFile("${Dir.er1EcgDir}/20210412162855.txt")?.let { file ->
 
                 if (!file.exists()) {
                     Log.d(C_TAG, "saveCollectEcg  !file.exists")

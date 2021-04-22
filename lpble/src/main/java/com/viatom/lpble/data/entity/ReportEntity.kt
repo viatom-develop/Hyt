@@ -30,7 +30,7 @@ data class ReportEntity @JvmOverloads constructor(
     val aiResultList: List<AiResult>?,
     val aiDiagnosis: String,
     val aiSuggestion: String,
-    var pdfPath: String, //本地路径
+    var pdfName: String, //本地相对路径
     ) {
 
     /**

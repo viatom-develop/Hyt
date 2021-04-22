@@ -136,17 +136,23 @@ fun Application.getExtraDir(): File?{
  * @param filename String
  * @return File
  */
-fun Context.getFile(filename: String): File = File(getExternalFilesDir(null), filename)
+fun Context.getFile(filename: String): File?{
+    return if (filename.isEmpty()) null else
+        File(getExternalFilesDir(null), filename)
+}
 
 
 fun Context.createDir(path: String): Boolean{
    getFile(path).let {
-       if(!it.exists()) {
-           it.mkdirs()
-           Log.d("createDir success", it.absolutePath)
+       it?.let {
+           if(!it.exists()) {
+               it.mkdirs()
+               Log.d("createDir success", it.absolutePath)
+               return true
+           }
            return true
-        }
-       return true
+       }?: return false
+
     }
     return false
 }
@@ -155,7 +161,7 @@ fun Context.createDir(path: String): Boolean{
 fun Context.createFile(dir: String, filename: String): File?{
     try {
         "$dir/$filename".run {
-            getFile(this).let {
+            getFile(this)?.let {
                 if(!it.exists()) {
                     if (createDir(dir)) {
                         it.createNewFile()
@@ -165,7 +171,7 @@ fun Context.createFile(dir: String, filename: String): File?{
                     return null
                 }
                 return it
-            }
+            }?: return null
         }
     }catch (e: IOException){
         e.printStackTrace()

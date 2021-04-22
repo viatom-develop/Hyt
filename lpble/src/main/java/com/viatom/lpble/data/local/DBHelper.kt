@@ -118,6 +118,7 @@ class DBHelper private constructor(context: Context) {
 
     }
 
+
     /**
      * 内联查询record report 生成视图用于展示分析列表
      * @param userId Long
@@ -137,17 +138,8 @@ class DBHelper private constructor(context: Context) {
     }
 
 
-    suspend fun updateReportWithPdf(reportId: Long, path: String): Flow<LpResult<Boolean>> {
-        return flow {
-            try {
-                db.reportDao().updateWithPdf(reportId, path)
-                    emit(LpResult.Success(true))
-
-            } catch (e: Exception) {
-                emit(LpResult.Failure(e.cause))
-            }
-
-        }.flowOn(Dispatchers.IO)
+    suspend fun updateReportWithPdf(reportId: Long, pdfName: String) {
+         db.reportDao().updateWithPdf(reportId, pdfName)
 
     }
 

@@ -17,6 +17,7 @@ import com.viatom.lpble.data.entity.UserEntity
 import com.viatom.lpble.data.local.DBHelper
 import com.viatom.lpble.ecg.FilterECGReportWave
 import com.viatom.lpble.ecg.ReportUtil
+import com.viatom.lpble.util.LpResult
 import com.viatom.lpble.util.doFailure
 import com.viatom.lpble.util.doSuccess
 import kotlinx.coroutines.Dispatchers
@@ -55,6 +56,8 @@ class ReportDetailViewModel : ViewModel() {
                     it.doFailure { }
                     it.doSuccess { result ->
                         _recordAndReport.postValue(result)
+                        Log.d("ReportDetailFragment", "queryRecordAndReport success")
+
                     }
                 }
 
@@ -62,13 +65,15 @@ class ReportDetailViewModel : ViewModel() {
 
     }
 
+
+
     fun inflateReportFile(context: Context, userEntity: UserEntity): File? {
 
         _recordAndReport.value?.let {
             it.recordEntity.run {
 
                 val fileName = "${this.createTime}.pdf"
-                Log.d("report", "去生成pdf--$fileName")
+                Log.d("ReportDetailFragment", "去生成pdf--$fileName")
                 return ReportUtil.inflaterReportView(
                     context,
                     it.recordEntity,
@@ -92,9 +97,9 @@ class ReportDetailViewModel : ViewModel() {
 
     }
 
-    fun updatePdf(context: Context, reportId: Long, path: String){
-        viewModelScope.launch {
-            DBHelper.getInstance(context).updateReportWithPdf(reportId, path)
+    fun updatePdf(context: Context, reportId: Long, pdfName: String){
+        viewModelScope.launch(Dispatchers.IO) {
+            DBHelper.getInstance(context).updateReportWithPdf(reportId, pdfName)
         }
     }
 

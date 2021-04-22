@@ -9,11 +9,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.viatom.lpble.R
+import com.viatom.lpble.constants.Constant
 import com.viatom.lpble.databinding.FragmentReportDetailBinding
 import com.viatom.lpble.ext.getFile
 import com.viatom.lpble.viewmodels.MainViewModel
+import kotlinx.coroutines.launch
 import kotlin.properties.Delegates
 
 /**
@@ -56,11 +59,15 @@ class ReportDetailFragment : Fragment() {
     }
     fun subscribeUi(){
         viewModel.recordAndReport.observe(viewLifecycleOwner, {
+
+            Log.d(LogTag, "recordAndReport: $it")
+
             it?.let {
                 //先从本地加载
-                requireContext().getFile(it.reportEntity.pdfPath).let { local ->
-                    if (local.exists()){
+                requireContext().getFile("${Constant.Dir.er1PdfDir}/${it.reportEntity.pdfName}").let { local ->
+                    if (local != null && local.exists()){
 
+                        Log.d(LogTag, "本地已存在文件：${it.reportEntity.pdfName}---- ${local.absolutePath}")
                         binding.pdfView.fromFile(local).load()
                     }else {
                         //生成pdf
@@ -69,7 +76,7 @@ class ReportDetailFragment : Fragment() {
                                 Log.d(LogTag, "生成pdf成功: ${file.name}, ${file.absolutePath}")
                                 binding.pdfView.fromFile(file).load()
                                 //更新db
-                                viewModel.updatePdf(requireContext(), it.reportEntity.id,  file.absolutePath)
+                                viewModel.updatePdf(requireContext(), it.reportEntity.id,  file.name)
 
                             }?: run{
                                 Log.d(LogTag, "生成的pdf失败")
@@ -84,9 +91,7 @@ class ReportDetailFragment : Fragment() {
     }
 
     fun initData(){
-
         viewModel.queryRecordAndReport(requireContext(), recordId)
-
     }
 
     fun back(){
