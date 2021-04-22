@@ -17,8 +17,8 @@ import kotlinx.coroutines.flow.*
  * created on: 20214/6 10:28
  * description:
  */
-class DBHelper private constructor(application: Application) {
-    companion object : SingletonHolder<DBHelper, Application>(::DBHelper)
+class DBHelper private constructor(application: Context) {
+    companion object : SingletonHolder<DBHelper, Context>(::DBHelper)
 
     val db = Room.databaseBuilder(
         application.applicationContext,

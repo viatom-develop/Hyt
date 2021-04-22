@@ -98,8 +98,17 @@ class ReportListFragment : Fragment() {
                 })
             }
         }
+        binding.swiperRefresh.setOnRefreshListener {
+            adapter.refresh()
+        }
 
-        lifecycleScope.launchWhenCreated {
+
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        lifecycleScope.launch {
             adapter.loadStateFlow.collectLatest { state ->
                 binding.swiperRefresh.isRefreshing = state.refresh is LoadState.Loading
 
@@ -108,11 +117,6 @@ class ReportListFragment : Fragment() {
                 }
             }
         }
-        binding.swiperRefresh.setOnRefreshListener {
-            adapter.refresh()
-        }
-
-
 
     }
     fun back(){

@@ -69,7 +69,7 @@ public class DataController {
         if(dataSrc.length != 0) {
             index = (index + fs.length) % dataSrc.length;
         }
-        Log.d("dashboard", "DataController index: " + index+"maxIndex :" + maxIndex);
+        Log.d("dashboard", "DataController feed index: " + index+"maxIndex :" + maxIndex);
 
     }
 
@@ -89,6 +89,9 @@ public class DataController {
     }
 
     synchronized public static float[] draw(int n) {
+
+        Log.d("dashboard", "DataController draw " + n);
+
         if (n == 0 || n > dataRec.length) {
             return null;
         }

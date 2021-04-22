@@ -1,11 +1,13 @@
 package com.viatom.lpble.ble
 
+import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.util.Log
 import com.lepu.blepro.BleServiceHelper
 import com.lepu.blepro.base.BleInterface
+import com.lepu.blepro.ble.service.BleService
 import com.lepu.blepro.constants.Ble
 import com.lepu.blepro.objs.Bluetooth
 import com.lepu.blepro.observer.BIOL
@@ -283,6 +285,10 @@ class LpBleUtil {
          */
         fun isRtStop(model: Int): Boolean{
           return BleServiceHelper.BleServiceHelper.isRtStop(model)
+        }
+
+        fun stopService(application: Context){
+            BleService.stopService(application)
         }
 
 

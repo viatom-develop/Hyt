@@ -50,10 +50,10 @@ import kotlin.collections.ArrayList
  * created on: 2021/4/12 16:30
  * description:
  */
-class CollectUtil private constructor(val application: Application) {
+class CollectUtil private constructor(val application: Context) {
     val C_TAG: String = "collectUtil"
 
-    companion object : SingletonHolder<CollectUtil, Application>(::CollectUtil)
+    companion object : SingletonHolder<CollectUtil, Context>(::CollectUtil)
 
 
     var autoData: FloatArray = FloatArray(0)

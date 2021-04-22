@@ -16,6 +16,7 @@ import com.lepu.blepro.objs.Bluetooth
 import com.lepu.blepro.observer.BIOL
 import com.lepu.blepro.observer.BleChangeObserver
 import com.viatom.lpble.R
+import com.viatom.lpble.ble.CollectService
 import com.viatom.lpble.ble.CollectUtil
 import com.viatom.lpble.ble.LpBleUtil
 import com.viatom.lpble.ble.LpBleUtil.State
@@ -24,6 +25,7 @@ import com.viatom.lpble.constants.Constant.BluetoothConfig.Companion.CHECK_BLE_R
 import com.viatom.lpble.constants.Constant.BluetoothConfig.Companion.SUPPORT_MODEL
 import com.viatom.lpble.data.entity.DeviceEntity
 import com.viatom.lpble.data.entity.UserEntity
+import com.viatom.lpble.data.local.DBHelper
 import com.viatom.lpble.ext.checkBluetooth
 import com.viatom.lpble.ext.createDir
 import com.viatom.lpble.ext.permissionNecessary
@@ -72,7 +74,6 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
             )
 
         }
-
 
         subscribeUi()
         initLiveEvent()
@@ -247,6 +248,15 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
 
     private fun hideConnecting() {
         if (this::dialog.isInitialized) dialog.dismiss()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        LpBleUtil.stopService(applicationContext)
+        CollectService.stopService(applicationContext)
+        DBHelper.getInstance(applicationContext).db.close()
+
+
     }
 
 

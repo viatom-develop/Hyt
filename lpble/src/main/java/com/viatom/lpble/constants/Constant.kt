@@ -69,11 +69,6 @@ class Constant{
             val AUTO_STOP: Int = 1001
 
             val MANUAL_DURATION_S: Int = 30 //s
-            val MANUAL_START: Int = 2001
-            val MANUAL_STOP: Int = 2000
-
-
-
         }
     }
 
@@ -107,9 +102,4 @@ class Constant{
         }
     }
 
-    interface User{
-        companion object{
-           var currentUser: UserEntity? = null
-        }
-    }
 }
