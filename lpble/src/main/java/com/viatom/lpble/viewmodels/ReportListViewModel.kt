@@ -1,5 +1,6 @@
 package com.viatom.lpble.viewmodels
 
+import android.app.Application
 import android.content.Context
 import androidx.lifecycle.*
 import androidx.paging.*
@@ -15,7 +16,7 @@ import com.viatom.lpble.model.ReportItemModel
 class ReportListViewModel: ViewModel() {
 
 
-    fun queryData(context: Context, userId: Long,  entity2ItemModelMapper: Entity2ItemModelMapper, pagingConfig: PagingConfig): LiveData<PagingData<ReportItemModel>> =
+    fun queryData(context: Application, userId: Long,  entity2ItemModelMapper: Entity2ItemModelMapper, pagingConfig: PagingConfig): LiveData<PagingData<ReportItemModel>> =
       DBHelper.getInstance(context).queryRecordAndReportList(userId, entity2ItemModelMapper, pagingConfig ).cachedIn(viewModelScope).asLiveData()
 
 

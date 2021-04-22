@@ -1,34 +1,24 @@
 package com.viatom.lpble.viewmodels
 
-import android.content.Context
+import android.app.Application
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.widget.RelativeLayout
-import android.widget.TextView
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.viatom.lpble.R
 import com.viatom.lpble.constants.Constant
 import com.viatom.lpble.data.entity.RecordAndReport
 import com.viatom.lpble.data.entity.UserEntity
 import com.viatom.lpble.data.local.DBHelper
-import com.viatom.lpble.ecg.FilterECGReportWave
 import com.viatom.lpble.ecg.ReportUtil
 import com.viatom.lpble.ext.getFile
-import com.viatom.lpble.util.LpResult
 import com.viatom.lpble.util.doFailure
 import com.viatom.lpble.util.doSuccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.File
-import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.TimeUnit
-import kotlin.collections.ArrayList
 
 /**
  * author: wujuan
@@ -50,9 +40,9 @@ class ReportDetailViewModel : ViewModel() {
     var pdf: LiveData<File?> = _pdf
 
 
-    fun queryRecordAndReport(context: Context, recordId: Long) {
+    fun queryRecordAndReport(application: Application, recordId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
-            DBHelper.getInstance(context).queryRecordAndReport(recordId)
+            DBHelper.getInstance(application).queryRecordAndReport(recordId)
                 .onStart {
 
                 }
@@ -74,16 +64,16 @@ class ReportDetailViewModel : ViewModel() {
 
     /**
      * 优先本地加载
-     * @param context Context
+     * @param application application
      * @param filename String
      * @param userId Long
      */
-    fun loadPdf(context: Context,filename: String, userId: Long, reportId: Long){
+    fun loadPdf(application: Application,filename: String, userId: Long, reportId: Long){
         if (filename.isEmpty()){
             Log.d("ReportDetail", "filename is empty， 去创建")
-            createPdf(context, userId, reportId)
+            createPdf(application, userId, reportId)
         }else {
-            context.getFile("${Constant.Dir.er1PdfDir}/${filename}").let { local ->
+            application.getFile("${Constant.Dir.er1PdfDir}/${filename}").let { local ->
                 if (local != null && local.exists()) {
                     Log.d(
                         "ReportDetail",
@@ -92,26 +82,26 @@ class ReportDetailViewModel : ViewModel() {
                    _pdf.value = local
                 } else {
                     Log.d("ReportDetail", "本地pdf 不存在， 去创建")
-                    createPdf(context, userId, reportId)
+                    createPdf(application, userId, reportId)
 
                 }
             }
         }
     }
 
-    fun createPdf(context: Context, userId: Long, reportId: Long){
+    fun createPdf(application: Application, userId: Long, reportId: Long){
         viewModelScope.launch(Dispatchers.IO) {
-            DBHelper.getInstance(context).queryUser(userId)
+            DBHelper.getInstance(application).queryUser(userId)
                 .collect {
                     it.doFailure { }
                     it.doSuccess { result ->
                         result?.let {
-                            inflateReportFile(context, result)?.let { file ->
+                            inflateReportFile(application, result)?.let { file ->
 
                                 Log.d("ReportDetail", "生成pdf成功: ${file.name}, ${file.absolutePath}")
                                 _pdf.postValue(file)
                                 //更新db
-                                updatePdf(context, reportId,  file.name)
+                                updatePdf(application, reportId,  file.name)
 
                             }?: Log.d("ReportDetail", "生成的pdf失败")
                         }?: Log.e("ReportDetail", "user is null can not create pdf")
@@ -125,7 +115,7 @@ class ReportDetailViewModel : ViewModel() {
 
 
 
-    fun inflateReportFile(context: Context, userEntity: UserEntity): File? {
+    fun inflateReportFile(application: Application, userEntity: UserEntity): File? {
 
         _recordAndReport.value?.let {
             it.recordEntity.run {
@@ -133,7 +123,7 @@ class ReportDetailViewModel : ViewModel() {
                 val fileName = "${this.createTime}.pdf"
                 Log.d("ReportDetail", "去生成pdf--$fileName")
                 return ReportUtil.inflaterReportView(
-                    context,
+                    application,
                     it.recordEntity,
                     it.reportEntity,
                     userEntity
@@ -142,7 +132,7 @@ class ReportDetailViewModel : ViewModel() {
 
                         Log.d("ReportDetail", "views build success")
                         return ReportUtil.makeRecordReport(
-                            context,
+                            application,
                             Constant.Dir.er1PdfDir,
                             fileName,
                             views
@@ -155,10 +145,10 @@ class ReportDetailViewModel : ViewModel() {
 
     }
 
-    fun updatePdf(context: Context, reportId: Long, pdfName: String){
+    fun updatePdf(application: Application, reportId: Long, pdfName: String){
         Log.d("ReportDetail", "updateReportWithPdf")
         viewModelScope.launch(Dispatchers.IO) {
-            DBHelper.getInstance(context).updateReportWithPdf(reportId, pdfName)
+            DBHelper.getInstance(application).updateReportWithPdf(reportId, pdfName)
         }
     }
 

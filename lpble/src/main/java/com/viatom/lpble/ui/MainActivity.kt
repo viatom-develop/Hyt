@@ -241,8 +241,4 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
     }
 
 
-
-
-
-
 }

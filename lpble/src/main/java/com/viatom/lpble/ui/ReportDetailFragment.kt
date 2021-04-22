@@ -9,14 +9,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.viatom.lpble.R
-import com.viatom.lpble.constants.Constant
 import com.viatom.lpble.databinding.FragmentReportDetailBinding
-import com.viatom.lpble.ext.getFile
 import com.viatom.lpble.viewmodels.MainViewModel
-import kotlinx.coroutines.launch
 import kotlin.properties.Delegates
 
 /**
@@ -54,7 +50,7 @@ class ReportDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.queryRecordAndReport(requireContext(), recordId)
+        activity?.let { viewModel.queryRecordAndReport(it.application, recordId) }
         subscribeUi()
     }
     private fun subscribeUi(){
@@ -62,9 +58,12 @@ class ReportDetailFragment : Fragment() {
 
             it?.let {
                 mainViewModel.currentUser.value?.userId?.let { it1 ->
-                    viewModel.loadPdf(requireContext(), it.reportEntity.pdfName,
-                        it1, it.reportEntity.id
-                    )
+                    activity?.let { it2 ->
+                        viewModel.loadPdf(
+                            it2.application, it.reportEntity.pdfName,
+                            it1, it.reportEntity.id
+                        )
+                    }
                 }
 
             }

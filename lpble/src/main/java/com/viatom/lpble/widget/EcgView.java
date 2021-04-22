@@ -46,27 +46,19 @@ public class EcgView extends View {
 
     public int[] mBase = new int[cellSize];
 
-    private Context context;
-
-    private CollectUtil collectUtil;
-
 
     public EcgView(Context context) {
         super(context);
-        this.context = context;
         init(null, 0);
     }
 
     public EcgView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        this.context = context;
         init(attrs, 0);
     }
 
     public EcgView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        this.context = context;
-
         init(attrs, defStyle);
     }
 
@@ -79,7 +71,6 @@ public class EcgView extends View {
 
         // Set up a default TextPaint object
         iniPaint();
-        collectUtil = CollectUtil.Companion.getInstance(context.getApplicationContext());
     }
 
     private void iniPaint() {
@@ -132,9 +123,6 @@ public class EcgView extends View {
         if ((Constant.BluetoothConfig.Companion.getCurrentRunState() == Constant.RunState.PREPARING_TEST ||
                 Constant.BluetoothConfig.Companion.getCurrentRunState()  == Constant.RunState.RECORDING) && DataController.dataSrc.length > 0) {
             drawWave(canvas);
-        }else{
-//            this.clear();
-//            invalidate();
         }
     }
 

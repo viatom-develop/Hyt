@@ -90,11 +90,13 @@ class ReportListFragment : Fragment() {
 
 
         mainViewModel._currentUser.value?.userId?.let { userId ->
-            viewModel.queryData(requireContext(), userId, Entity2ItemModelMapper(), pagingConfig).observe(viewLifecycleOwner, {
+            activity?.let {
+                viewModel.queryData(it.application, userId, Entity2ItemModelMapper(), pagingConfig).observe(viewLifecycleOwner, {
 
-                adapter.submitData(lifecycle, it)
-                adapter.notifyDataSetChanged()
-            })
+                    adapter.submitData(lifecycle, it)
+                    adapter.notifyDataSetChanged()
+                })
+            }
         }
 
         lifecycleScope.launchWhenCreated {

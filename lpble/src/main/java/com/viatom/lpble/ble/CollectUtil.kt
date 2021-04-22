@@ -1,5 +1,6 @@
 package com.viatom.lpble.ble
 
+import android.app.Application
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -49,10 +50,10 @@ import kotlin.collections.ArrayList
  * created on: 2021/4/12 16:30
  * description:
  */
-class CollectUtil private constructor(val context: Context) {
+class CollectUtil private constructor(val application: Application) {
     val C_TAG: String = "collectUtil"
 
-    companion object : SingletonHolder<CollectUtil, Context>(::CollectUtil)
+    companion object : SingletonHolder<CollectUtil, Application>(::CollectUtil)
 
 
     var autoData: FloatArray = FloatArray(0)
@@ -94,10 +95,10 @@ class CollectUtil private constructor(val context: Context) {
     fun initService(): CollectUtil {
         Log.d(C_TAG, "into initService")
 
-        CollectService.startService(context)
+        CollectService.startService(application)
 
-        Intent(context, CollectService::class.java).also { intent ->
-            context.bindService(intent, con, Context.BIND_AUTO_CREATE)
+        Intent(application, CollectService::class.java).also { intent ->
+            application.bindService(intent, con, Context.BIND_AUTO_CREATE)
         }
 
         return this
@@ -282,7 +283,7 @@ class CollectUtil private constructor(val context: Context) {
             userId
 
         ).let { record ->
-            DBHelper.getInstance(context).let {
+            DBHelper.getInstance(application).let {
                 GlobalScope.launch {
                     it.insertRecord(
                         record
@@ -378,7 +379,7 @@ class CollectUtil private constructor(val context: Context) {
     fun insertReport(reportEntity: ReportEntity, type: Int) {
 
 
-        DBHelper.getInstance(context).let {
+        DBHelper.getInstance(application).let {
             GlobalScope.launch {
                 it.insertReport(
                     reportEntity
@@ -399,7 +400,7 @@ class CollectUtil private constructor(val context: Context) {
     }
 
     fun updateRecordWithAi(recordId: Long, type: Int) {
-        DBHelper.getInstance(context).let {
+        DBHelper.getInstance(application).let {
             GlobalScope.launch {
                 it.updateRecordWithAi(
                     recordId
@@ -483,7 +484,7 @@ class CollectUtil private constructor(val context: Context) {
 
         val fileName = if (type == TYPE_MANUAL) "$manualCreateTime.txt" else "$autoCreateTime.txt"
        fileName.run {
-            context.createFile(Dir.er1EcgDir, this)?.let { file ->
+            application.createFile(Dir.er1EcgDir, this)?.let { file ->
 //        context.getFile("${Dir.er1EcgDir}/20210412162855.txt")?.let { file ->
 
                 if (!file.exists()) {

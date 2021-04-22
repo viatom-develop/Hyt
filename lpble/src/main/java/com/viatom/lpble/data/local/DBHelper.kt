@@ -1,5 +1,6 @@
 package com.viatom.lpble.data.local
 
+import android.app.Application
 import android.content.Context
 import androidx.paging.*
 import androidx.room.Room
@@ -16,11 +17,11 @@ import kotlinx.coroutines.flow.*
  * created on: 20214/6 10:28
  * description:
  */
-class DBHelper private constructor(context: Context) {
-    companion object : SingletonHolder<DBHelper, Context>(::DBHelper)
+class DBHelper private constructor(application: Application) {
+    companion object : SingletonHolder<DBHelper, Application>(::DBHelper)
 
     val db = Room.databaseBuilder(
-        context,
+        application.applicationContext,
         AppDataBase::class.java, "xphealth-db"
     ).build()
     suspend fun insertOrUpdateUser(userEntity: UserEntity):Flow<LpResult<Boolean>> =

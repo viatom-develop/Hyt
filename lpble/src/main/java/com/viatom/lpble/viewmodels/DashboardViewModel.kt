@@ -64,7 +64,7 @@ class DashboardViewModel : ViewModel() {
      */
     fun feedWaveData(data: Er1BleResponse.RtData){
         data.wave.wFs?.let {
-            Log.d("dashboard", "去添加实时数据")
+//            Log.d("dashboard", "去添加实时数据")
 
             for (i in it.indices) {
                 val d: DoubleArray = WaveFilter.filter(it[i].toDouble(), false)

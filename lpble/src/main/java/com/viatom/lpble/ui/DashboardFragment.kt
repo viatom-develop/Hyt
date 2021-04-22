@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -56,32 +57,24 @@ class DashboardFragment : Fragment() {
     lateinit var ecgView: EcgView
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Log.d(DASH, "onCreate")
-    }
-
-
-    override fun onDetach() {
-        super.onDetach()
-        Log.d(DASH, "onDetach")
+    override fun onDestroyView() {
+        super.onDestroyView()
+        Log.d(DASH, "onDestroyView")
         stopTimer()
         mainVM.resetDashboard()
     }
-
-
 
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
+        Log.d(DASH, "onCreateView")
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_dashborad, container, false)
         binding.lifecycleOwner = this
         binding.ctx = this
 
         activity?.window?.setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        Log.d(DASH, "onCreateView")
 
         return binding.root
     }
@@ -129,8 +122,7 @@ class DashboardFragment : Fragment() {
 
     private fun subscribeUi() {
 
-
-        //状态切换
+        //实时状态切换 更新UI
         viewModel.runState.observe(viewLifecycleOwner, {
             binding.battery.visibility =  if(it in RunState.NONE..RunState.OFFLINE) View.INVISIBLE else View.VISIBLE
             binding.hr.visibility = if(it in RunState.NONE..RunState.PREPARING_TEST || it in RunState.SAVE_FAILED..RunState.LEAD_OFF) View.INVISIBLE else View.VISIBLE
@@ -139,7 +131,6 @@ class DashboardFragment : Fragment() {
 
 
         })
-
 
         //电池UI
         viewModel.battery.observe(viewLifecycleOwner, {
@@ -169,7 +160,6 @@ class DashboardFragment : Fragment() {
             }
 
         })
-
 
 
         viewModel.collectBtnText.observe(viewLifecycleOwner, {
@@ -269,6 +259,7 @@ class DashboardFragment : Fragment() {
 
 
             viewModel._collectBtnText.value = getString(R.string.collection)
+            binding.report.isVisible = true
 
         })
 
@@ -280,6 +271,7 @@ class DashboardFragment : Fragment() {
             }
 
             viewModel._collectBtnText.value = getString(R.string.collection)
+            binding.report.isVisible = true
 
 
         })
@@ -317,10 +309,6 @@ class DashboardFragment : Fragment() {
                         FloatArray(temp.size)
                     }
                 }
-
-
-
-//                Log.d(DASH, "DataController.draw(5) == " + Arrays.toString(temp))
                 // 采集数据 自动手动可能同时进行
 
                 CollectUtil.getInstance(requireActivity().application).run {
@@ -414,13 +402,17 @@ class DashboardFragment : Fragment() {
         }else if (viewModel.fingerState.value == false){
             Toast.makeText(requireContext(), "导联断开， 无法采集", Toast.LENGTH_SHORT).show()
             return
-        }else if (CollectUtil.getInstance(requireContext()).manualCounting) {
+        }else if (activity?.let { CollectUtil.getInstance(it.application).manualCounting } == true) {
             Toast.makeText(requireContext(), "正在采集/分析中", Toast.LENGTH_SHORT).show()
             return
         }else{
             lifecycleScope.launch {
-                CollectUtil.getInstance(requireContext()).manualCollect(viewModel, mainVM)
+                activity?.let {
+                    CollectUtil.getInstance(it.application).manualCollect(viewModel, mainVM)
+
+                }
             }
+            binding.report.isVisible = false
 
         }
     }
