@@ -129,7 +129,7 @@
         
         <TextView
             android:id="@+id/collection"
-            android:layout_width="wrap_content"
+            android:layout_width="142dp"
             android:layout_height="wrap_content"
             android:textSize="18sp"
             android:background="@drawable/public_shape_white_corner_28"
@@ -138,8 +138,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginBottom="33dp"
-            android:paddingHorizontal="50dp"
             android:paddingVertical="10dp"
+            android:gravity="center"
             tools:text="@string/collection"
             android:onClick="@{() -> ctx.manualCollect()}"
 

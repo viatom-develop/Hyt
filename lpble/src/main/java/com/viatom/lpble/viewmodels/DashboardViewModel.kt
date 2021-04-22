@@ -43,18 +43,6 @@ class DashboardViewModel : ViewModel() {
 
 
 
-
-//
-//    /**
-//     *  是否自动采集中
-//     */
-//    val _autoCollecting = MutableLiveData<Boolean>().apply {
-//        value = false
-//    }
-//    var autoCollecting : LiveData<Boolean> = _autoCollecting
-
-
-
     val _collectBtnText = MutableLiveData<String>().apply {
         value = "采集"
     }

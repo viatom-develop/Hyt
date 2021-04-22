@@ -23,7 +23,7 @@ import kotlin.properties.Delegates
  * A simple [Fragment] subclass as the second destination in the navigation.
  */
 class ReportDetailFragment : Fragment() {
-    private val LogTag: String ="ReportDetailFragment"
+    private val LogTag: String ="ReportDetail"
 
     private lateinit var binding: FragmentReportDetailBinding
 
@@ -44,7 +44,7 @@ class ReportDetailFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
+        Log.d(LogTag, "onCreateView")
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_report_detail, container, false)
         binding.lifecycleOwner = this
         binding.ctx = this
@@ -54,45 +54,36 @@ class ReportDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        viewModel.queryRecordAndReport(requireContext(), recordId)
         subscribeUi()
-        initData()
     }
-    fun subscribeUi(){
+    private fun subscribeUi(){
         viewModel.recordAndReport.observe(viewLifecycleOwner, {
 
-            Log.d(LogTag, "recordAndReport: $it")
-
             it?.let {
-                //先从本地加载
-                requireContext().getFile("${Constant.Dir.er1PdfDir}/${it.reportEntity.pdfName}").let { local ->
-                    if (local != null && local.exists()){
-
-                        Log.d(LogTag, "本地已存在文件：${it.reportEntity.pdfName}---- ${local.absolutePath}")
-                        binding.pdfView.fromFile(local).load()
-                    }else {
-                        //生成pdf
-                        mainViewModel.currentUser.value?.let { user ->
-                            viewModel.inflateReportFile(requireContext(), user )?.let { file ->
-                                Log.d(LogTag, "生成pdf成功: ${file.name}, ${file.absolutePath}")
-                                binding.pdfView.fromFile(file).load()
-                                //更新db
-                                viewModel.updatePdf(requireContext(), it.reportEntity.id,  file.name)
-
-                            }?: run{
-                                Log.d(LogTag, "生成的pdf失败")
-                            }
-                        }
-                    }
+                mainViewModel.currentUser.value?.userId?.let { it1 ->
+                    viewModel.loadPdf(requireContext(), it.reportEntity.pdfName,
+                        it1, it.reportEntity.id
+                    )
                 }
 
+            }
+        })
 
+        viewModel.pdf.observe(viewLifecycleOwner, {
+            it?.let {
+                binding.pdfView.fromFile(it).load()
             }
         })
     }
 
-    fun initData(){
-        viewModel.queryRecordAndReport(requireContext(), recordId)
+    override fun onDestroyView() {
+        super.onDestroyView()
+        viewModel._recordAndReport.value = null
+        viewModel._pdf.value = null
     }
+
+
 
     fun back(){
         findNavController().popBackStack()

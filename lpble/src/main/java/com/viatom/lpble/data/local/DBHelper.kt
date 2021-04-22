@@ -144,6 +144,17 @@ class DBHelper private constructor(context: Context) {
     }
 
 
+    suspend fun queryUser(id: Long): Flow<LpResult<UserEntity?>> {
+        return flow {
+            try {
+                emit(LpResult.Success(db.userDao().queryUser(id)))
+            } catch (e: Exception) {
+                emit(LpResult.Failure(e.cause))
+            }
+
+        }.flowOn(Dispatchers.IO)
+
+    }
 
 
 

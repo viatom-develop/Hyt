@@ -1,8 +1,6 @@
 package com.viatom.lpble.ui
 
 import android.app.AlertDialog
-import android.app.ProgressDialog
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,9 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Toast
-import androidx.core.view.isGone
-import androidx.core.view.isInvisible
-import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -179,11 +174,14 @@ class DashboardFragment : Fragment() {
 
         viewModel.collectBtnText.observe(viewLifecycleOwner, {
             //更新采集按钮UI
-            binding.collection.text = it
+            binding.collection.run {
+                text = it
+                background = if (it == getString(R.string.collection)) resources.getDrawable(R.drawable.public_shape_white_corner_28) else resources.getDrawable(R.drawable.public_shape_black_corner_28)
+                setTextColor(if (it == getString(R.string.collection)) resources.getColor(R.color.color_363636) else resources.getColor(R.color.white))
+            }
+
+
         })
-
-
-
 
 
     }
@@ -269,7 +267,8 @@ class DashboardFragment : Fragment() {
                     Toast.makeText(requireContext(), it , Toast.LENGTH_SHORT).show()
             }
 
-            binding.collection.text = "采集"
+
+            viewModel._collectBtnText.value = getString(R.string.collection)
 
         })
 
@@ -279,7 +278,9 @@ class DashboardFragment : Fragment() {
                 if ((it as String).isNotEmpty())
                     Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
             }
-           binding.collection.text = "采集"
+
+            viewModel._collectBtnText.value = getString(R.string.collection)
+
 
         })
 

@@ -95,6 +95,7 @@
             android:ellipsize="end"
             android:textColor="@color/white"
             android:textSize="18sp"
+            android:maxLines="2"
             android:text="@{report.aiDiagnosis}"
             />
 
