@@ -102,7 +102,7 @@ class ReportListFragment : Fragment() {
                 binding.swiperRefresh.isRefreshing = state.refresh is LoadState.Loading
 
                 if (state.append is LoadState.NotLoading){
-                    binding.size.text = "当前共${adapter.itemCount}例"
+                    binding.size.text = "当前共${adapter.itemCount}例 "
                 }
             }
         }

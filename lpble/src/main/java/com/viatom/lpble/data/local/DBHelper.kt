@@ -82,6 +82,11 @@ class DBHelper private constructor(context: Context) {
 
     }
 
+    /**
+     * 对上传分析过的record标记
+     * @param recordId Long
+     * @return Flow<LpResult<Int>>
+     */
     suspend fun updateRecordWithAi(recordId: Long): Flow<LpResult<Int>> {
         return flow {
             try {
@@ -95,11 +100,16 @@ class DBHelper private constructor(context: Context) {
 
     }
 
+    /**
+     * 联合查询record and report  用于展示分析报告详情
+     * @param recordId Long
+     * @return Flow<LpResult<RecordAndReport>>
+     */
     suspend fun queryRecordAndReport(recordId: Long): Flow<LpResult<RecordAndReport>> {
         return flow {
             try {
+                emit(LpResult.Success(db.recordDao().getRecordAndReportDetail(recordId)))
 
-                emit(LpResult.Success(db.recordDao().getRecordAndReport(recordId)))
             } catch (e: Exception) {
                 emit(LpResult.Failure(e.cause))
             }
@@ -108,7 +118,13 @@ class DBHelper private constructor(context: Context) {
 
     }
 
-
+    /**
+     * 内联查询record report 生成视图用于展示分析列表
+     * @param userId Long
+     * @param mapper2ItemModel Mapper<ReportDetail, ReportItemModel>
+     * @param pageConfig PagingConfig
+     * @return Flow<PagingData<ReportItemModel>>
+     */
      fun queryRecordAndReportList(userId: Long, mapper2ItemModel: Mapper<ReportDetail, ReportItemModel>, pageConfig: PagingConfig): Flow<PagingData<ReportItemModel>> {
         return Pager(pageConfig) {
             // 加载数据库的数据
@@ -117,6 +133,21 @@ class DBHelper private constructor(context: Context) {
 
             pagingData.map { mapper2ItemModel.map(it) }
         }
+
+    }
+
+
+    suspend fun updateReportWithPdf(reportId: Long, path: String): Flow<LpResult<Boolean>> {
+        return flow {
+            try {
+                db.reportDao().updateWithPdf(reportId, path)
+                    emit(LpResult.Success(true))
+
+            } catch (e: Exception) {
+                emit(LpResult.Failure(e.cause))
+            }
+
+        }.flowOn(Dispatchers.IO)
 
     }
 

@@ -17,5 +17,9 @@ interface ReportDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReport(reportEntity: ReportEntity): Long
 
+    @Query("UPDATE report SET pdfPath = :path WHERE id= :reportId")
+    suspend fun updateWithPdf(reportId: Long, path: String)
+
+
 
 }

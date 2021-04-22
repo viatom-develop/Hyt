@@ -137,8 +137,10 @@ class LpBleUtil {
                 }
                 //检查必须要有interface
                 if (isDisconnected(model)) {
-                    Log.d(TAG, "去重连")
+                    Log.d(TAG, "去重连...")
                     BleServiceHelper.BleServiceHelper.reconnect(model, name, toConnectUpdater)
+                }else{
+                    Log.d(TAG, "蓝牙处于连接状态，reconnect 不往下进行 ")
                 }
             }
 

@@ -59,8 +59,6 @@ class MainViewModel: ViewModel() {
     var autoCollectEnable : LiveData<Boolean> = _autoCollectEnable
 
 
-
-
     /**
      * 连接过程中的蓝牙对象
      */
@@ -82,6 +80,9 @@ class MainViewModel: ViewModel() {
     }
     var connectState: LiveData<Int> = _connectState
 
+    /**
+     * 当前用户
+     */
     val _currentUser = MutableLiveData<UserEntity?>()
 
     var currentUser: LiveData<UserEntity?> = _currentUser
@@ -100,10 +101,10 @@ class MainViewModel: ViewModel() {
             .initLog(BuildConfig.DEBUG)
             .initRawFolder(SparseArray<String>().apply {
                 this.put(SUPPORT_MODEL,  Constant.Dir.er1EcgDir)
-            })
+            }) // 如需下载主机文件必须配置
             .initModelConfig(SparseArray<Int>().apply {
                 this.put(SUPPORT_MODEL, SUPPORT_MODEL)
-            })
+            }) // 配置要支持的设备
             .initService(
                 application,
                 BleSO.getInstance(application)

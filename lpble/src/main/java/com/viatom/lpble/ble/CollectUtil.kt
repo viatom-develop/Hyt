@@ -482,36 +482,36 @@ class CollectUtil private constructor(val context: Context) {
 
         val fileName = if (type == TYPE_MANUAL) "$manualCreateTime.txt" else "$autoCreateTime.txt"
        fileName.run {
-//            context.createFile(Dir.er1EcgDir, this)?.let { file ->
-        context.getFile("${Dir.er1EcgDir}/20210412162855.txt").let { file ->
+            context.createFile(Dir.er1EcgDir, this)?.let { file ->
+//        context.getFile("${Dir.er1EcgDir}/20210412162855.txt").let { file ->
 
                 if (!file.exists()) {
                     Log.d(C_TAG, "saveCollectEcg  !file.exists")
                     return null
                 }
-//                try {
-//                    BufferedWriter(FileWriter(file)).use { bufferedWriter ->
-//
-//                        val data = if (type == TYPE_MANUAL)manualData else autoData
-//
-//                        (data.size - 1).also {
-//                            bufferedWriter.write("125,II,1,")
-//                            for (i in 0 until it) {
-//                                bufferedWriter.write(data[i].toString())
-//                                bufferedWriter.write(",")
-//                            }
-//                            bufferedWriter.write(data[it - 1].toString())
-//                        }
-//                        bufferedWriter.close()
+                try {
+                    BufferedWriter(FileWriter(file)).use { bufferedWriter ->
+
+                        val data = if (type == TYPE_MANUAL)manualData else autoData
+
+                        (data.size - 1).also {
+                            bufferedWriter.write("125,II,1,")
+                            for (i in 0 until it) {
+                                bufferedWriter.write(data[i].toString())
+                                bufferedWriter.write(",")
+                            }
+                            bufferedWriter.write(data[it - 1].toString())
+                        }
+                        bufferedWriter.close()
 
                         Log.d(C_TAG, "数据文件保存完成，${file.name} ")
                         return file
 
-//                    }
-//                } catch (e: IOException) {
-//                    Log.e(C_TAG, "write txt ai file error")
-//                    return null
-//                }
+                    }
+                } catch (e: IOException) {
+                    Log.e(C_TAG, "write txt ai file error")
+                    return null
+                }
 
             }
 

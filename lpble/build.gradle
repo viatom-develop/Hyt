@@ -72,7 +72,7 @@ dependencies {
 
 
     api "androidx.room:room-runtime:$rootProject.room_version"
-    kapt "androidx.room:room-compiler:$rootProject.room_version"
+    kapt "androidx.room:room-compiler:$rootProject.room_apt_version"
     api "androidx.room:room-ktx:$rootProject.room_version"
     api "androidx.room:room-testing:$rootProject.room_version"
 
@@ -110,7 +110,7 @@ dependencies {
 
     api "com.github.CymChad:BaseRecyclerViewAdapterHelper:$rootProject.brvah"
     implementation "com.itextpdf:itextg:$rootProject.pdf"
-    implementation "androidx.paging:paging-runtime:$rootProject.paging"
+    implementation "androidx.paging:paging-runtime-ktx:$rootProject.paging"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$rootProject.swiperefreshlayout"
 
 

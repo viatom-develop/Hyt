@@ -30,12 +30,23 @@ import com.viatom.lpble.ext.createDir
 import com.viatom.lpble.ext.permissionNecessary
 import com.viatom.lpble.viewmodels.MainViewModel
 
-
+/**
+ * MainActivity初始化流程
+ * 1.检查权限
+ * 2.检查蓝牙可用状态
+ * 3.初始化蓝牙服务
+ * 4.订阅蓝牙interface， 监测连接状态
+ * 5.初始化自动采集服务，完成之后开始运行自动采集
+ * 6.读取本地当前设备， 如果存在则去重连
+ *
+ *
+ * @property TAG String
+ * @property mainVM MainViewModel
+ * @property dialog ProgressDialog
+ */
 class MainActivity : AppCompatActivity(), BleChangeObserver {
 
-
-
-    val TAG: String = "MainActivity"
+    private val TAG: String = "MainActivity"
     private val mainVM: MainViewModel by viewModels()
 
     private lateinit var dialog: ProgressDialog
@@ -89,7 +100,7 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
                     )
                 ) // ble service 初始完成后添加订阅才有效
 
-                //开启采集服务
+                //初始化自动采集服务
                 CollectUtil.getInstance(application).initService()
 
                 // 读取本地最近保存的设备
@@ -199,16 +210,15 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
                 LpBleUtil.stopRtTask(SUPPORT_MODEL)
                 mainVM.resetDashboard()
 
-//                //如果断开 并且是需要重连时。（手动断开时会自动连接标志置为false）
-//                if (LpBleUtil.isAutoConnect(SUPPORT_MODEL)) {
-//                    Log.d("main", "去重连....")
-//                    mainVM.curBluetooth.value?.deviceName?.let {
-//                        LpBleUtil.reconnect(
-//                            SUPPORT_MODEL,
-//                            it
-//                        )
-//                    }
-//                }
+                //app 运行时如果断开 去重连。
+                if (LpBleUtil.isAutoConnect(SUPPORT_MODEL) ) { //默认自动重连开启
+                    mainVM.curBluetooth.value?.deviceName?.let {
+                        LpBleUtil.reconnect(
+                            SUPPORT_MODEL,
+                            it
+                        )
+                    }
+                }
 
             }
             State.CONNECTED -> {
@@ -229,6 +239,8 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
     private fun hideConnecting() {
         if (this::dialog.isInitialized) dialog.dismiss()
     }
+
+
 
 
 }

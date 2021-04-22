@@ -92,5 +92,11 @@ class ReportDetailViewModel : ViewModel() {
 
     }
 
+    fun updatePdf(context: Context, reportId: Long, path: String){
+        viewModelScope.launch {
+            DBHelper.getInstance(context).updateReportWithPdf(reportId, path)
+        }
+    }
+
 
 }

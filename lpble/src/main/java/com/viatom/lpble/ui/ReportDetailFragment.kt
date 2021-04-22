@@ -12,6 +12,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.viatom.lpble.R
 import com.viatom.lpble.databinding.FragmentReportDetailBinding
+import com.viatom.lpble.ext.getFile
 import com.viatom.lpble.viewmodels.MainViewModel
 import kotlin.properties.Delegates
 
@@ -56,20 +57,34 @@ class ReportDetailFragment : Fragment() {
     fun subscribeUi(){
         viewModel.recordAndReport.observe(viewLifecycleOwner, {
             it?.let {
-                //生成pdf
-                mainViewModel.currentUser.value?.let { user ->
-                    viewModel.inflateReportFile(requireContext(), user )?.let { file ->
-                        Log.d(LogTag, "生成pdf成功: ${file.name}")
-                        binding.pdfView.fromFile(file).load()
-                    }?: run{
-                        Log.d(LogTag, "生成的pdf失败")
+                //先从本地加载
+                requireContext().getFile(it.reportEntity.pdfPath).let { local ->
+                    if (local.exists()){
+
+                        binding.pdfView.fromFile(local).load()
+                    }else {
+                        //生成pdf
+                        mainViewModel.currentUser.value?.let { user ->
+                            viewModel.inflateReportFile(requireContext(), user )?.let { file ->
+                                Log.d(LogTag, "生成pdf成功: ${file.name}, ${file.absolutePath}")
+                                binding.pdfView.fromFile(file).load()
+                                //更新db
+                                viewModel.updatePdf(requireContext(), it.reportEntity.id,  file.absolutePath)
+
+                            }?: run{
+                                Log.d(LogTag, "生成的pdf失败")
+                            }
+                        }
                     }
                 }
+
+
             }
         })
     }
 
     fun initData(){
+
         viewModel.queryRecordAndReport(requireContext(), recordId)
 
     }
