@@ -249,28 +249,10 @@ class LpBleUtil {
         }
 
         @JvmOverloads
-        fun startRtTask(model: Int, delayMillis: Long = 1000) {
-            setRTDelayTime(model, delayMillis)
+        fun startRtTask(model: Int, delayMillis: Long = 200) {
+            BleServiceHelper.BleServiceHelper.setRTDelayTime(model, delayMillis)
             BleServiceHelper.BleServiceHelper.startRtTask(model)
         }
-
-        fun updateSetting(model: Int, type: String, value: Any) {
-            Log.d(TAG, "syncData")
-            BleServiceHelper.BleServiceHelper.updateSetting(model, type, value)
-        }
-
-        fun syncTime(model: Int){
-            Log.d(TAG, "syncTime")
-            BleServiceHelper.BleServiceHelper.syncTime(model)
-
-        }
-
-
-        fun reset(model: Int) {
-            BleServiceHelper.BleServiceHelper.reset(model)
-        }
-
-
 
 
         /**
@@ -280,12 +262,6 @@ class LpBleUtil {
          */
         fun isBleConnected(model: Int): Boolean{
             return getBleState(model) == State.CONNECTED
-        }
-
-
-
-        fun isConnecting(model: Int): Boolean{
-            return getBleState(model) == State.CONNECTING
         }
 
 
@@ -301,71 +277,6 @@ class LpBleUtil {
 
 
         /**
-         * 切换设备后 取消订阅状态更新
-         */
-        fun detachSubBIOL(biol: BIOL){
-            Log.d(TAG, "detachSubBIOL")
-            biol.detachBI()
-//            getCurrentModels()?.let {
-//
-//                Log.d(TAG, it.joinToString())
-//                biol.detachBI()
-//            }
-        }
-
-        /**
-         * 获取设备数据保存文件夹路径
-         * @param model Int
-         * @return String?
-         */
-        fun getRawFolder(model: Int): String?{
-            return BleServiceHelper.BleServiceHelper.rawFolder?.get(model)
-        }
-
-
-        /**
-         * 结束读取文件
-         * @param model Int
-         */
-        fun cancelReadFile(model: Int){
-            BleServiceHelper.BleServiceHelper.cancelReadFile(model)
-        }
-
-        /**
-         * 取消读取文件状态中
-         * @param model Int
-         * @return Boolean
-         */
-        fun isCanceledReadFile(model: Int): Boolean{
-            BleServiceHelper.BleServiceHelper.getInterface(model)?.let {
-                Log.d(TAG, "read File state: isCanceled:${it.isCancelRF}")
-                return it.isCancelRF
-            }?: throw Exception("model：$model,interface is null")
-        }
-
-        /**
-         * 暂停读取文件中
-         * @param model Int
-         * @return Boolean
-         */
-        fun isPausedReadFile(model: Int): Boolean{
-            BleServiceHelper.BleServiceHelper.getInterface(model)?.let {
-                Log.d(TAG, "read File state: isPaused:${it.isPausedRF}")
-                return it.isPausedRF
-            }?: throw Exception("model：$model,interface is null")
-        }
-
-        /**
-         * 设置实时测量任务执行间隔
-         * @param model Int
-         * @param delayMillis Long 默认1s
-         */
-        fun setRTDelayTime(model: Int, delayMillis: Long = 1000){
-            BleServiceHelper.BleServiceHelper.setRTDelayTime(model, delayMillis)
-        }
-
-
-        /**
          * 实时任务是否暂停中
          * @param model Int
          * @return Boolean
@@ -373,6 +284,7 @@ class LpBleUtil {
         fun isRtStop(model: Int): Boolean{
           return BleServiceHelper.BleServiceHelper.isRtStop(model)
         }
+
 
 
 

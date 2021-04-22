@@ -132,6 +132,9 @@ public class EcgView extends View {
         if ((Constant.BluetoothConfig.Companion.getCurrentRunState() == Constant.RunState.PREPARING_TEST ||
                 Constant.BluetoothConfig.Companion.getCurrentRunState()  == Constant.RunState.RECORDING) && DataController.dataSrc.length > 0) {
             drawWave(canvas);
+        }else{
+            this.clear();
+            invalidate();
         }
     }
 

@@ -223,7 +223,7 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
             }
             State.CONNECTED -> {
                 //去开启实时任务
-                if (LpBleUtil.isRtStop(SUPPORT_MODEL)) LpBleUtil.startRtTask(SUPPORT_MODEL, 200)
+                if (LpBleUtil.isRtStop(SUPPORT_MODEL)) LpBleUtil.startRtTask(SUPPORT_MODEL)
             }
         }
     }
@@ -239,6 +239,8 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
     private fun hideConnecting() {
         if (this::dialog.isInitialized) dialog.dismiss()
     }
+
+
 
 
 
