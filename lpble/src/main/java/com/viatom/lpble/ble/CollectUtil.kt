@@ -344,7 +344,7 @@ class CollectUtil private constructor(val application: Context) {
                                                         else -> {
                                                             // 文件异常等
                                                             Log.e(C_TAG, "分析失败 采集类型$type")
-                                                            updateRecordWithAi(recordId, type) //  根据自己的业务决定 请求异常是否更新状态
+                                                            updateRecordWithAi(recordId, type) //  根据自己的业务决定此处是否更新状态为已分析，如不标记则可以在合适的时候再次上传分析
                                                             finishCollecting(false, type, "文件异常，分析失败")
                                                         }
                                                     }

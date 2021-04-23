@@ -77,13 +77,15 @@ class CollectService : Service(){
                             break
                         }
 
-                        delay(1000)
-                        Log.d("collectUtil", "自动 读秒 $i")
-
                         if (i == 1) {
                             Log.d("collectUtil", "自动 AUTO_START")
                             emit(LpResult.Success(AUTO_START))
                         }
+
+                        delay(1000)
+                        Log.d("collectUtil", "自动 读秒 $i")
+
+
                         if (i == AUTO_DURATION_MILLS )  {
                             emit(LpResult.Success(AUTO_STOP))
                             Log.d("collectUtil", "自动AUTO_STOP")
