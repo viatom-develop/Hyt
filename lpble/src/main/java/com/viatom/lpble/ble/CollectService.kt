@@ -61,8 +61,10 @@ class CollectService : Service(){
             try {
                 while (true){
                     delay(AUTO_INTERVAL) //
-                    for (i in 0..AUTO_DURATION_MILLS){
-                        Log.d("collectUtil", "自动 读秒 $i")
+
+                    for (i in 1..AUTO_DURATION_MILLS){
+
+
                         if (LpBleUtil.isDisconnected(Constant.BluetoothConfig.SUPPORT_MODEL)) {
                             Log.e("collectUtil", "自动蓝牙已断开, 停止采集")
                             LpResult.Success(AUTO_EXIT)
@@ -75,17 +77,17 @@ class CollectService : Service(){
                             break
                         }
 
-                        if (i == 0) {
+                        delay(1000)
+                        Log.d("collectUtil", "自动 读秒 $i")
+
+                        if (i == 1) {
                             Log.d("collectUtil", "自动 AUTO_START")
                             emit(LpResult.Success(AUTO_START))
                         }
-                        if (i == AUTO_DURATION_MILLS)  {
+                        if (i == AUTO_DURATION_MILLS )  {
                             emit(LpResult.Success(AUTO_STOP))
                             Log.d("collectUtil", "自动AUTO_STOP")
                         }
-
-
-                        delay(1000)
 
                     }
 
