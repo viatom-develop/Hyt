@@ -41,6 +41,9 @@ import com.viatom.lpble.viewmodels.MainViewModel
  * 6.读取本地当前设备， 如果存在则去重连
  *
  *
+ * 退出本Activity 实时心电服务将停止
+ *
+ *
  * @property TAG String
  * @property mainVM MainViewModel
  * @property dialog ProgressDialog
@@ -55,23 +58,26 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        Log.d("main", "oncreate ${intent.extras.toString()}")
 
         // 跳转传入UserEntity， userId 应为医汇通平台的id
         intent.getParcelableExtra<UserEntity>("userEntity")?.let {
+            Log.d("main", "$it")
+
             // 将用户更新到db 及viewmodel
             mainVM.saveUser(application, it)
         }?: run{
-            //测试
-            mainVM.saveUser(
-                application, UserEntity(
-                    userId = 1002,
-                    name = "李四",
-                    height = "176",
-                    weight = "70",
-                    birthday = "1994-05-6",
-                    gender = "男"
-                )
-            )
+//            //测试
+//            mainVM.saveUser(
+//                application, UserEntity(
+//                    userId = 1002,
+//                    name = "李四",
+//                    height = "176",
+//                    weight = "70",
+//                    birthday = "1994-05-6",
+//                    gender = "男"
+//                )
+//            )
 
         }
 
@@ -252,10 +258,9 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
 
     override fun onDestroy() {
         super.onDestroy()
+        LpBleUtil.stopRtTask(SUPPORT_MODEL)
         LpBleUtil.stopService(applicationContext)
         CollectService.stopService(applicationContext)
-        DBHelper.getInstance(applicationContext).db.close()
-
 
     }
 

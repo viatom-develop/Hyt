@@ -13,7 +13,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application>
-        <activity android:name=".ui.MainActivity"
+        <activity android:name=".ui.WelcomeActivity"
             android:screenOrientation="portrait"
             >
             <intent-filter>
@@ -21,6 +21,12 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+        </activity>
+        <activity android:name=".ui.MainActivity"
+            android:screenOrientation="portrait"
+            >
+
         </activity>
         <service
             android:name=".ble.CollectService"

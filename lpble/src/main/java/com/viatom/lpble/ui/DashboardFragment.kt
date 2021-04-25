@@ -424,6 +424,11 @@ class DashboardFragment : Fragment() {
         }
     }
 
+
+    fun back(){
+        activity?.finish()
+    }
+
 }
 
 fun Er1BleResponse.RtParam.batteryState(): Int{

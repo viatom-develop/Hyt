@@ -306,7 +306,7 @@ class CollectUtil private constructor(val application: Context) {
     }
 
     /**
-     *
+     * 分析接口可能存在超时，可以自主设计表记录在下次启动时重新尝试上传并分析
      * @param file File
      */
     fun uploadFile(file: File, recordId: Long, type: Int) {

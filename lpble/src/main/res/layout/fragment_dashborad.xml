@@ -41,6 +41,7 @@
             android:paddingVertical="10dp"
             android:paddingHorizontal="20dp"
             android:src="@mipmap/left"
+            android:onClick="@{() ->ctx.back()}"
 
 
             />
