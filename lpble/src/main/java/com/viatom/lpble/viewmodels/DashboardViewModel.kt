@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.lepu.blepro.ble.cmd.Er1BleResponse
 import com.viatom.lpble.ble.*
+import com.viatom.lpble.constants.Constant
 import com.viatom.lpble.constants.Constant.RunState
 
 /**
@@ -62,7 +63,7 @@ class DashboardViewModel : ViewModel() {
      * 实时数据池添加数据
      * @param data RtData
      */
-    fun feedWaveData(data: Er1BleResponse.RtData){
+    fun feedWaveData(data: Er1BleResponse.RtData, collectUtil: CollectUtil){
         data.wave.wFs?.let {
 //            Log.d("dashboard", "去添加实时数据")
 
@@ -76,8 +77,39 @@ class DashboardViewModel : ViewModel() {
                     }
 
                     DataController.receive(floatArray)
+                    collectData(collectUtil, floatArray)
                 }
             }
+        }
+    }
+
+    fun collectData(collectUtil: CollectUtil, data: FloatArray){
+        Log.e("collect", "temp == ${data.joinToString() }}, ${Constant.BluetoothConfig.currentRunState}")
+
+        if (collectUtil.manualCounting) {
+            if (data.isEmpty()) {
+                collectUtil.tempValueManual = true
+            }
+
+        }
+
+        if (collectUtil.autoCounting){
+            if (data.isEmpty()) {
+                collectUtil.tempValueAuto = true
+            }
+
+        }
+
+        collectUtil.run {
+            if (this.manualCounting) {
+
+                this.actionCollectManual(data)
+            }
+            if (this.autoCounting ) {
+                this.actionCollectAuto(data)
+
+            }
+
         }
     }
 

@@ -60,6 +60,8 @@ class CollectUtil private constructor(val context: Context) {
     var manualData: FloatArray = FloatArray(0)
     var manualCreateTime: Long = 0L
     var manualCounting: Boolean = false
+    var tempValueManual: Boolean = false
+    var tempValueAuto: Boolean = false
 
 
     lateinit var collectService: CollectService
@@ -109,10 +111,10 @@ class CollectUtil private constructor(val context: Context) {
     }
 
     suspend fun runAutoCollect(mainViewModel: MainViewModel) {
+
         collectService.autoCollect()
             .onStart {
                 Log.d("actionCollect", "自动采集服务已经运行")
-
 
             }
             .onCompletion {
@@ -152,6 +154,11 @@ class CollectUtil private constructor(val context: Context) {
                             if (!autoCounting || autoCreateTime == 0L){
                                 Log.d(C_TAG, "30秒前 不满足执行采集条件")
                                 return@doSuccess
+                            }
+
+                            if (!autoCounting){
+                                Log.d(C_TAG, "其他原因已经停止采集")
+                                return@collect
                             }
                             autoCounting = false
 
@@ -194,15 +201,9 @@ class CollectUtil private constructor(val context: Context) {
 
     suspend fun manualCollect(vm: DashboardViewModel, mainViewModel: MainViewModel) {
         if (!this::collectService.isInitialized){
-
             Log.d(C_TAG, "!this::collectService.isInitialized")
-
             return
         }
-
-
-
-
         collectService.manualCount()
             .onStart {
                 Log.d(C_TAG, "手动采集开始")
@@ -221,15 +222,19 @@ class CollectUtil private constructor(val context: Context) {
 
                 finishCollecting(false, TYPE_MANUAL,"采集异常终止")
 
-            }
+            }.cancellable()
             .collect { result ->
                 result.doFailure {
                     Log.e(C_TAG, "读秒 doFailure， $it")
-                    finishCollecting(false, TYPE_MANUAL)
+                    finishCollecting(false, TYPE_MANUAL, "${it?.message}")
                 }
                 result.doSuccess { res ->
                     //刷新读秒UI
                     Log.d(C_TAG, "读秒 $res")
+                    if (!manualCounting){
+                        Log.d(C_TAG, "其他原因已经停止采集")
+                        return@collect
+                    }
 
                     vm._collectBtnText.postValue("$res S")
                     if (res == MANUAL_DURATION_S) {
@@ -262,6 +267,7 @@ class CollectUtil private constructor(val context: Context) {
                 }
 
             }
+
 
 
     }
@@ -429,9 +435,9 @@ class CollectUtil private constructor(val context: Context) {
      * @param type Int
      * @param feed FloatArray
      */
-    fun actionCollectAuto(feed: FloatArray, index: Int) {
+    fun actionCollectAuto(feed: FloatArray) {
 
-        Log.d(C_TAG, " feed size = ${feed.size}, index = $index")
+
         if (!autoCounting) {
             Log.e(C_TAG, "自动读秒已结束 不能再添加数据")
             return
@@ -441,13 +447,11 @@ class CollectUtil private constructor(val context: Context) {
             feed.copyInto(this, autoData.size)
         }
 
-        Log.d(C_TAG, "复制后，自动 Size = ${autoData.size} $autoCreateTime  $autoCounting")
     }
 
 
-    fun actionCollectManual(feed: FloatArray, index: Int) {
+    fun actionCollectManual(feed: FloatArray) {
 
-        Log.d(C_TAG, " feed size = ${feed.size}, index = $index")
         if (!manualCounting) {
             Log.e(C_TAG, "手动读秒已结束 不能再添加数据")
             return
@@ -460,7 +464,6 @@ class CollectUtil private constructor(val context: Context) {
 
         Log.d(C_TAG, "复制后 手动 ，manualData Size = ${manualData.size}")
 
-        Log.d(C_TAG, "添加到的手动  index： $index")
 
 
     }
@@ -549,6 +552,7 @@ class CollectUtil private constructor(val context: Context) {
         manualData = FloatArray(0)
         manualCreateTime = 0L
         DataController.dataSrcCollect = null
+        tempValueManual = false
         Log.d(C_TAG, "cleanData")
     }
 
@@ -556,6 +560,7 @@ class CollectUtil private constructor(val context: Context) {
         autoCounting = false
         autoData = FloatArray(0)
         autoCreateTime = 0L
+        tempValueAuto = false
     }
 
     fun releaseAll(){

@@ -27,6 +27,7 @@ class CollectService : Service(){
 
     private val binder = CollectBinder()
 
+
    inner class CollectBinder: Binder(){
        fun getService(): CollectService = this@CollectService
    }
@@ -62,19 +63,26 @@ class CollectService : Service(){
                 while (true){
                     delay(AUTO_INTERVAL) //
 
+                    CollectUtil.getInstance(this@CollectService).tempValueAuto = false
+
                     for (i in 1..AUTO_DURATION_MILLS){
 
 
                         if (LpBleUtil.isDisconnected(Constant.BluetoothConfig.SUPPORT_MODEL)) {
-                            Log.e("collectUtil", "自动蓝牙已断开, 停止采集")
+                            Log.e("collectUtil", "自动:蓝牙已断开, 停止本次自动采集")
                             LpResult.Success(AUTO_EXIT)
                             break
                         }
 
-                        if (Constant.BluetoothConfig.currentRunState !in  Constant.RunState.PREPARING_TEST..Constant.RunState.RECORDING) {
-                            Log.e("collectUtil","自动 导联断开, 停止采集")
+                        if (Constant.BluetoothConfig.currentRunState != Constant.RunState.RECORDING) {
+                            Log.e("collectUtil","自动:不在测量中, 停止本次自动采集")
                             LpResult.Success(AUTO_EXIT)
                             break
+                        }
+                        if (CollectUtil.getInstance(this@CollectService).tempValueAuto){
+                            Log.e("collectUtil","自动:测量无效值, 停止本次自动采集")
+                            LpResult.Success(AUTO_EXIT)
+                            return@flow
                         }
 
                         if (i == 1) {
@@ -112,17 +120,29 @@ class CollectService : Service(){
         return flow{
             try {
                 Log.d("manualCollect", " start.....")
-                for (i in 0..MANUAL_DURATION_S){
+                CollectUtil.getInstance(this@CollectService).tempValueManual = false
+
+                for (i in 0..MANUAL_DURATION_S ){
 
                     if (LpBleUtil.isDisconnected(Constant.BluetoothConfig.SUPPORT_MODEL)) {
+                        Log.e("collectUtil","手动：蓝牙已断开, 停止采集")
+
                         emit(LpResult.Failure(Exception("蓝牙已断开, 停止采集")))
                         return@flow
                     }
 
-                    if (Constant.BluetoothConfig.currentRunState !in  Constant.RunState.PREPARING_TEST..Constant.RunState.RECORDING) {
-                        emit(LpResult.Failure(Exception("导联断开, 停止采集")))
+                    if (Constant.BluetoothConfig.currentRunState != Constant.RunState.RECORDING) {
+                        Log.e("collectUtil","手动：不在测量中, 停止采集")
+
+                        emit(LpResult.Failure(Exception("不在测量中, 停止采集")))
                         return@flow
                     }
+                    if (CollectUtil.getInstance(this@CollectService).tempValueManual){
+                        Log.e("collectUtil","手动：测量无效值, 停止采集")
+                        emit(LpResult.Failure(Exception("测量无效值, 停止采集")))
+                        return@flow
+                    }
+
 
                     emit(LpResult.Success(i))
                     delay(1000)

@@ -56,12 +56,15 @@ class DashboardFragment : Fragment() {
 
     lateinit var ecgView: EcgView
 
+    lateinit var collectUtil: CollectUtil
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         activity?.window?.setFlags(
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         )
+        collectUtil = CollectUtil.getInstance(requireContext())
     }
 
     override fun onDestroyView() {
@@ -81,7 +84,6 @@ class DashboardFragment : Fragment() {
         binding.lifecycleOwner = this
         binding.ctx = this
 
-        activity?.window?.setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         return binding.root
     }
@@ -251,7 +253,7 @@ class DashboardFragment : Fragment() {
                         viewModel._isSignalPoor.value = param.isSignalPoor()
 
                         //wave data
-                        viewModel.feedWaveData(data)
+                        viewModel.feedWaveData(data, collectUtil)
 
                     }
 
@@ -317,7 +319,10 @@ class DashboardFragment : Fragment() {
         waveTask = object : TimerTask() {
             override fun run() {
                 var temp: FloatArray? = DataController.draw(5)
-//                Log.d(DASH, "DataController.draw(5) == " + Arrays.toString(temp))
+
+                Log.d(DASH, "current .temp == ${temp?.size}, ${BluetoothConfig.currentRunState}")
+
+
                 if (viewModel._runState.value != RunState.RECORDING) {
                     temp = if (temp == null || temp.isEmpty()) {
                         FloatArray(0)
@@ -325,27 +330,9 @@ class DashboardFragment : Fragment() {
                         FloatArray(temp.size)
                     }
                 }
-                // 采集数据 自动手动可能同时进行
+                    // 采集数据 自动手动可能同时进行
+                DataController.feed(temp, collectUtil.manualCounting)
 
-                CollectUtil.getInstance(requireActivity().application).run {
-                    DataController.feed(temp, this.manualCounting)
-
-                    if (this.manualCounting) {
-                        if (temp == null || temp.isEmpty()) {
-                            this.actionCollectManual(FloatArray(5), DataController.index)
-                        } else {
-                            this.actionCollectManual(temp, DataController.index)
-                        }
-                    }
-                    if (this.autoCounting) {
-                        if (temp == null || temp.isEmpty()) {
-                            this.actionCollectAuto(FloatArray(5), DataController.index)
-                        } else {
-                            this.actionCollectAuto(temp, DataController.index)
-                        }
-
-                    }
-                }
 
                 ecgView.invalidate()
             }
@@ -416,25 +403,33 @@ class DashboardFragment : Fragment() {
         if (mainVM.connectState.value != LpBleUtil.State.CONNECTED) {
             Toast.makeText(requireContext(), "蓝牙未连接，无法采集", Toast.LENGTH_SHORT).show()
             return
-        } else if (viewModel.fingerState.value == false) {
+        }
+        if (viewModel.fingerState.value == false) {
             Toast.makeText(requireContext(), "导联断开， 无法采集", Toast.LENGTH_SHORT).show()
             return
-        } else if (activity?.let { CollectUtil.getInstance(it.application).manualCounting } == true) {
+        }
+        if (BluetoothConfig.currentRunState != RunState.RECORDING) {
+            Toast.makeText(requireContext(), "不在测量中， 无法采集", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (activity?.let { collectUtil.manualCounting } == true) {
             Toast.makeText(requireContext(), "正在采集/分析中", Toast.LENGTH_SHORT).show()
             return
-        } else if (!CollectUtil.getInstance(requireContext()).checkService()) {
+        }
+        if (!collectUtil.checkService()) {
             Toast.makeText(requireContext(), "正在初始化采集服务", Toast.LENGTH_SHORT).show()
             return
-        } else {
-            lifecycleScope.launch {
-                activity?.let {
-                    CollectUtil.getInstance(it.application).manualCollect(viewModel, mainVM)
-
-                }
-            }
-            binding.report.isVisible = false
-
         }
+
+        lifecycleScope.launch {
+            activity?.let {
+                collectUtil.manualCollect(viewModel, mainVM)
+
+            }
+        }
+        binding.report.isVisible = false
+
+
     }
 
 

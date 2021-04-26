@@ -66,7 +66,7 @@ class Constant{
             val TYPE_MANUAL: Int = 1
             val TYPE_AUTO: Int = 0
 
-            val AUTO_INTERVAL: Long = 30 * 60 * 1000 // 自动采集间歇时长
+            val AUTO_INTERVAL: Long = 1 * 60 * 1000 // 自动采集间歇时长
             val AUTO_DURATION_MILLS: Int = 30 //s   自动采集时长
             val AUTO_START: Int = 1000
             val AUTO_EXIT: Int = 1002
