@@ -1,6 +1,8 @@
 package com.viatom.lpble.constants
 
 import com.lepu.blepro.objs.Bluetooth
+import com.viatom.lpble.constants.Constant.BluetoothConfig.Companion.currentRunState
+import com.viatom.lpble.constants.Constant.Report.Companion.A4_HEIGHT
 import com.viatom.lpble.data.entity.UserEntity
 
 /**
@@ -24,6 +26,8 @@ class Constant{
             val TIME_OUT_MILLIS: Long = 2000 //s
             val CHECK_BLE_REQUEST_CODE = 6001
             var currentRunState: Int = RunState.NONE // 设备实时状态
+
+            var bleSdkEnable: Boolean = false
 
         }
     }
@@ -62,7 +66,7 @@ class Constant{
             val TYPE_MANUAL: Int = 1
             val TYPE_AUTO: Int = 0
 
-            val AUTO_INTERVAL: Long = 30 * 60 * 1000 // 自动采集间歇时长
+            val AUTO_INTERVAL: Long = 1 * 60 * 1000 // 自动采集间歇时长
             val AUTO_DURATION_MILLS: Int = 30 //s   自动采集时长
             val AUTO_START: Int = 1000
             val AUTO_EXIT: Int = 1002
@@ -98,6 +102,14 @@ class Constant{
             const val A4_WIDTH = 2520 / 2 // 210 * 6
 
             var  A4_HEIGHT = 3564 / 2 // 297 * 6
+
+        }
+    }
+
+    companion object{
+        fun releaseAll(){
+            currentRunState = RunState.NONE
+            A4_HEIGHT = 3564 / 2
 
         }
     }

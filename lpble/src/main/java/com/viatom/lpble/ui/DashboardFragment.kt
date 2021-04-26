@@ -42,7 +42,7 @@ import kotlin.math.floor
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
 class DashboardFragment : Fragment() {
-    
+
     val DASH: String = "dashFragment"
 
 
@@ -59,8 +59,8 @@ class DashboardFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         activity?.window?.setFlags(
-            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
-            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         )
     }
 
@@ -126,15 +126,14 @@ class DashboardFragment : Fragment() {
     }
 
 
-
     private fun subscribeUi() {
 
         //实时状态切换 更新UI
         viewModel.runState.observe(viewLifecycleOwner, {
-            binding.battery.visibility =  if(it in RunState.NONE..RunState.OFFLINE) View.INVISIBLE else View.VISIBLE
-            binding.hr.visibility = if(it in RunState.NONE..RunState.PREPARING_TEST || it in RunState.SAVE_FAILED..RunState.LEAD_OFF) View.INVISIBLE else View.VISIBLE
-            binding.bpmText.visibility = if(it in RunState.NONE..RunState.PREPARING_TEST || it in RunState.SAVE_FAILED..RunState.LEAD_OFF) View.INVISIBLE else View.VISIBLE
-            binding.bpmImg.visibility = if(it in RunState.NONE..RunState.PREPARING_TEST || it in RunState.SAVE_FAILED..RunState.LEAD_OFF) View.INVISIBLE else View.VISIBLE
+            binding.battery.visibility = if (it in RunState.NONE..RunState.OFFLINE) View.INVISIBLE else View.VISIBLE
+            binding.hr.visibility = if (it in RunState.NONE..RunState.PREPARING_TEST || it in RunState.SAVE_FAILED..RunState.LEAD_OFF) View.INVISIBLE else View.VISIBLE
+            binding.bpmText.visibility = if (it in RunState.NONE..RunState.PREPARING_TEST || it in RunState.SAVE_FAILED..RunState.LEAD_OFF) View.INVISIBLE else View.VISIBLE
+            binding.bpmImg.visibility = if (it in RunState.NONE..RunState.PREPARING_TEST || it in RunState.SAVE_FAILED..RunState.LEAD_OFF) View.INVISIBLE else View.VISIBLE
 
 
         })
@@ -163,7 +162,7 @@ class DashboardFragment : Fragment() {
         //hr
         viewModel.hr.observe(viewLifecycleOwner, { h ->
             (h < 30 || h > 250).let {
-                binding.hr.text =   if (it) "--" else h.toString()
+                binding.hr.text = if (it) "--" else h.toString()
             }
 
         })
@@ -198,27 +197,37 @@ class DashboardFragment : Fragment() {
 
                             //判断状态是否切换了
 
-                                BluetoothConfig.currentRunState.let { lastState->
+                            BluetoothConfig.currentRunState.let { lastState ->
 
-                                    Log.d(DASH, "currentRunState = $this,lastState = $lastState")
-                                    if (this != lastState){
-                                        Log.d(DASH, "currentRunState = $this,lastState = $lastState--------------切换")
+                                Log.d(DASH, "currentRunState = $this,lastState = $lastState")
+                                if (this != lastState) {
+                                    Log.d(DASH, "currentRunState = $this,lastState = $lastState--------------切换")
 
-                                        ecgView.clear()
-                                        ecgView.invalidate()
-                                        if (this in RunState.PREPARING_TEST..RunState.RECORDING) {
-                                            //进入到运行的导联状态
-                                            viewModel._fingerState.value = true
-                                            startTimer(ecgView)
-                                        } else {
-                                            viewModel._fingerState.value = false
-                                            stopTimer()
-                                        }
+                                    ecgView.clear()
+                                    ecgView.invalidate()
+                                    if (this in RunState.PREPARING_TEST..RunState.RECORDING) {
+                                        //进入到运行的导联状态
+                                        viewModel._fingerState.value = true
+                                        startTimer(ecgView)
+                                    } else {
+                                        viewModel._fingerState.value = false
+                                        stopTimer()
                                     }
                                 }
+                            }
 
-                                //更新记录为最新的状态
-                                BluetoothConfig.currentRunState = this
+                            //更新记录为最新的状态
+                            BluetoothConfig.currentRunState = this
+
+                            if(this == RunState.LEAD_OFF && (watchTimer != null || waveTimer != null)){
+                                ecgView.clear()
+                                ecgView.invalidate()
+                                stopTimer()
+                            }
+
+
+
+
 
 
                             Log.d(DASH, " runState $this")
@@ -261,7 +270,7 @@ class DashboardFragment : Fragment() {
         LiveEventBus.get(Constant.Event.analysisProcessSuccess).observe(viewLifecycleOwner, {
             it?.let {
                 if ((it as String).isNotEmpty())
-                    Toast.makeText(requireContext(), it , Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
             }
 
 
@@ -287,15 +296,15 @@ class DashboardFragment : Fragment() {
     }
 
 
-    fun showDialog(){
-        if (mainVM.lpBleEnable.value != true){
+    fun showDialog() {
+        if (!BluetoothConfig.bleSdkEnable) {
             Toast.makeText(requireContext(), "初始化中，请稍候再试！", Toast.LENGTH_SHORT).show()
             return
         }
         activity?.supportFragmentManager?.let { ConnectDialog().show(it, "show") }
     }
 
-    var waveTimer: Timer? =  null
+    var waveTimer: Timer? = null
     var waveTask: TimerTask? = null
     var watchTimer: Timer? = null
     var watchTask: TimerTask? = null
@@ -319,19 +328,19 @@ class DashboardFragment : Fragment() {
                 // 采集数据 自动手动可能同时进行
 
                 CollectUtil.getInstance(requireActivity().application).run {
-                    DataController.feed(temp,  this.manualCounting)
+                    DataController.feed(temp, this.manualCounting)
 
-                    if ( this.manualCounting){
-                        if(temp ==  null || temp.isEmpty()){
+                    if (this.manualCounting) {
+                        if (temp == null || temp.isEmpty()) {
                             this.actionCollectManual(FloatArray(5), DataController.index)
-                        }else{
+                        } else {
                             this.actionCollectManual(temp, DataController.index)
                         }
                     }
-                    if (this.autoCounting){
-                        if(temp ==  null || temp.isEmpty()){
+                    if (this.autoCounting) {
+                        if (temp == null || temp.isEmpty()) {
                             this.actionCollectAuto(FloatArray(5), DataController.index)
-                        }else{
+                        } else {
                             this.actionCollectAuto(temp, DataController.index)
                         }
 
@@ -388,6 +397,7 @@ class DashboardFragment : Fragment() {
         stopWatchTimer()
         stopWaveTimer()
     }
+
     fun startTimer(ecgView: EcgView) {
         startWatchTimer(ecgView)
         startWaveTimer(ecgView)
@@ -402,17 +412,20 @@ class DashboardFragment : Fragment() {
     /**
      * 手动采集
      */
-    fun manualCollect(){
-        if (mainVM.connectState.value != LpBleUtil.State.CONNECTED){
+    fun manualCollect() {
+        if (mainVM.connectState.value != LpBleUtil.State.CONNECTED) {
             Toast.makeText(requireContext(), "蓝牙未连接，无法采集", Toast.LENGTH_SHORT).show()
             return
-        }else if (viewModel.fingerState.value == false){
+        } else if (viewModel.fingerState.value == false) {
             Toast.makeText(requireContext(), "导联断开， 无法采集", Toast.LENGTH_SHORT).show()
             return
-        }else if (activity?.let { CollectUtil.getInstance(it.application).manualCounting } == true) {
+        } else if (activity?.let { CollectUtil.getInstance(it.application).manualCounting } == true) {
             Toast.makeText(requireContext(), "正在采集/分析中", Toast.LENGTH_SHORT).show()
             return
-        }else{
+        } else if (!CollectUtil.getInstance(requireContext()).checkService()) {
+            Toast.makeText(requireContext(), "正在初始化采集服务", Toast.LENGTH_SHORT).show()
+            return
+        } else {
             lifecycleScope.launch {
                 activity?.let {
                     CollectUtil.getInstance(it.application).manualCollect(viewModel, mainVM)
@@ -425,21 +438,21 @@ class DashboardFragment : Fragment() {
     }
 
 
-    fun back(){
+    fun back() {
         activity?.finish()
     }
 
 }
 
-fun Er1BleResponse.RtParam.batteryState(): Int{
+fun Er1BleResponse.RtParam.batteryState(): Int {
     return sysFlag.toInt() shr 6 and 0x03
 }
 
-fun Er1BleResponse.RtParam.isSignalPoor(): Boolean{
+fun Er1BleResponse.RtParam.isSignalPoor(): Boolean {
     return sysFlag and 0x04 > 0
 }
 
-fun Er1BleResponse.RtParam.getRunState(): Int{
+fun Er1BleResponse.RtParam.getRunState(): Int {
     return (runStatus and 0x0F).toInt()
 }
 

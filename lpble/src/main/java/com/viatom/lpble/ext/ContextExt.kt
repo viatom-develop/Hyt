@@ -69,7 +69,7 @@ fun FragmentActivity.permissionNecessary() {
                 }
                 .request { allGranted, grantedList, deniedList ->
                     Log.e("权限", "$allGranted, $grantedList, $deniedList")
-                    LiveEventBus.get(Constant.Event.permissionNecessary).post(true)
+                    LiveEventBus.get(Constant.Event.permissionNecessary).post(allGranted)
                 }
 
 }

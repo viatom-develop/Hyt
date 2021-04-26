@@ -80,6 +80,10 @@ class LpBleUtil {
             return BleServiceHelper.BleServiceHelper
         }
 
+        fun setInterface(model: Int){
+            BleServiceHelper.BleServiceHelper.getInterfaces()?.clear()
+            BleServiceHelper.BleServiceHelper.setInterfaces(model)
+        }
 
         fun  getInterface(model: Int): BleInterface?{
 

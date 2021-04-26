@@ -42,21 +42,21 @@ class MainViewModel: ViewModel() {
     }
     var bleEnable : LiveData<Boolean> = _bleEnable
 
-    /**
-     * ble sdk 状态
-     */
-    val _lpBleEnable = MutableLiveData<Boolean>().apply {
-        value = false
-    }
-    var lpBleEnable : LiveData<Boolean> = _lpBleEnable
+//    /**
+//     * ble sdk 状态
+//     */
+//    val _lpBleEnable = MutableLiveData<Boolean>().apply {
+//        value = Constant.BluetoothConfig.bleSdkEnable
+//    }
+//    var lpBleEnable : LiveData<Boolean> = _lpBleEnable
 
-    /**
-     * 自动采集服务可用状态
-     */
-    val _autoCollectEnable = MutableLiveData<Boolean>().apply {
-        value = false
-    }
-    var autoCollectEnable : LiveData<Boolean> = _autoCollectEnable
+//    /**
+//     * 自动采集服务可用状态
+//     */
+//    val _autoCollectEnable = MutableLiveData<Boolean>().apply {
+//        value = false
+//    }
+//    var autoCollectEnable : LiveData<Boolean> = _autoCollectEnable
 
 
     /**
@@ -137,7 +137,7 @@ class MainViewModel: ViewModel() {
                             Log.d("main", "查询当前设备结束")
 
                         }
-                        .collectLatest { result ->
+                        .collect { result ->
                             result.doFailure {
                                 Log.d("main", "查询当前设备失败")
                             }

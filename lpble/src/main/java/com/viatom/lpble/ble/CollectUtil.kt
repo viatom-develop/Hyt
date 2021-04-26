@@ -1,6 +1,5 @@
 package com.viatom.lpble.ble
 
-import android.app.Application
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -8,7 +7,6 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import android.util.Log
 import com.jeremyliao.liveeventbus.LiveEventBus
-import com.viatom.lpble.constants.Constant
 import com.viatom.lpble.constants.Constant.*
 import com.viatom.lpble.constants.Constant.Collection.Companion.AUTO_DURATION_MILLS
 import com.viatom.lpble.constants.Constant.Collection.Companion.AUTO_START
@@ -21,7 +19,6 @@ import com.viatom.lpble.data.entity.RecordEntity
 import com.viatom.lpble.data.entity.ReportEntity
 import com.viatom.lpble.data.local.DBHelper
 import com.viatom.lpble.ext.createFile
-import com.viatom.lpble.ext.getFile
 import com.viatom.lpble.net.RetrofitManager
 import com.viatom.lpble.net.RetrofitResponse
 import com.viatom.lpble.net.isSuccess
@@ -42,7 +39,6 @@ import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 /**
@@ -50,7 +46,7 @@ import kotlin.collections.ArrayList
  * created on: 2021/4/12 16:30
  * description:
  */
-class CollectUtil private constructor(val application: Context) {
+class CollectUtil private constructor(val context: Context) {
     val C_TAG: String = "collectUtil"
 
     companion object : SingletonHolder<CollectUtil, Context>(::CollectUtil)
@@ -67,8 +63,6 @@ class CollectUtil private constructor(val application: Context) {
 
 
     lateinit var collectService: CollectService
-
-    lateinit var mainViewModel: MainViewModel
 
 
     private val con = object : ServiceConnection {
@@ -92,13 +86,22 @@ class CollectUtil private constructor(val application: Context) {
 
     }
 
+    fun checkService(): Boolean{
+        return this::collectService.isInitialized
+    }
+
+    fun unbindService(){
+        if (checkService())
+            context.unbindService(con)
+    }
+
     fun initService(): CollectUtil {
         Log.d(C_TAG, "into initService")
 
-        CollectService.startService(application)
+        CollectService.startService(context)
 
-        Intent(application, CollectService::class.java).also { intent ->
-            application.bindService(intent, con, Context.BIND_AUTO_CREATE)
+        Intent(context, CollectService::class.java).also { intent ->
+            context.bindService(intent, con, Context.BIND_AUTO_CREATE)
         }
 
         return this
@@ -106,7 +109,6 @@ class CollectUtil private constructor(val application: Context) {
     }
 
     suspend fun runAutoCollect(mainViewModel: MainViewModel) {
-        this.mainViewModel = mainViewModel
         collectService.autoCollect()
             .onStart {
                 Log.d("actionCollect", "自动采集服务已经运行")
@@ -153,7 +155,6 @@ class CollectUtil private constructor(val application: Context) {
                             }
                             autoCounting = false
 
-                            if (this::mainViewModel.isInitialized) {
                                 mainViewModel._curBluetooth.value?.deviceName?.let { deviceName ->
 
                                     saveCollectEcg(TYPE_AUTO)?.let {
@@ -173,7 +174,6 @@ class CollectUtil private constructor(val application: Context) {
                                 }
                             }
 
-                        }
                         AUTO_EXIT ->{
                             Log.e(C_TAG, "自动采集中断  等待下一次执行")
                             finishCollecting(false, TYPE_AUTO)
@@ -193,7 +193,15 @@ class CollectUtil private constructor(val application: Context) {
 
 
     suspend fun manualCollect(vm: DashboardViewModel, mainViewModel: MainViewModel) {
-        this.mainViewModel = mainViewModel
+        if (!this::collectService.isInitialized){
+
+            Log.d(C_TAG, "!this::collectService.isInitialized")
+
+            return
+        }
+
+
+
 
         collectService.manualCount()
             .onStart {
@@ -231,7 +239,6 @@ class CollectUtil private constructor(val application: Context) {
 
                         //保存txt -> record保存到DB -> 上传txt,等待返回分析结果 -> report保存到DB -> record更新DB 分析状态
 
-                        if (this::mainViewModel.isInitialized) {
                             mainViewModel._curBluetooth.value?.deviceName?.let { deviceName ->
 
                                 saveCollectEcg(TYPE_MANUAL)?.let {
@@ -250,11 +257,6 @@ class CollectUtil private constructor(val application: Context) {
                             } ?: run {
                                 Log.e(C_TAG, "deviceName is null ")
                             }
-
-
-                        }
-
-
                     }
 
                 }
@@ -282,7 +284,7 @@ class CollectUtil private constructor(val application: Context) {
             userId
 
         ).let { record ->
-            DBHelper.getInstance(application).let {
+            DBHelper.getInstance(context).let {
                 GlobalScope.launch {
                     it.insertRecord(
                         record
@@ -378,7 +380,7 @@ class CollectUtil private constructor(val application: Context) {
     fun insertReport(reportEntity: ReportEntity, type: Int) {
 
 
-        DBHelper.getInstance(application).let {
+        DBHelper.getInstance(context).let {
             GlobalScope.launch {
                 it.insertReport(
                     reportEntity
@@ -399,7 +401,7 @@ class CollectUtil private constructor(val application: Context) {
     }
 
     fun updateRecordWithAi(recordId: Long, type: Int) {
-        DBHelper.getInstance(application).let {
+        DBHelper.getInstance(context).let {
             GlobalScope.launch {
                 it.updateRecordWithAi(
                     recordId
@@ -467,6 +469,7 @@ class CollectUtil private constructor(val application: Context) {
 
     fun saveCollectEcg(type: Int): File? {
 
+
         Log.d(
             C_TAG,
             "saveCollectEcg = type$type, manualData:${manualData.size}, autoData: ${autoData.size}"
@@ -483,7 +486,7 @@ class CollectUtil private constructor(val application: Context) {
 
         val fileName = if (type == TYPE_MANUAL) "$manualCreateTime.txt" else "$autoCreateTime.txt"
        fileName.run {
-            application.createFile(Dir.er1EcgDir, this)?.let { file ->
+            context.createFile(Dir.er1EcgDir, this)?.let { file ->
 //        context.getFile("${Dir.er1EcgDir}/20210412162855.txt")?.let { file ->
 
                 if (!file.exists()) {
@@ -521,17 +524,7 @@ class CollectUtil private constructor(val application: Context) {
     }
 
 
-    fun cleanData() {
-        manualData = FloatArray(0)
-        manualCreateTime = 0L
-        DataController.dataSrcCollect = null
-        Log.d(C_TAG, "autoCreateTime")
-    }
 
-    fun cleanAutoData() {
-        autoData = FloatArray(0)
-        autoCreateTime = 0L
-    }
 
     fun finishCollecting(isSuccess: Boolean, type: Int, msg: String = "") {
         Log.d(C_TAG, "finishCollecting $isSuccess, $type")
@@ -542,13 +535,33 @@ class CollectUtil private constructor(val application: Context) {
                 LiveEventBus.get(Event.analysisProcessFailed).post(msg)
             }
             cleanData()
-            manualCounting = false
+
         } else {
-            autoCounting = false
+
             cleanAutoData()
         }
 
 
+    }
+
+    fun cleanData() {
+        manualCounting = false
+        manualData = FloatArray(0)
+        manualCreateTime = 0L
+        DataController.dataSrcCollect = null
+        Log.d(C_TAG, "cleanData")
+    }
+
+    fun cleanAutoData() {
+        autoCounting = false
+        autoData = FloatArray(0)
+        autoCreateTime = 0L
+    }
+
+    fun releaseAll(){
+        cleanData()
+        cleanAutoData()
+        unbindService()
     }
 
 }

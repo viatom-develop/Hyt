@@ -135,4 +135,10 @@ class CollectService : Service(){
 
     }
 
+    override fun onUnbind(intent: Intent?): Boolean {
+        Log.d("collectService", "unbind success")
+
+        return super.onUnbind(intent)
+    }
+
 }

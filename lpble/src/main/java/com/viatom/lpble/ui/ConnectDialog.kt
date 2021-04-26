@@ -123,7 +123,7 @@ class ConnectDialog : DialogFragment(){
     private fun subscribeUi(){
         mainVM.bleEnable.observe(this, {
             // ble 状态可用即开始扫描
-            if (mainVM.lpBleEnable.value == true)
+            if (Constant.BluetoothConfig.bleSdkEnable)
                 if (it)viewModel._scanning.value = true
 
         })
@@ -185,7 +185,8 @@ class ConnectDialog : DialogFragment(){
 
     fun reconnect(){
         if (LpBleUtil.isDisconnected(SUPPORT_MODEL))
-            mainVM.curBluetooth.value?.deviceName?.let { LpBleUtil.reconnect(SUPPORT_MODEL, it) }
+            mainVM.curBluetooth.value?.deviceName?.let {
+                LpBleUtil.reconnect(SUPPORT_MODEL, it) }
 
     }
 

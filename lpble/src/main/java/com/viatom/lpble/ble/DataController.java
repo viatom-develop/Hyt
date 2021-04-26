@@ -114,4 +114,9 @@ public class DataController {
             dataRec = temp;
         }
     }
+    public static void releaseAll(){
+        dataRec = new float[0];
+        dataSrc = null;
+        dataSrcCollect = null;
+    }
 }

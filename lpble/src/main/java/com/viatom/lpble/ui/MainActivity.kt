@@ -1,10 +1,11 @@
 package com.viatom.lpble.ui
 
+import android.Manifest
 import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.WindowManager
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -15,9 +16,10 @@ import com.lepu.blepro.event.InterfaceEvent
 import com.lepu.blepro.objs.Bluetooth
 import com.lepu.blepro.observer.BIOL
 import com.lepu.blepro.observer.BleChangeObserver
+import com.permissionx.guolindev.PermissionX
 import com.viatom.lpble.R
-import com.viatom.lpble.ble.CollectService
 import com.viatom.lpble.ble.CollectUtil
+import com.viatom.lpble.ble.DataController
 import com.viatom.lpble.ble.LpBleUtil
 import com.viatom.lpble.ble.LpBleUtil.State
 import com.viatom.lpble.constants.Constant
@@ -25,10 +27,8 @@ import com.viatom.lpble.constants.Constant.BluetoothConfig.Companion.CHECK_BLE_R
 import com.viatom.lpble.constants.Constant.BluetoothConfig.Companion.SUPPORT_MODEL
 import com.viatom.lpble.data.entity.DeviceEntity
 import com.viatom.lpble.data.entity.UserEntity
-import com.viatom.lpble.data.local.DBHelper
 import com.viatom.lpble.ext.checkBluetooth
 import com.viatom.lpble.ext.createDir
-import com.viatom.lpble.ext.permissionNecessary
 import com.viatom.lpble.viewmodels.MainViewModel
 
 /**
@@ -66,64 +66,74 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
 
             // 将用户更新到db 及viewmodel
             mainVM.saveUser(application, it)
-        }?: run{
-//            //测试
-//            mainVM.saveUser(
-//                application, UserEntity(
-//                    userId = 1002,
-//                    name = "李四",
-//                    height = "176",
-//                    weight = "70",
-//                    birthday = "1994-05-6",
-//                    gender = "男"
-//                )
-//            )
 
+            subscribeUi()
+            initLiveEvent()
+            needPermission()
+        }?: run{
+            Toast.makeText(this, "缺少用户信息", Toast.LENGTH_SHORT).show()
         }
 
-        subscribeUi()
-        initLiveEvent()
-        permissionNecessary()
+    }
 
+    fun needPermission(){
+        PermissionX.init(this)
+                .permissions(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.BLUETOOTH,
+                        Manifest.permission.BLUETOOTH_ADMIN
+                )
+                .onExplainRequestReason { scope, deniedList ->
+                    // 当请求被拒绝后，说明权限原因
+                    scope.showRequestReasonDialog(
+                            deniedList, getString(R.string.permission_location_reason), getString(
+                            R.string.open
+                    ), getString(R.string.ignore)
+                    )
+
+
+                }
+                .onForwardToSettings { scope, deniedList ->
+                    //选择了拒绝且不再询问的权限，去设置
+                    scope.showForwardToSettingsDialog(
+                            deniedList, getString(R.string.permission_location_setting), getString(
+                            R.string.confirm
+                    ), getString(R.string.ignore)
+                    )
+                }
+                .request { allGranted, grantedList, deniedList ->
+                    Log.e("权限", "$allGranted, $grantedList, $deniedList")
+//                LiveEventBus.get(Constant.Event.permissionNecessary).post(true)
+
+                    Log.d("main", "permissionNecessary")
+                    //权限OK, 检查蓝牙状态
+                    if (allGranted)
+                        checkBluetooth(CHECK_BLE_REQUEST_CODE).let {
+                            Log.e("main", "蓝牙状态 $it")
+                            mainVM._bleEnable.value = true
+
+                        }
+                }
 
     }
+
+
 
     /**
      * 先检查蓝牙权限及状态 再初始化蓝牙服务， 之后再初始化自动采集服务
      */
     private fun initLiveEvent() {
 
-        LiveEventBus.get(Constant.Event.permissionNecessary).observe(this, { p ->
-            //权限OK, 检查蓝牙状态
-            if (p == true)
-                checkBluetooth(CHECK_BLE_REQUEST_CODE).let {
-                    Log.e("main", "蓝牙状态 $it")
-                    mainVM._bleEnable.value = true
-                    mainVM.initBle(application)
-
-
-                }
-        })
 
         // 当BleService onServiceConnected执行后发出通知 蓝牙sdk 初始化完成
         LiveEventBus.get(EventMsgConst.Ble.EventServiceConnectedAndInterfaceInit).observe(
-            this, {
-                mainVM._lpBleEnable.value = true
-                lifecycle.addObserver(
-                    BIOL(
-                        this,
-                        intArrayOf(SUPPORT_MODEL)
-                    )
-                ) // ble service 初始完成后添加订阅才有效
+                this, {
 
-                //初始化自动采集服务
-                CollectUtil.getInstance(application).initService()
-
-                // 读取本地最近保存的设备
-                mainVM.getCurrentDevice(application)
+            Constant.BluetoothConfig.bleSdkEnable = true
+            afterLpBleInit()
 
 
-            }
+         }
         )
 
         //同步时间
@@ -150,9 +160,10 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
 
                         //保存设备
                         mainVM.saveDevice(
-                            application,
-                            DeviceEntity.convert2DeviceEntity(b, event.data as LepuDevice)
+                                application,
+                                DeviceEntity.convert2DeviceEntity(b, event.data as LepuDevice)
                         )
+
 
                         //ui
                         mainVM._toConnectDevice.value = null
@@ -165,19 +176,35 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
         LiveEventBus.get(Constant.Event.collectServiceConnected).observe(this, {
             // 采集服务已经初始化成功, 去运行自动采集
             mainVM.runAutoCollect(application)
+
         })
 
 
     }
 
+    fun afterLpBleInit(){
+        lifecycle.addObserver(
+                BIOL(
+                        this,
+                        intArrayOf(SUPPORT_MODEL)
+                )
+        ) // ble service 初始完成后添加订阅才有效
+
+        // 读取本地最近保存的设备
+        mainVM.getCurrentDevice(application)
+
+        //初始化自动采集服务
+        CollectUtil.getInstance(application).initService()
+    }
+
     private fun subscribeUi() {
 
-        //手机ble状态
+        //手机ble状态,
         mainVM.bleEnable.observe(this, {
             if (it) {
-                if (mainVM.lpBleEnable.value == true) LpBleUtil.reInitBle() else mainVM.initBle(
-                    application
-                )
+                //ble service
+                if (Constant.BluetoothConfig.bleSdkEnable) afterLpBleInit()
+                    else mainVM.initBle(application)
             }
         })
 
@@ -230,8 +257,8 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
                 if (LpBleUtil.isAutoConnect(SUPPORT_MODEL)) { //默认自动重连开启
                     mainVM.curBluetooth.value?.deviceName?.let {
                         LpBleUtil.reconnect(
-                            SUPPORT_MODEL,
-                            it
+                                SUPPORT_MODEL,
+                                it
                         )
                     }
                 }
@@ -258,9 +285,13 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
 
     override fun onDestroy() {
         super.onDestroy()
+
         LpBleUtil.stopRtTask(SUPPORT_MODEL)
-        LpBleUtil.stopService(applicationContext)
-        CollectService.stopService(applicationContext)
+        LpBleUtil.disconnect(false)
+
+        Constant.releaseAll()
+        DataController.releaseAll()
+        CollectUtil.getInstance(application).releaseAll()
 
     }
 
