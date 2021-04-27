@@ -221,7 +221,7 @@ class DashboardFragment : Fragment() {
                             //更新记录为最新的状态
                             BluetoothConfig.currentRunState = this
 
-                            if(this == RunState.LEAD_OFF && (watchTimer != null || waveTimer != null)){
+                            if((this !in RunState.PREPARING_TEST..RunState.RECORDING) && (watchTimer != null || waveTimer != null)){
                                 ecgView.clear()
                                 ecgView.invalidate()
                                 stopTimer()

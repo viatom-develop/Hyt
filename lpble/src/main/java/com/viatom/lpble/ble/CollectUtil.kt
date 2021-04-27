@@ -39,6 +39,7 @@ import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 import java.util.*
+import kotlin.math.roundToInt
 
 
 /**
@@ -53,6 +54,8 @@ class CollectUtil private constructor(val context: Context) {
 
 
     var autoData: FloatArray = FloatArray(0)
+
+
     var autoCreateTime: Long = 0L
     var autoCounting: Boolean = false
 
@@ -487,6 +490,7 @@ class CollectUtil private constructor(val context: Context) {
             return null
         }
 
+
         val fileName = if (type == TYPE_MANUAL) "$manualCreateTime.txt" else "$autoCreateTime.txt"
        fileName.run {
             context.createFile(Dir.er1EcgDir, this)?.let { file ->
@@ -502,13 +506,15 @@ class CollectUtil private constructor(val context: Context) {
                         val data = if (type == TYPE_MANUAL)manualData else autoData
 
                         (data.size - 1).also {
-                            bufferedWriter.write("125,II,1,")
-                            for (i in 0 until it) {
-                                bufferedWriter.write(data[i].toString())
+                            bufferedWriter.write("125,II,1500,")
+                            for (i in 0..it) {
+                                bufferedWriter.write(((data[i] * 1500).roundToInt()).toString())
                                 bufferedWriter.write(",")
                             }
-                            bufferedWriter.write(data[it - 1].toString())
                         }
+
+                        bufferedWriter.write((data[data.size - 1] * 1500).roundToInt().toString())
+
                         bufferedWriter.close()
 
                         Log.d(C_TAG, "数据文件保存完成，${file.name} ")
