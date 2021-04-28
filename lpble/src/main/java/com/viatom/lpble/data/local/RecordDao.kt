@@ -30,7 +30,7 @@ interface RecordDao {
     suspend fun updateWithAnalysed(recordId: Long, isAnalysed: Boolean )
 
 
-    @Query("SELECT* FROM reportdetail WHERE userId=:userId")
+    @Query("SELECT* FROM reportdetail WHERE userId=:userId ORDER BY recordId DESC ")
     fun getRecordAndReportList(userId: Long): PagingSource<Int, ReportDetail>
 
 

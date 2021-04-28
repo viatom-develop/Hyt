@@ -32,6 +32,7 @@ import com.viatom.lpble.viewmodels.DashboardViewModel
 import com.viatom.lpble.viewmodels.MainViewModel
 import com.viatom.lpble.widget.EcgBkg
 import com.viatom.lpble.widget.EcgView
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -93,6 +94,8 @@ class DashboardFragment : Fragment() {
         initView()
         subscribeUi()
         initLiveEvent()
+        dowatchTask()
+        dowaveTask()
 
     }
 
@@ -188,6 +191,8 @@ class DashboardFragment : Fragment() {
     private fun initLiveEvent() {
         LiveEventBus.get(InterfaceEvent.ER1.EventEr1RtData).observe(this, { event ->
 
+            Log.d(DASH, "get(InterfaceEvent.ER1.EventEr1RtData")
+
             (event as InterfaceEvent).let {
                 (it.data as Er1BleResponse.RtData)?.let { data ->
 
@@ -207,30 +212,19 @@ class DashboardFragment : Fragment() {
 
                                     ecgView.clear()
                                     ecgView.invalidate()
-                                    if (this in RunState.PREPARING_TEST..RunState.RECORDING) {
-                                        //进入到运行的导联状态
-                                        viewModel._fingerState.value = true
-                                        startTimer(ecgView)
-                                    } else {
-                                        viewModel._fingerState.value = false
-                                        stopTimer()
-                                    }
+
+                                    viewModel._fingerState.value = this in RunState.PREPARING_TEST..RunState.RECORDING
                                 }
                             }
 
                             //更新记录为最新的状态
                             BluetoothConfig.currentRunState = this
 
-                            if((this !in RunState.PREPARING_TEST..RunState.RECORDING) && (watchTimer != null || waveTimer != null)){
-                                ecgView.clear()
-                                ecgView.invalidate()
-                                stopTimer()
-                            }
-
-
-
-
-
+//                            if((this !in RunState.PREPARING_TEST..RunState.RECORDING) && (watchTimer != null || waveTimer != null)){
+//                                ecgView.clear()
+//                                ecgView.invalidate()
+//                                stopTimer()
+//                            }
 
                             Log.d(DASH, " runState $this")
                         }
@@ -311,6 +305,47 @@ class DashboardFragment : Fragment() {
     var watchTimer: Timer? = null
     var watchTask: TimerTask? = null
     var period: Long = 41L
+
+    fun dowaveTask(){
+        lifecycleScope.launch {
+            while (true) {
+
+                if (BluetoothConfig.currentRunState in RunState.PREPARING_TEST..RunState.RECORDING) {
+                    var temp: FloatArray? = DataController.draw(5)
+
+                    Log.d(DASH, "current .temp == ${temp?.size}, ${BluetoothConfig.currentRunState}")
+
+                    if (viewModel._runState.value != RunState.RECORDING) {
+                        temp = if (temp == null || temp.isEmpty()) {
+                            FloatArray(0)
+                        } else {
+                            FloatArray(temp.size)
+                        }
+                    }
+                    // 采集数据 自动手动可能同时进行
+                    DataController.feed(temp, collectUtil.manualCounting)
+
+                    ecgView.postInvalidate()
+                }
+                delay(period)
+            }
+        }
+    }
+
+    fun dowatchTask(){
+        lifecycleScope.launch {
+            while(true) {
+                if (BluetoothConfig.currentRunState in RunState.PREPARING_TEST..RunState.RECORDING) {
+                    if (period != 0L && DataController.dataRec.size in 101..199) {
+                        period = if (DataController.dataRec.size > 150) 39 else period
+                    }
+                }
+                delay(1000)
+            }
+        }
+    }
+
+
 
     fun startWaveTimer(ecgView: EcgView) {
 

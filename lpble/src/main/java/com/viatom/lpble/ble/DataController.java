@@ -74,11 +74,12 @@ public class DataController {
     }
 
     synchronized public static void receive(float[] fs) {
+        Log.d("dashboard", "DataController receive: " + fs.length);
+
         if (fs == null || fs.length == 0) {
             return;
         }
 
-        Log.d("dashboard", "DataController receive: " + fs.length);
 
         float[] temp = new float[dataRec.length + fs.length];
         System.arraycopy(dataRec, 0, temp, 0, dataRec.length);

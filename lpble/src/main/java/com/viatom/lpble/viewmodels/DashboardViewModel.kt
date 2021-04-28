@@ -84,7 +84,7 @@ class DashboardViewModel : ViewModel() {
     }
 
     fun collectData(collectUtil: CollectUtil, data: FloatArray){
-        Log.e("collect", "temp == ${data.joinToString() }}, ${Constant.BluetoothConfig.currentRunState}")
+        Log.e("collect", "temp == ${data.joinToString() }, ${Constant.BluetoothConfig.currentRunState}")
 
         if (collectUtil.manualCounting) {
             if (data.isEmpty()) {
