@@ -534,7 +534,6 @@ class CollectUtil private constructor(val context: Context) {
 
 
 
-
     fun finishCollecting(isSuccess: Boolean, type: Int, msg: String = "") {
         Log.d(C_TAG, "finishCollecting $isSuccess, $type")
         if (type == TYPE_MANUAL) {

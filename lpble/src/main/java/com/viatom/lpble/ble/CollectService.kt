@@ -82,7 +82,7 @@ class CollectService : Service(){
                         if (CollectUtil.getInstance(this@CollectService).tempValueAuto){
                             Log.e("collectUtil","自动:测量无效值, 停止本次自动采集")
                             LpResult.Success(AUTO_EXIT)
-                            return@flow
+                            break
                         }
 
                         if (i == 1) {
