@@ -256,6 +256,7 @@ class MainActivity : AppCompatActivity(), BleChangeObserver {
                 LpBleUtil.stopRtTask(SUPPORT_MODEL)
                 mainVM.resetDashboard()
 
+
                 //app 运行时如果断开 去重连。
                 if (LpBleUtil.isAutoConnect(SUPPORT_MODEL)) { //默认自动重连开启
                     mainVM.curBluetooth.value?.deviceName?.let {

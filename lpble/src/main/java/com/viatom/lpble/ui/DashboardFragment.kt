@@ -71,7 +71,6 @@ class DashboardFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         Log.d(DASH, "onDestroyView")
-        stopTimer()
         mainVM.resetDashboard()
     }
 
@@ -94,8 +93,8 @@ class DashboardFragment : Fragment() {
         initView()
         subscribeUi()
         initLiveEvent()
-        dowatchTask()
-        dowaveTask()
+        doWaveTask()
+        doWatchTask()
 
     }
 
@@ -132,6 +131,11 @@ class DashboardFragment : Fragment() {
 
 
     private fun subscribeUi() {
+        mainVM.connectState.observe(viewLifecycleOwner, {
+            //断开连接清空ecg
+            ecgView.clear()
+            ecgView.invalidate()
+        })
 
         //实时状态切换 更新UI
         viewModel.runState.observe(viewLifecycleOwner, {
@@ -300,13 +304,9 @@ class DashboardFragment : Fragment() {
         activity?.supportFragmentManager?.let { ConnectDialog().show(it, "show") }
     }
 
-    var waveTimer: Timer? = null
-    var waveTask: TimerTask? = null
-    var watchTimer: Timer? = null
-    var watchTask: TimerTask? = null
     var period: Long = 41L
 
-    fun dowaveTask(){
+    fun doWaveTask(){
         lifecycleScope.launch {
             while (true) {
 
@@ -332,7 +332,7 @@ class DashboardFragment : Fragment() {
         }
     }
 
-    fun dowatchTask(){
+    fun doWatchTask(){
         lifecycleScope.launch {
             while(true) {
                 if (BluetoothConfig.currentRunState in RunState.PREPARING_TEST..RunState.RECORDING) {
@@ -345,85 +345,6 @@ class DashboardFragment : Fragment() {
         }
     }
 
-
-
-    fun startWaveTimer(ecgView: EcgView) {
-
-        stopWaveTimer()
-        waveTimer = Timer()
-        waveTask = object : TimerTask() {
-            override fun run() {
-                var temp: FloatArray? = DataController.draw(5)
-
-                Log.d(DASH, "current .temp == ${temp?.size}, ${BluetoothConfig.currentRunState}")
-
-
-                if (viewModel._runState.value != RunState.RECORDING) {
-                    temp = if (temp == null || temp.isEmpty()) {
-                        FloatArray(0)
-                    } else {
-                        FloatArray(temp.size)
-                    }
-                }
-                    // 采集数据 自动手动可能同时进行
-                DataController.feed(temp, collectUtil.manualCounting)
-
-
-                ecgView.invalidate()
-            }
-        }
-        waveTimer?.schedule(
-                waveTask,
-                5,
-                period
-        )
-    }
-
-    fun stopWaveTimer() {
-        waveTask?.cancel()
-        waveTask = null
-
-        waveTimer?.cancel()
-        waveTimer = null
-    }
-
-    fun startWatchTimer(ecgView: EcgView) {
-        stopWatchTimer()
-        watchTimer = Timer()
-        watchTask = object : TimerTask() {
-            override fun run() {
-                if (period == 0L) {
-                    return
-                }
-                if (DataController.dataRec.size in 101..199) {
-                    return
-                }
-                period =
-                        if (DataController.dataRec.size > 150) 39 else period
-                startWaveTimer(ecgView)
-            }
-        }
-        watchTimer?.schedule(
-                watchTask,
-                1000,
-                1000L
-        )
-    }
-
-    fun stopWatchTimer() {
-        watchTask?.cancel()
-        watchTask = null
-    }
-
-    fun stopTimer() {
-        stopWatchTimer()
-        stopWaveTimer()
-    }
-
-    fun startTimer(ecgView: EcgView) {
-        startWatchTimer(ecgView)
-        startWaveTimer(ecgView)
-    }
 
 
     fun toReportList() {
