@@ -22,7 +22,6 @@ class ReportAdapter(val fragment: Fragment) :
     PagingDataAdapter<ReportItemModel, ReportViewHolder>(ReportItemModel.diffCallback) {
 
 
-    var total: Int = 0
 
     override fun onBindViewHolder(holder: ReportViewHolder, position: Int) {
         dowithTry {
@@ -30,7 +29,6 @@ class ReportAdapter(val fragment: Fragment) :
             data?.let {
                 holder.bindData(data, position)
             }
-            total =position
         }
     }
 

@@ -46,7 +46,7 @@
             app:layout_constraintStart_toEndOf="@id/time"
             tools:text="@{report.type == 0? `自动采集` : `手动采集`}"
             android:textSize="@dimen/sp_14"
-            android:textColor="@{report.type == 0? @color/color_dashboard_ecg_wave_collecting : @color/color_3D5AFE}"
+            android:textColor="@{report.type == 0?@color/color_3D5AFE : @color/color_dashboard_ecg_wave_collecting}"
             android:layout_marginStart="10dp"
 
             />
