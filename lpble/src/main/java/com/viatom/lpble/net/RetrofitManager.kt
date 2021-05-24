@@ -19,19 +19,23 @@ object RetrofitManager{
 
 
     val retrofit: Retrofit = OkHttpClient.Builder().let { builder ->
-
+        var baseUrl: String
         if (BuildConfig.DEBUG) {
+            baseUrl = "https://ai.viatomtech.com.cn/"
             // Log信息拦截器
             val loggingInterceptor = HttpLoggingInterceptor()
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY) //这里可以选择拦截级别
 
             //设置 Debug Log 模式
             builder.addInterceptor(loggingInterceptor)
+
+        }else{
+            baseUrl = "https://lepucare.viatomtech.com.cn/"
         }
         builder.build().let {
             Retrofit.Builder()
                 .client(it)
-                .baseUrl("https://ai.viatomtech.com.cn/")
+                .baseUrl(baseUrl)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
         }
