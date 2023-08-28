@@ -320,6 +320,7 @@ class CollectUtil private constructor(val context: Context) {
                         result.doSuccess { id ->
                             Log.d(C_TAG, "保存心电记录到数据库成功, id: $id")
 //                            uploadFile(file, id, type)
+                            // 使用新AI分析
                             uploadEcgInfo(id, type, file, user,
                                 SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault()).format(Date(measureTime)), duration.toString())
 
