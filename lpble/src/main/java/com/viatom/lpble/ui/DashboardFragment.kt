@@ -283,7 +283,7 @@ class DashboardFragment : Fragment() {
         LiveEventBus.get(Constant.Event.analysisProcessFailed).observe(viewLifecycleOwner, {
             it?.let {
                 if ((it as String).isNotEmpty())
-                    Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
             }
 
             viewModel._collectBtnText.value = getString(R.string.collection)

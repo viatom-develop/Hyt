@@ -1,14 +1,13 @@
 package com.viatom.lpble.net
 
-import androidx.annotation.NonNull
-import androidx.annotation.Nullable
 import com.viatom.lpble.data.entity.ReportEntity
+import com.viatom.lpble.retrofit.response.AiRequestRes
+import com.viatom.lpble.retrofit.response.AiResult
+import com.viatom.lpble.retrofit.response.BaseResponse
+import io.reactivex.Observable
 import okhttp3.MultipartBody
-import okhttp3.ResponseBody
-import org.json.JSONObject
+import okhttp3.RequestBody
 import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import retrofit2.http.*
 
 /**
@@ -28,5 +27,20 @@ interface CommonService {
     fun ecgAnalysis(@Part file: MultipartBody.Part): Call<RetrofitResponse<ReportEntity?>>
 
 
+    // 2.1.	数据导入
+    @POST("/api/v1/ecg/analysis/request")
+    @Multipart
+    fun requestAi(
+        @HeaderMap header: Map<String, String>,
+        @Part analyse_file: MultipartBody.Part,
+        @Part("ecg_info") ecg_info: RequestBody
+    ) : Call<BaseResponse<AiRequestRes?>>
+
+
+    @POST("/api/v1/ecg/analysis/result/query")
+    fun requestAiResult(
+        @HeaderMap header: Map<String, String>,
+        @Body res: AiRequestRes
+    ) : Call<BaseResponse<AiResult?>>
 
 }

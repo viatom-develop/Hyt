@@ -16,7 +16,7 @@ class WelcomeActivity : AppCompatActivity() {
 
             Intent(this, MainActivity::class.java ).let {
                 Bundle().apply {
-                    putParcelable("userEntity", UserEntity(1001, "小明","188", "78", "1992-9-23","男"))
+                    putParcelable("userEntity", UserEntity(1001, "小明","17722473994", "1", "1992-9-23","420381199108136270"))
                     it.putExtras(this)
                 }
                 startActivity(it)

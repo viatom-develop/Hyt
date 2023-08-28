@@ -16,8 +16,10 @@ data class UserEntity(
     @PrimaryKey
     val userId: Long = 0,
     val name: String,
-    val height: String,
-    val weight: String,
+    val phone: String,
+    val gender: String,
     val birthday: String,
-    val gender: String
+    val id_number: String,
+//    val height: String = "", // AI 不必须
+//    val weight: String = "", // AI 不必须
 ) : Parcelable

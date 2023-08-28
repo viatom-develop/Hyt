@@ -114,6 +114,8 @@ dependencies {
     implementation "androidx.paging:paging-runtime-ktx:$rootProject.paging"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$rootProject.swiperefreshlayout"
 
+    implementation "io.reactivex.rxjava2:rxjava:2.2.10" // 必要rxjava2依赖
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$rootProject.retrofit" // 必要依赖，和Rxjava结合必须用到，下面会提到
 
 
 
@@ -121,4 +123,6 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    debugImplementation 'com.localebro:okhttpprofiler:1.0.8'
+
 }

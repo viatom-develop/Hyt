@@ -59,6 +59,16 @@
             tools:text="最大心率"
             />
 
+        <TextView
+            android:id="@+id/hr_val"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="25px"
+            android:layout_toEndOf="@id/name_val"
+            android:textColor="@color/black"
+            android:textSize="@dimen/public_text_size_report"
+            />
+
 
         <TextView
             android:id="@+id/tv_ruler"

@@ -7,6 +7,7 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import android.util.Log
 import com.jeremyliao.liveeventbus.LiveEventBus
+import com.viatom.lpble.BuildConfig
 import com.viatom.lpble.constants.Constant.*
 import com.viatom.lpble.constants.Constant.Collection.Companion.AUTO_DURATION_MILLS
 import com.viatom.lpble.constants.Constant.Collection.Companion.AUTO_START
@@ -15,30 +16,41 @@ import com.viatom.lpble.constants.Constant.Collection.Companion.AUTO_EXIT
 import com.viatom.lpble.constants.Constant.Collection.Companion.MANUAL_DURATION_S
 import com.viatom.lpble.constants.Constant.Collection.Companion.TYPE_AUTO
 import com.viatom.lpble.constants.Constant.Collection.Companion.TYPE_MANUAL
+import com.viatom.lpble.data.entity.DeviceEntity
 import com.viatom.lpble.data.entity.RecordEntity
 import com.viatom.lpble.data.entity.ReportEntity
+import com.viatom.lpble.data.entity.UserEntity
 import com.viatom.lpble.data.local.DBHelper
 import com.viatom.lpble.ext.createFile
 import com.viatom.lpble.net.RetrofitManager
 import com.viatom.lpble.net.RetrofitResponse
 import com.viatom.lpble.net.isSuccess
+import com.viatom.lpble.retrofit.request.Device
+import com.viatom.lpble.retrofit.request.Ecg
+import com.viatom.lpble.retrofit.request.EcgInfo
+import com.viatom.lpble.retrofit.response.*
 import com.viatom.lpble.util.*
 import com.viatom.lpble.viewmodels.DashboardViewModel
 import com.viatom.lpble.viewmodels.MainViewModel
+import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Call
+import retrofit2.Callback
 import retrofit2.Response
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
+import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.concurrent.schedule
 import kotlin.math.roundToInt
 
 
@@ -165,12 +177,12 @@ class CollectUtil private constructor(val context: Context) {
                             }
                             autoCounting = false
 
-                                mainViewModel._curBluetooth.value?.deviceName?.let { deviceName ->
+                                mainViewModel._curBluetooth.value?.let { device ->
 
                                     saveCollectEcg(TYPE_AUTO)?.let {
                                         //检查deviceName  userId  保存到数据库 并分析
-                                        mainViewModel._currentUser.value?.userId?.let { userId ->
-                                            insertRecord(it, TYPE_AUTO, userId, deviceName)
+                                        mainViewModel._currentUser.value?.let { user ->
+                                            insertRecord(it, TYPE_AUTO, user, device)
                                         } ?: run {
                                             Log.e(C_TAG, "userId is null ")
                                         }
@@ -247,12 +259,12 @@ class CollectUtil private constructor(val context: Context) {
 
                         //保存txt -> record保存到DB -> 上传txt,等待返回分析结果 -> report保存到DB -> record更新DB 分析状态
 
-                            mainViewModel._curBluetooth.value?.deviceName?.let { deviceName ->
+                            mainViewModel._curBluetooth.value?.let { device ->
 
                                 saveCollectEcg(TYPE_MANUAL)?.let {
                                     //检查deviceName  userId  保存到数据库 并分析
-                                    mainViewModel._currentUser.value?.userId?.let { userId ->
-                                        insertRecord(it, TYPE_MANUAL, userId, deviceName)
+                                    mainViewModel._currentUser.value?.let { user ->
+                                        insertRecord(it, TYPE_MANUAL, user, device)
                                     } ?: run {
                                         Log.e(C_TAG, "userId is null ")
                                     }
@@ -276,21 +288,24 @@ class CollectUtil private constructor(val context: Context) {
     }
 
 
-    fun insertRecord(file: File, type: Int, userId: Long, deviceName: String) {
+    fun insertRecord(file: File, type: Int, user: UserEntity, device: DeviceEntity) {
         Log.d(C_TAG, "into insertRecord... ")
 //        val bytes: ByteArray = FileIOUtils.readFile2BytesByStream(file.absoluteFile)
         if (type == TYPE_AUTO && autoData.isEmpty()  || type == TYPE_MANUAL && manualData.isEmpty()){
             Log.d(C_TAG, "into insertRecord type =$type, data isEmpty ")
             return
         }
+
+        val measureTime = if (type == TYPE_AUTO) autoCreateTime else manualCreateTime
+        val duration = if (type == TYPE_AUTO) AUTO_DURATION_MILLS else MANUAL_DURATION_S
         RecordEntity.convert2RecordEntity(
-            if (type == TYPE_AUTO) autoCreateTime else manualCreateTime,
+            measureTime,
             file.name,
             type,
             if (type == TYPE_AUTO) autoData else manualData,
-            if (type == TYPE_AUTO) AUTO_DURATION_MILLS else MANUAL_DURATION_S,
-            deviceName,
-            userId
+            duration,
+            device.deviceName,
+            user.userId
 
         ).let { record ->
             DBHelper.getInstance(context).let {
@@ -304,8 +319,9 @@ class CollectUtil private constructor(val context: Context) {
                         }
                         result.doSuccess { id ->
                             Log.d(C_TAG, "保存心电记录到数据库成功, id: $id")
-                            uploadFile(file, id, type)
-
+//                            uploadFile(file, id, type)
+                            uploadEcgInfo(id, type, file, user,
+                                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault()).format(Date(measureTime)), duration.toString())
 
                         }
                     }
@@ -330,12 +346,13 @@ class CollectUtil private constructor(val context: Context) {
                         MultipartBody.Part.createFormData("ecgFile", file.name, requestBody)
                             .let { body ->
 
-                                Log.d(C_TAG, "upload param...... ${body.body}")
+                                Log.d(C_TAG, "upload param...... ${body.body.toString()}")
                                 api.ecgAnalysis(body)
                                     .enqueue(object :
                                         retrofit2.Callback<RetrofitResponse<ReportEntity?>> {
                                         override fun onResponse(
                                             call: Call<RetrofitResponse<ReportEntity?>>,
+
                                             response: Response<RetrofitResponse<ReportEntity?>>
                                         ) {
 
@@ -346,7 +363,6 @@ class CollectUtil private constructor(val context: Context) {
                                                         true -> {
                                                             it.data?.run {
                                                                 Log.d(C_TAG, "分析成功 采集类型$type")
-                                                                this.recordId = recordId
                                                                 this.pdfName =""
                                                                 insertReport(this, type)
 
@@ -380,6 +396,123 @@ class CollectUtil private constructor(val context: Context) {
             }
         }
     }
+
+
+    /**
+     * 测量数据导入
+     */
+    private fun uploadEcgInfo(recordId: Long, type: Int,file: File,user: UserEntity, time:String, duration: String) {
+
+        val ecgInfo = EcgInfo(user, Device(RetrofitManager.sn), Ecg(time, duration))
+        Log.d(C_TAG, "ecgInfo $ecgInfo")
+
+        val analyse_file_body : RequestBody = RequestBody.create("multipart/form-data".toMediaTypeOrNull(), file)
+        val analyse_file = MultipartBody.Part.createFormData("analyse_file", file.name, analyse_file_body)
+        val ecg_info: RequestBody = RequestBody.create("multipart/form-data".toMediaTypeOrNull(), ecgInfo.toString())
+
+        RetrofitManager.commonService.requestAi(
+            RetrofitManager.header(),
+            analyse_file,
+            ecg_info
+        ).enqueue(object: Callback<BaseResponse<AiRequestRes?>>{
+            override fun onResponse(call: Call<BaseResponse<AiRequestRes?>>, response: Response<BaseResponse<AiRequestRes?>>) {
+                if (response.isSuccessful)
+                    response.body()?.let { res ->
+                        Log.d(C_TAG, "测量数据导入结果 ${res.toString()}")
+                        when (res.isSuccess()) {
+                            true -> {
+                                res.data?.let {
+                                    // 分析
+                                    getAiResult(recordId, type, it)
+                                }?: kotlin.run {
+                                    Log.d(C_TAG, "测量数据导入失败， 采集类型$type")
+                                    finishCollecting(false, type, "测量数据导入失败，$response")
+                                }
+                            }
+                            else -> {
+                                Log.d(C_TAG, "测量数据导入失败， 采集类型$type")
+                                finishCollecting(false, type, "测量数据导入失败，$response")
+                            }
+                        }
+
+
+                    } else finishCollecting(false, type)
+            }
+
+            override fun onFailure(call: Call<BaseResponse<AiRequestRes?>>, t: Throwable) {
+                Log.d(C_TAG, "测量数据导入响应异常， 采集类型$type")
+
+                finishCollecting(false, type, "测量数据导入响应异常，${t}")
+            }
+
+        })
+    }
+
+    /**
+     * 获取AI分析结果
+     */
+    private fun getAiResult(recordId: Long, type: Int,aiRequestRes: AiRequestRes) {
+
+        RetrofitManager.commonService.requestAiResult(
+            RetrofitManager.header(),
+            aiRequestRes
+        ).enqueue(object :Callback<BaseResponse<AiResult?>>{
+            override fun onResponse(call: Call<BaseResponse<AiResult?>>, response: Response<BaseResponse<AiResult?>>) {
+                if (response.isSuccessful)
+                    response.body()?.let { res ->
+                        Log.d(C_TAG, "Ai分析结果 $res")
+                        when (res.isSuccess()) {
+                            true -> {
+                                res.data?.let {
+                                    when(it.analysis_status){
+                                        AiResult.ANALYSING ->{
+                                            GlobalScope.launch {
+                                                delay(2000)
+                                                getAiResult(recordId, type, aiRequestRes)
+                                            }
+                                        }
+                                        AiResult.FINISHED ->{
+                                            if (it.report_url != "") {
+                                                Log.d(C_TAG, "分析成功 采集类型$type")
+
+                                                insertReport(it.convertToReportEntity(recordId), type)
+                                                return
+                                            }else{
+                                                GlobalScope.launch {
+                                                    delay(2000)
+                                                    getAiResult(recordId, type, aiRequestRes)
+                                                }
+                                            }
+                                        }
+                                        else ->{
+                                            Log.d(C_TAG, "分析失败， ${res.data?.analysis_status}")
+                                            finishCollecting(false, type, "分析失败，${res.data?.analysis_status}")
+
+                                        }
+                                    }
+                                }?: kotlin.run {
+                                    Log.e(C_TAG, "分析失败， 采集类型$type")
+                                    finishCollecting(false, type, "分析失败，$response")
+                                }
+                            }
+                            else -> {
+                                Log.e(C_TAG, "分析失败， 采集类型$type")
+                                finishCollecting(false, type, "分析失败，$response")
+                            }
+                        }
+
+                    } else finishCollecting(false, type)
+            }
+
+            override fun onFailure(call: Call<BaseResponse<AiResult?>>, t: Throwable) {
+                Log.e(C_TAG, "分析失败， 采集类型$type")
+                finishCollecting(false, type, "分析失败，${t.message}")
+            }
+
+        })
+
+    }
+
 
 
     /**
@@ -506,14 +639,18 @@ class CollectUtil private constructor(val context: Context) {
                         val data = if (type == TYPE_MANUAL)manualData else autoData
 
                         (data.size - 1).also {
-                            bufferedWriter.write("125,II,1500,")
+//                            bufferedWriter.write("125,II,1500,")
+//                            bufferedWriter.write("F-0-01,125,II,1500,")
+                            bufferedWriter.write("F-0-01,125,II,405.35,")
                             for (i in 0..it) {
-                                bufferedWriter.write(((data[i] * 1500).roundToInt()).toString())
+//                                bufferedWriter.write(((data[i] * 1500).roundToInt()).toString())
+                                bufferedWriter.write(((data[i] * 405.35).roundToInt()).toString())
                                 bufferedWriter.write(",")
                             }
                         }
 
-                        bufferedWriter.write((data[data.size - 1] * 1500).roundToInt().toString())
+//                        bufferedWriter.write((data[data.size - 1] * 1500).roundToInt().toString())
+                        bufferedWriter.write((data[data.size - 1] * 405.35).roundToInt().toString())
 
                         bufferedWriter.close()
 

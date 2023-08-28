@@ -93,50 +93,50 @@ public class FilterECGReportWave extends View {
         drawRuler(canvas);
         drawWave(canvas);
 
-        drawLabels(canvas);
+//        drawLabels(canvas);
     }
 
-    private void drawLabels(Canvas canvas) {
-//        ReportEntity.Fragment item = report.getFragmentList().get(fragmentIndex);
-        int startIndex = Collections.binarySearch(report.getPosList(), Integer.valueOf(fragment.getStartPose()), Integer::compareTo);
-        //第一个标记的index为第一个大于或等于startPose的pos值的index;
-        int startLabelIndex = startIndex >= 0 ? startIndex : (Math.abs(startIndex) - 1);
-        //最后一个标记的index为第一个大于或等于endPose的pos值的index - 1;
-        int endIndex = Collections.binarySearch(report.getPosList(), Integer.valueOf(fragment.getEndPose()), Integer::compareTo);
-        int endLabelIndex = endIndex >= 0 ? endIndex : (Math.abs(endIndex) - 1) - 1;
-
-        //从 startLabelIndex 遍历到endLabelIndex;
-        List<Integer> posList = report.getPosList();
-        List<String>  labelList = report.getLabelList();
-        int preLabelPose = -1;
-        float preLabelX = -1;
-        final float textSize = 15;
-        labelPaint.setTextSize(textSize);
-        labelPaint.setTextAlign(Paint.Align.CENTER);
-        for (int i = startLabelIndex; i <= endLabelIndex; i++) {
-            int pos = posList.get(i);
-            if(pos / 2 - startPoint > FIXED_POINT_COUNT)
-                return;
-            String label = labelList.get(i);
-            float tempX = rulerTotalWidth + (pos/2 -startPoint) * xDis;
-            labelPaint.setTypeface(Typeface.DEFAULT_BOLD);
-            canvas.drawText(label, tempX, textSize, labelPaint);
-
-            //计算rr间期和心率
-            if(preLabelPose != -1) {
-                // 两个点的间距 除频率 250得到秒数， 乘1000得到毫秒数；
-                int rrPeriod = (pos - preLabelPose) * 4;
-                labelPaint.setTypeface(Typeface.SANS_SERIF);
-                canvas.drawText(String.valueOf(rrPeriod), (tempX + preLabelX)/2, textSize + 30, labelPaint);
-
-                //心率等于60s除以rr间隙（一次心跳的时长）
-                int hr = (int) (60/(rrPeriod/1000f));
-                canvas.drawText(String.valueOf(hr), (preLabelX + tempX)/2, textSize, labelPaint);
-            }
-            preLabelPose = pos;
-            preLabelX = tempX;
-        }
-    }
+//    private void drawLabels(Canvas canvas) {
+////        ReportEntity.Fragment item = report.getFragmentList().get(fragmentIndex);
+//        int startIndex = Collections.binarySearch(report.getPosList(), Integer.valueOf(fragment.getStartPose()), Integer::compareTo);
+//        //第一个标记的index为第一个大于或等于startPose的pos值的index;
+//        int startLabelIndex = startIndex >= 0 ? startIndex : (Math.abs(startIndex) - 1);
+//        //最后一个标记的index为第一个大于或等于endPose的pos值的index - 1;
+//        int endIndex = Collections.binarySearch(report.getPosList(), Integer.valueOf(fragment.getEndPose()), Integer::compareTo);
+//        int endLabelIndex = endIndex >= 0 ? endIndex : (Math.abs(endIndex) - 1) - 1;
+//
+//        //从 startLabelIndex 遍历到endLabelIndex;
+//        List<Integer> posList = report.getPosList();
+//        List<String>  labelList = report.getLabelList();
+//        int preLabelPose = -1;
+//        float preLabelX = -1;
+//        final float textSize = 15;
+//        labelPaint.setTextSize(textSize);
+//        labelPaint.setTextAlign(Paint.Align.CENTER);
+//        for (int i = startLabelIndex; i <= endLabelIndex; i++) {
+//            int pos = posList.get(i);
+//            if(pos / 2 - startPoint > FIXED_POINT_COUNT)
+//                return;
+//            String label = labelList.get(i);
+//            float tempX = rulerTotalWidth + (pos/2 -startPoint) * xDis;
+//            labelPaint.setTypeface(Typeface.DEFAULT_BOLD);
+//            canvas.drawText(label, tempX, textSize, labelPaint);
+//
+//            //计算rr间期和心率
+//            if(preLabelPose != -1) {
+//                // 两个点的间距 除频率 250得到秒数， 乘1000得到毫秒数；
+//                int rrPeriod = (pos - preLabelPose) * 4;
+//                labelPaint.setTypeface(Typeface.SANS_SERIF);
+//                canvas.drawText(String.valueOf(rrPeriod), (tempX + preLabelX)/2, textSize + 30, labelPaint);
+//
+//                //心率等于60s除以rr间隙（一次心跳的时长）
+//                int hr = (int) (60/(rrPeriod/1000f));
+//                canvas.drawText(String.valueOf(hr), (preLabelX + tempX)/2, textSize, labelPaint);
+//            }
+//            preLabelPose = pos;
+//            preLabelX = tempX;
+//        }
+//    }
 
     /**
      * 画网格

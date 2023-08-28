@@ -2,6 +2,7 @@ package com.viatom.lpble.data.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.viatom.lpble.retrofit.response.AiResult
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -16,21 +17,23 @@ import java.util.*
 data class ReportEntity @JvmOverloads constructor(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    var recordId: Long,
-    val fragmentList: List<Fragment>?,
-    val aiDiagnosisCode: String,
-    val isShowAiResult: String, //1：是 0：否
-    val shortRangeTime: String,
-    val hr: String,
-    val posList: List<Int>?,
-    val sendTime: String,
-    val levelCode: Int,
-    val labelList: List<String>?,
-    val aiResult: String,
-    val aiResultList: List<AiResult>?,
-    val aiDiagnosis: String,
-    val aiSuggestion: String,
-    var pdfName: String, //本地相对路径
+    var recordId: Long = 0,
+    var fragmentList: List<Fragment>? = null,
+//    var aiDiagnosisCode: String, // 删除
+//    val isShowAiResult: String, //1：是 0：否  // 删除
+//    val shortRangeTime: String, // 删除
+    var hr: String = "",
+//    var posList: List<Int>?,
+    var sendTime: String ="",
+//    var levelCode: Int,
+//    val labelList: List<String>?,
+    var aiResult: String ="",
+    var aiResultList: List<AiResult>? = null,
+    var aiDiagnosis: String ="",
+//    val aiSuggestion: String,
+    var pdfName: String ="", //本地相对路径
+
+    var analysisId: String ="", // 新增
     ) {
 
     /**
@@ -48,7 +51,8 @@ data class ReportEntity @JvmOverloads constructor(
         val startPose: String,
         val code: String,
         val name: String,
-        val endPose: String
+        val endPose: String,
+        val hr: String
     ){
         override fun equals(obj: Any?): Boolean {
             return if (obj !is Fragment) false else obj.startPose == startPose

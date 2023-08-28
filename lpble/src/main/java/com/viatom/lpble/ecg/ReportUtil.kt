@@ -18,6 +18,7 @@ import com.itextpdf.text.PageSize
 import com.itextpdf.text.pdf.BaseFont
 import com.itextpdf.text.pdf.PdfWriter
 import com.viatom.lpble.R
+import com.viatom.lpble.ble.DataController.hr
 import com.viatom.lpble.constants.Constant
 import com.viatom.lpble.data.entity.*
 import com.viatom.lpble.ext.createFile
@@ -103,6 +104,10 @@ object ReportUtil {
                                     this.text = frag.name
                                 }
 
+                                itemView.findViewById<TextView>(R.id.hr_val).apply {
+                                    this.text = "(${frag.hr}bpm)"
+                                }
+
                                 //填写片段起始时间
                                 itemView.findViewById<TextView>(R.id.time_val).apply {
                                     val startPoint: Int = frag.startPose.toInt() / 2
@@ -140,7 +145,7 @@ object ReportUtil {
                                                 imgHeight,
                                                 0,
                                                 frag,
-                                                startPoint
+                                                startPoint,
                                             ).apply {
                                                 this.layoutParams = layoutParams
                                                 this.invalidate()
@@ -235,13 +240,13 @@ object ReportUtil {
                 }
             }
 
-            reportView.findViewById<TextView>(R.id.val_height).apply {
-                text = user.height
-            }
-
-            reportView.findViewById<TextView>(R.id.val_weight).apply {
-                text = user.weight
-            }
+//            reportView.findViewById<TextView>(R.id.val_height).apply {
+//                text = user.height
+//            }
+//
+//            reportView.findViewById<TextView>(R.id.val_weight).apply {
+//                text = user.weight
+//            }
 
         }
 
